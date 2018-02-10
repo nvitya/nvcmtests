@@ -95,6 +95,23 @@ void spi_flash_test()
 	spiflash.txdma.Init(1, 1);  // perid = 1: SPI0_TX
 	spiflash.rxdma.Init(2, 2);  // perid = 2: SPI0_RX
 
+#elif defined(BOARD_DEV_STM32F407ZE)
+
+	// SPI Flash on the F407ZE board
+
+	spiflash.pin_cs.Assign(PORTNUM_B, 14, false);
+	spiflash.pin_cs.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(PORTNUM_B, 3, PINCFG_AF_5);  // SPI1_SCK    = SWO !!!!!!!!!!!!!!!!!!!!!
+	hwpinctrl.PinSetup(PORTNUM_B, 4, PINCFG_AF_5);  // SPI1_MISO
+	hwpinctrl.PinSetup(PORTNUM_B, 5, PINCFG_AF_5);  // SPI1_MOSI
+
+	spiflash.spi.speed = 16000000;
+	spiflash.spi.Init(1);
+
+	spiflash.txdma.Init(0x020503);  // dma2/stream5/ch3
+	spiflash.rxdma.Init(0x020003);  // dma2/stream0/ch3
+
 #else
   #error "Unknown board!"
 #endif
@@ -124,7 +141,7 @@ void spi_flash_test()
 	//TRACE("Issuing reset...\r\n");
 	//spiflash.ResetChip();
 
-	//return;
+	return;
 
 	TRACE("Erasing whole chip...\r\n");
 	spiflash.StartEraseAll();

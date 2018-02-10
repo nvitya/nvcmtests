@@ -65,6 +65,11 @@ void setup_board()
 	// nucleo board leds
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
+	conuart.Init(1);
 }
 
 #endif
@@ -105,6 +110,27 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_DEV_STM32F407ZE)
+
+TGpioPin  led1pin(5, 9, true);  // PF9
+TGpioPin  led2pin(5, 10, true);  // PF10
+
+THwUart   conuart;  // console uart
+
+#define LED_COUNT 2
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
+	conuart.Init(1);
+}
+
+#endif
 
 #ifndef LED_COUNT
   #define LED_COUNT 1
@@ -186,8 +212,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	TRACE("\r\n------------------------------------------\r\n");
 	TRACE("Serial Flash Test\r\n");
 
-	//spi_flash_test();
-	qspi_flash_test();
+	spi_flash_test();
+	//qspi_flash_test();
 
 	TRACE("Starting main cycle...\r\n");
 
