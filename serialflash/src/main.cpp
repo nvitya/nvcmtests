@@ -37,6 +37,8 @@
 #include "spiflashtest.h"
 #include "qspiflashtest.h"
 
+THwUart   conuart;  // console uart
+
 #if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
 
 TGpioPin  led1pin(1, 0, false);
@@ -51,6 +53,14 @@ void setup_board()
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+  // USART3: Stlink USB / Serial converter
+	// USART3_TX: PD.8
+	hwpinctrl.PinSetup(3, 8,  PINCFG_OUTPUT | PINCFG_AF_7);
+	// USART3_RX: Pd.9
+	hwpinctrl.PinSetup(3, 9,  PINCFG_INPUT  | PINCFG_AF_7);
+
+	conuart.Init(3); // USART3
 }
 
 #endif
@@ -94,8 +104,6 @@ void setup_board()
 
 #if defined(BOARD_MIBO100_ATSAME70)
 
-THwUart   conuart;  // console uart
-
 TGpioPin  led1pin(PORTNUM_D, 13, false);
 
 void setup_board()
@@ -114,8 +122,6 @@ void setup_board()
 
 TGpioPin  led1pin(5, 9, true);  // PF9
 TGpioPin  led2pin(5, 10, true);  // PF10
-
-THwUart   conuart;  // console uart
 
 #define LED_COUNT 2
 

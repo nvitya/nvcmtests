@@ -112,6 +112,21 @@ void spi_flash_test()
 	spiflash.txdma.Init(0x020503);  // dma2/stream5/ch3
 	spiflash.rxdma.Init(0x020003);  // dma2/stream0/ch3
 
+#elif defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
+
+	spiflash.pin_cs.Assign(PORTNUM_D, 14, false);
+	spiflash.pin_cs.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_AF_5);  // SPI1_SCK
+	hwpinctrl.PinSetup(PORTNUM_A, 6, PINCFG_AF_5);  // SPI1_MISO
+	hwpinctrl.PinSetup(PORTNUM_A, 7, PINCFG_AF_5);  // SPI1_MOSI
+
+	spiflash.spi.speed = 16000000;
+	spiflash.spi.Init(1);
+
+	spiflash.txdma.Init(0x020503);  // dma2/stream5/ch3
+	spiflash.rxdma.Init(0x020003);  // dma2/stream0/ch3
+
 #else
   #error "Unknown board!"
 #endif
