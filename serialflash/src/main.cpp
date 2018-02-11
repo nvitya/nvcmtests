@@ -199,15 +199,15 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	// provide info to the system about the clock speed:
 	hwclkctrl.SetClockInfo(clockspeed);
 
-	mcu_enable_fpu();    // enable coprocessor if present
-	mcu_enable_icache(); // enable instruction cache if present
+	//mcu_enable_fpu();    // enable coprocessor if present
+	//mcu_enable_icache(); // enable instruction cache if present
 
 	clockcnt_init();
 
 	// go on with the hardware initializations
 	setup_board();
 
-	mcu_enable_interrupts();
+	//mcu_enable_interrupts();
 
 	TRACE("\r\n------------------------------------------\r\n");
 	TRACE("Serial Flash Test\r\n");

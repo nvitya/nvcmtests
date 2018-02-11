@@ -141,8 +141,6 @@ void spi_flash_test()
 	//TRACE("Issuing reset...\r\n");
 	//spiflash.ResetChip();
 
-	return;
-
 	TRACE("Erasing whole chip...\r\n");
 	spiflash.StartEraseAll();
 	spiflash.WaitForComplete();
