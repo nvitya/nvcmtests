@@ -130,7 +130,7 @@ void setup_board()
 
 #endif
 
-#if defined(BOARD_F103_MIN)
+#if defined(BOARD_MIN_F103)
 
 TGpioPin  led1pin(2, 13, false); // PC13
 

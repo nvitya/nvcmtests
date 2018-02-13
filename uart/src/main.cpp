@@ -222,15 +222,15 @@ void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
-	//// USART1
-	//hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
-	//hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
-	//conuart.Init(1);
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
+	conuart.Init(1);
 
 	// USART2
-	hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
-	conuart.Init(2);
+	//hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
+	//hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
+	//conuart.Init(2);
 }
 #endif
 
@@ -427,7 +427,7 @@ void heartbeat_task() // invoked every 0.5 s
 	led5pin.SetTo(hbcounter >> 4);
 #endif
 
-	//TRACE("hbcounter = %u, systick = %u\r\n", hbcounter, systick);
+	TRACE("hbcounter = %u, systick = %u\r\n", hbcounter, systick);
 
 	//conuart.TrySendChar(0x55);
 }
