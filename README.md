@@ -1,6 +1,7 @@
 # Test Projects for the NVCM Framework
 
 In order to compile and run the examples here the following SW and HW required:
+ * The NVCM Core [https://github.com/nvitya/nvcm]
  * Eclipse CDT
  * GNU ARM Plugins for Eclipse CDT
  * Working ARM Cross-Compiler
@@ -9,7 +10,7 @@ In order to compile and run the examples here the following SW and HW required:
 
 ## Symlinking NVCM Core
 
-The examples here require the NVCM core sources in the "nvcm" subdirectory within the root directory of the "nvcmtests".
+The examples here require the NVCM core ([https://github.com/nvitya/nvcm]) sources in the "nvcm" subdirectory within the root directory of the "nvcmtests".
 The easiest way to achieve this is to create a symlink.
 
 Assuming you have downloaded the example sources into c:\work\nvcmtests-master and you have downloaded the NVCM core into c:\work\nvcm-master the following command is required on Windows:
