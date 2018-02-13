@@ -14,6 +14,6 @@ The easiest way to achieve this is to create a symlink.
 
 Assuming you have downloaded the sources into c:\work\nvcmtests-master and you have downloaded the NVCM core into c:\work\nvcm-master the following command is required on Windows:
 
-  c:\work\nvcmtests-master>mklink /d nvcm c:\work\nvcm-master
+    c:\work\nvcmtests-master>mklink /d nvcm c:\work\nvcm-master
 
 x
