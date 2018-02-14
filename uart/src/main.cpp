@@ -348,49 +348,21 @@ void setup_board()
 
 #endif
 
-#if defined(BOARD_PV_MK20)
-
-// At address 0x00000400:
-__attribute__ ((section(".flash_specials"),used))
-unsigned char kinetis_flash_protection[16] =
-{
-		0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // backdoor comparison key
-		0xFF, 0xFF, 0xFF, 0xFF, // program flash protection bytes
-		0x82,  // flash security byte (FSEC)
-		0x07,  // flash nonvolatile option byte (FOPT)
-		0xFF,  // EEPROM protection byte (FEPROT)
-		0xFF   // Data flash protection byte (FDPROT)
-};
+#if defined(BOARD_NONE_MKV30F)
 
 TGpioPin  led1pin(PORTNUM_B, 0, true);
-TGpioPin  led2pin(PORTNUM_B, 1, true);
-
-#define LED_COUNT 2
 
 void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// UART0
+	hwpinctrl.PinSetup(PORTNUM_D, 7,  PINCFG_OUTPUT | PINCFG_AF_3);  // USART0_TX, pin 32
+	hwpinctrl.PinSetup(PORTNUM_D, 6,  PINCFG_INPUT  | PINCFG_AF_3);  // USART0_RX, pin 31
+	conuart.Init(0);
 }
 
 #endif
-
-#if defined(BOARD_PV_F070F6)
-
-TGpioPin  led1pin(PORTNUM_A, 0, true);
-TGpioPin  led2pin(PORTNUM_A, 1, true);
-
-#define LED_COUNT 2
-#undef USE_DWT_CYCCNT
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-}
-
-#endif
-
 
 #ifndef LED_COUNT
   #define LED_COUNT 1
