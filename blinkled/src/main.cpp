@@ -274,6 +274,18 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_NONE_MKV30F)
+
+TGpioPin  led1pin(PORTNUM_B, 0, true);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+}
+
+#endif
+
+
 #if defined(BOARD_PV_F070F6)
 
 TGpioPin  led1pin(PORTNUM_A, 0, true);
@@ -343,12 +355,12 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
   mcu_preinit_code(); // inline code for preparing the MCU, RAM regions. Without this even the stack does not work on some MCUs.
 
-  unsigned clockspeed = MAX_CLOCK_SPEED;
+  unsigned clockspeed = MCU_CLOCK_SPEED;
 
 #ifdef MCU_INPUT_FREQ
-	if (!hwclkctrl.InitCpuClock(MCU_INPUT_FREQ, MAX_CLOCK_SPEED))  // activate the external crystal oscillator with multiplication x2
+	if (!hwclkctrl.InitCpuClock(MCU_INPUT_FREQ, clockspeed))  // activate the external crystal oscillator with multiplication x2
 #else
-	if (!hwclkctrl.InitCpuClockIntRC(MCU_INTRC_SPEED, MAX_CLOCK_SPEED))  // activate the external crystal oscillator with multiplication x2
+	if (!hwclkctrl.InitCpuClockIntRC(MCU_INTRC_SPEED, clockspeed))  // activate the external crystal oscillator with multiplication x2
 #endif
 	{
 		while (1)

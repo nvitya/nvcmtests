@@ -37,6 +37,13 @@
   #define MCU_MK20DN
   #define MCU_INPUT_FREQ   12000000
 
+#elif defined(BOARD_NONE_MKV30F)
+
+  #define BOARD_NAME "Breakout board for MKV30F (32 pin)"
+  #define MCU_MKV30F
+  #define MCU_CLOCK_SPEED   96000000
+  #define MCU_INTRC_SPEED   48000000
+
 #elif defined(BOARD_NONE_F070F6)
 
   #define BOARD_NAME "Breakout board for STM32F070F6"
