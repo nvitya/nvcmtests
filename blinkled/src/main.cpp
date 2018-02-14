@@ -132,7 +132,7 @@ void setup_board()
 
 #if defined(BOARD_MIN_F103)
 
-TGpioPin  led1pin(2, 13, false); // PC13
+TGpioPin  led1pin(PORTNUM_C, 13, false); // PC13
 
 void setup_board()
 {
