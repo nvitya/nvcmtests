@@ -285,22 +285,21 @@ void setup_board()
 
 #if defined(BOARD_XPRESSO_LPC54608)
 
-TGpioPin  led1pin(3, 5, false);
-TGpioPin  led2pin(0, 7, false);
-TGpioPin  led3pin(3, 7, false);
+TGpioPin  led1pin(2, 2, true);
+TGpioPin  led2pin(3, 3, true);
+TGpioPin  led3pin(3, 14, true);
 
-#define LED_COUNT 1
+#define LED_COUNT 3
 
 void setup_board()
 {
-	// RGB LED
-	hwpinctrl.PinSetup(6,  9, PINCFG_OUTPUT | PINCFG_DRIVE_WEAK | PINCFG_AF_0);  // GPIO_3_5
-	hwpinctrl.PinSetup(2,  7, PINCFG_OUTPUT | PINCFG_DRIVE_WEAK | PINCFG_AF_0);  // GPIO_0_7
-	hwpinctrl.PinSetup(6, 11, PINCFG_OUTPUT | PINCFG_DRIVE_WEAK | PINCFG_AF_0);  // GPIO_3_7
-
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(0, 30, PINCFG_OUTPUT | PINCFG_AF_1); // UART_TX:
+	hwpinctrl.PinSetup(0, 29, PINCFG_INPUT  | PINCFG_AF_1); // UART_RX:
+	conuart.Init(0);
 }
 
 #endif
@@ -441,10 +440,10 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	mcu_disable_interrupts();
 
+  mcu_preinit_code(); // inline code for preparing the MCU, RAM regions. Without this even the stack does not work on some MCUs.
+
 	// Set the interrupt vector table offset, so that the interrupts and exceptions work
 	mcu_init_vector_table();
-
-  mcu_preinit_code(); // inline code for preparing the MCU, RAM regions. Without this even the stack does not work on some MCUs.
 
   unsigned clockspeed = MAX_CLOCK_SPEED;
 
