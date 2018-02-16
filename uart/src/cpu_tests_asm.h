@@ -29,12 +29,23 @@
 #ifndef SRC_CPU_TESTS_ASM_H_
 #define SRC_CPU_TESTS_ASM_H_
 
+#include "platform.h"
+
 extern "C"
 {
+
+#if __CORTEX_M >= 3
+
   unsigned linear_run_asm();
   unsigned linear_run_asm_itcram();
   unsigned linear_run_asm_dtcram();
   unsigned linear_run_asm_ram2();
+
+#endif
+
+  unsigned linear_run_asm_m0(volatile uint32_t * clockcounter);
+  unsigned linear_run_asm_ram_m0(volatile uint32_t * clockcounter);
+
 }
 
 #endif /* SRC_CPU_TESTS_ASM_H_ */

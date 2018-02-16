@@ -156,6 +156,10 @@ void setup_board()
 	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 	led4pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 	led5pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(1,  2, PINCFG_OUTPUT | PINCFG_AF_7);  // UART_TX
+	hwpinctrl.PinSetup(1,  3, PINCFG_INPUT  | PINCFG_AF_1);  // UART_RX
+	conuart.Init(0x001);  // usic_0_ch_1
 }
 
 #endif
@@ -405,8 +409,10 @@ void heartbeat_task() // invoked every 0.5 s
 
 void test_code_speed()
 {
-	TRACE("Testing code execution speed:\r\nInstruction clocks for 64 x single cycle 32bit:\r\n");
 	unsigned r1, r2, r3;
+
+#if __CORTEX_M >= 3
+	TRACE("Testing code execution speed:\r\nInstruction clocks for 64 x single cycle 32bit:\r\n");
 
 	r1 = linear_run_asm();
 	r2 = linear_run_asm();
@@ -429,6 +435,21 @@ void test_code_speed()
 	r2 = linear_run_asm_ram2();
 	r3 = linear_run_asm_ram2();
 	TRACE("RAM2  : %3u, %3u, %3u\r\n", r1, r2, r3);
+#endif
+
+	TRACE("Instruction clocks for 64 x single cycle 16bit:\r\n");
+
+	r1 = linear_run_asm_m0(&CLOCKCNT);
+	r2 = linear_run_asm_m0(&CLOCKCNT);
+	r3 = linear_run_asm_m0(&CLOCKCNT);
+	TRACE("Flash: %3u, %3u, %3u\r\n", r1, r2, r3);
+
+#if 0
+	r1 = linear_run_asm_ram_m0(&CLOCKCNT);
+	r2 = linear_run_asm_ram_m0(&CLOCKCNT);
+	r3 = linear_run_asm_ram_m0(&CLOCKCNT);
+	TRACE("RAM  : %3u, %3u, %3u\r\n", r1, r2, r3);
+#endif
 }
 
 // the C libraries require "_start" so we keep it as the entry point
@@ -448,9 +469,9 @@ extern "C" __attribute__((noreturn)) void _start(void)
   unsigned clockspeed = MAX_CLOCK_SPEED;
 
 #ifdef MCU_INPUT_FREQ
-	if (!hwclkctrl.InitCpuClock(MCU_INPUT_FREQ, clockspeed))  // activate the external crystal oscillator with multiplication x2
+	if (!hwclkctrl.InitCpuClock(MCU_INPUT_FREQ, clockspeed))
 #else
-	if (!hwclkctrl.InitCpuClockIntRC(MCU_INTRC_SPEED, clockspeed))  // activate the external crystal oscillator with multiplication x2
+	if (!hwclkctrl.InitCpuClockIntRC(MCU_INTRC_SPEED, clockspeed))
 #endif
 	{
 		while (1)
@@ -499,6 +520,9 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	TRACE("\r\nStarting main cycle...\r\n");
 
 	SysTick_Config(SystemCoreClock / 1000);
+
+	mcu_enable_interrupts();
+
 	//unsigned * ptr = (unsigned * )0x3000000;
 	//*ptr = 1;
 
@@ -528,7 +552,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	// use the SysTick for millisec counting
 
-	unsigned hbticks = 1000 / 20;
+	unsigned hbticks = 1000;
 
 	unsigned t0 = systick;
 
@@ -541,8 +565,6 @@ extern "C" __attribute__((noreturn)) void _start(void)
 		{
 			heartbeat_task();
 			t0 = systick;
-
-			if (hbcounter > 20)  hbticks = 500 / 2;  // slow down to 0.5 s
 		}
 	}
 
