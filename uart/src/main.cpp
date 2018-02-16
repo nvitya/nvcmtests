@@ -160,7 +160,7 @@ void setup_board()
 
 #endif
 
-#if defined(BOARD_F407VG_MIN)
+#if defined(BOARD_DEV_STM32F407VG)
 
 #define SKIP_DTCRAM_EXEC_TEST
 
