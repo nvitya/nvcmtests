@@ -316,7 +316,7 @@ void setup_board()
 
 	hwpinctrl.PinSetup(0, 30, PINCFG_OUTPUT | PINCFG_AF_1); // UART_TX:
 	hwpinctrl.PinSetup(0, 29, PINCFG_INPUT  | PINCFG_AF_1); // UART_RX:
-	conuart.Init(1);
+	conuart.Init(0);
 
 }
 
