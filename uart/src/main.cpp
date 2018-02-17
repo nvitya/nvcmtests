@@ -459,13 +459,13 @@ void test_code_speed()
 	r1 = linear_run_asm_m0((uint32_t *)&CLOCKCNT);
 	r2 = linear_run_asm_m0((uint32_t *)&CLOCKCNT);
 	r3 = linear_run_asm_m0((uint32_t *)&CLOCKCNT);
-	TRACE("Flash: %3u, %3u, %3u\r\n", r1, r2, r3);
+	TRACE("Flash:  %3u, %3u, %3u\r\n", r1, r2, r3);
 
-#if 0
+#if 1
 	r1 = linear_run_asm_ram_m0((uint32_t *)&CLOCKCNT);
 	r2 = linear_run_asm_ram_m0((uint32_t *)&CLOCKCNT);
 	r3 = linear_run_asm_ram_m0((uint32_t *)&CLOCKCNT);
-	TRACE("RAM  : %3u, %3u, %3u\r\n", r1, r2, r3);
+	TRACE("RAM:    %3u, %3u, %3u\r\n", r1, r2, r3);
 #endif
 }
 
