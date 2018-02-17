@@ -353,7 +353,9 @@ void setup_board()
 
 #if defined(BOARD_NONE_MKV30F)
 
-TGpioPin  led1pin(PORTNUM_B, 0, true);
+// QFN-32 in an adaptor
+
+TGpioPin  led1pin(PORTNUM_B, 0, true);  // pin 20
 
 void setup_board()
 {
@@ -481,7 +483,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	// Set the interrupt vector table offset, so that the interrupts and exceptions work
 	mcu_init_vector_table();
 
-  unsigned clockspeed = MAX_CLOCK_SPEED;
+  unsigned clockspeed = MCU_CLOCK_SPEED;
 
 #ifdef MCU_INPUT_FREQ
 	if (!hwclkctrl.InitCpuClock(MCU_INPUT_FREQ, clockspeed))
