@@ -367,6 +367,21 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_NONE_LPC822)
+
+TGpioPin  led1pin(0, 15, false);  // pin 11 / TSOP-20
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinFuncConnect(SWM_FUNC_U0_RXD, 0, 0);  // pin 19 / TSOP-20
+	hwpinctrl.PinFuncConnect(SWM_FUNC_U0_TXD, 0, 4);  // pin  6 / TSOP-20
+	conuart.Init(0);
+}
+#endif
+
+
 #ifndef LED_COUNT
   #define LED_COUNT 1
 #endif
@@ -439,15 +454,15 @@ void test_code_speed()
 
 	TRACE("Instruction clocks for 64 x single cycle 16bit:\r\n");
 
-	r1 = linear_run_asm_m0(&CLOCKCNT);
-	r2 = linear_run_asm_m0(&CLOCKCNT);
-	r3 = linear_run_asm_m0(&CLOCKCNT);
+	r1 = linear_run_asm_m0((uint32_t *)&CLOCKCNT);
+	r2 = linear_run_asm_m0((uint32_t *)&CLOCKCNT);
+	r3 = linear_run_asm_m0((uint32_t *)&CLOCKCNT);
 	TRACE("Flash: %3u, %3u, %3u\r\n", r1, r2, r3);
 
 #if 0
-	r1 = linear_run_asm_ram_m0(&CLOCKCNT);
-	r2 = linear_run_asm_ram_m0(&CLOCKCNT);
-	r3 = linear_run_asm_ram_m0(&CLOCKCNT);
+	r1 = linear_run_asm_ram_m0((uint32_t *)&CLOCKCNT);
+	r2 = linear_run_asm_ram_m0((uint32_t *)&CLOCKCNT);
+	r3 = linear_run_asm_ram_m0((uint32_t *)&CLOCKCNT);
 	TRACE("RAM  : %3u, %3u, %3u\r\n", r1, r2, r3);
 #endif
 }

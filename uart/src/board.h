@@ -30,7 +30,10 @@
 #define BOARD_H_
 
 // Special, non-builtin boards
-#if defined(BOARD_NONE_STM32F301)
+
+#if 0
+
+#elif defined(BOARD_NONE_STM32F301)
 
   #define BOARD_NAME "STM32F301K6 in adapter"
   #define MCU_STM32F301K6
@@ -44,6 +47,11 @@
   #define MCU_MKV30F
   #define MCU_CLOCK_SPEED   96000000
   #define MCU_INTRC_SPEED   48000000
+
+#elif defined(BOARD_NONE_LPC822)
+
+  #define BOARD_NAME "Breakout board for LPC822 (20 pin)"
+  #define MCU_LPC822
 
 #else
 
