@@ -32,9 +32,24 @@
 
 #include "platform.h"
 #include "hwpins.h"
+#include "hwi2c.h"
 #include "traces.h"
 
-void i2c_test()
+THwI2c  i2c;
+
+void show_mem(void * addr, unsigned len)
+{
+	unsigned char * cp = (unsigned char *)addr;
+	TRACE("Dumping memory at %08X, len = %u\r\n", addr, len);
+	for (unsigned n = 0; n < len; ++n)
+	{
+		TRACE(" %02X", *cp++);
+		if (n % 16 == 15) TRACE("\r\n");
+	}
+	TRACE("\r\n");
+}
+
+void i2c_test_direct()
 {
 	TRACE("I2C test for FM20V02A FRAM\r\n");
 
@@ -89,12 +104,12 @@ void i2c_test()
 	// set device address
 	unsigned dadr = 0x50;
 
-	regs->TWIHS_IADR = 0x003C187E;
+	regs->TWIHS_IADR = 0x00000000;
 
 	regs->TWIHS_MMR = 0
 		| (dadr << 16)
 		| (1 << 12)  // MREAD: 1 = read
-		| (0 <<  8)  // 0 = No internal address bytes
+		| (2 <<  8)  // 0 = No internal address bytes, 2 = 2 byte internal address
 	;
 
 	// send something:
@@ -105,7 +120,7 @@ void i2c_test()
 
 	unsigned cnt = 0;
 
-	while (cnt < 4)
+	while (cnt < 16)
 	{
 		while ((regs->TWIHS_SR & (1 << 1)) == 0)
 		{
@@ -140,4 +155,48 @@ void i2c_test()
 }
 
 
+void i2c_test()
+{
+	TRACE("I2C test for FM20V02A FRAM\r\n");
 
+	// TWIHS0
+	hwpinctrl.PinSetup(PORTNUM_A,  4, PINCFG_AF_0 | PINCFG_PULLUP); // TWIHS0: SCL/TWCK0
+	hwpinctrl.PinSetup(PORTNUM_A,  3, PINCFG_AF_0 | PINCFG_PULLUP); // TWIHS0: SDA/TWD0
+
+	i2c.Init(0); // TWIHS0
+
+	uint8_t rxbuf[32];
+	uint8_t txbuf[32];
+
+	unsigned addr = 0;
+	unsigned len = 16;
+
+	TRACE("Reading memory at %04X...\r\n", addr);
+
+	i2c.StartReadData(0x50, addr | I2CEX_2, &rxbuf[0], len);
+	i2c.WaitFinish();
+
+	show_mem(&rxbuf[0], len);
+
+	TRACE("Writing memory to 0x0008...\r\n", addr);
+
+	txbuf[0] = 0x91;
+	txbuf[1] = 0x92;
+	txbuf[2] = 0x93;
+	txbuf[3] = 0x94;
+
+	i2c.StartWriteData(0x50, 8 | I2CEX_2, &txbuf[0], 4);
+	i2c.WaitFinish();
+
+	TRACE("Write finished.\r\n");
+
+	TRACE("Reading memory at %04X...\r\n", addr);
+
+	i2c.StartReadData(0x50, addr | I2CEX_2, &rxbuf[0], len);
+	i2c.WaitFinish();
+
+	show_mem(&rxbuf[0], len);
+
+
+	TRACE("I2C test finished.\r\n");
+}
