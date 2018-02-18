@@ -26,6 +26,8 @@
  *  authors:  nvitya
 */
 
+#include "stdio.h"
+#include "string.h"
 #include "platform.h"
 #include "hwclkctrl.h"
 #include "hwpins.h"
@@ -118,6 +120,22 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_MIBO64_ATSAM4S)
+
+TGpioPin  led1pin(PORTNUM_A, 1, false);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// UART0
+	hwpinctrl.PinSetup(PORTNUM_A,  9, PINCFG_INPUT  | PINCFG_AF_0); // UART0_RXD
+	hwpinctrl.PinSetup(PORTNUM_A, 10, PINCFG_OUTPUT | PINCFG_AF_0); // UART0_TXD (Marked as B10 between B1 and D31 !!!)
+	conuart.Init(0x000); // UART0
+}
+
+#endif
+
 #if defined(BOARD_DEV_STM32F407ZE)
 
 TGpioPin  led1pin(5, 9, true);  // PF9
@@ -191,6 +209,33 @@ void heartbeat_task() // invoked every 0.5 s
 	//swo_printf("hbcounter = %i\r\n", hbcounter);
 }
 
+void uart_dma_test()
+{
+	TRACE("Testing DMA\r\n");
+
+	char txbuf[128];
+
+	sprintf(&txbuf[0], "Text sended with DMA...\r\n");
+
+	THwDmaChannel txdma;
+	txdma.InitPeriphDma(true, conuart.regs, conuart.usartregs);
+	conuart.DmaAssign(true, &txdma);
+
+	THwDmaTransfer txfer;
+
+	txfer.srcaddr = &txbuf[0];
+	txfer.count = strlen(&txbuf[0]);
+	txfer.addrinc = true;
+	txfer.bytewidth = 1;
+
+	conuart.DmaStartSend(&txfer);
+
+	while (txdma.Enabled())
+	{
+		// wait..
+	}
+}
+
 // the C libraries require "_start" so we keep it as the entry point
 extern "C" __attribute__((noreturn)) void _start(void)
 {
@@ -238,6 +283,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	TRACE("\r\n------------------------------------------\r\n");
 	TRACE("Serial Flash Test\r\n");
+
+	//uart_dma_test();
 
 	spi_flash_test();
 	//qspi_flash_test();

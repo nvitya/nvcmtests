@@ -49,121 +49,27 @@ void show_mem(void * addr, unsigned len)
 	TRACE("\r\n");
 }
 
-void i2c_test_direct()
-{
-	TRACE("I2C test for FM20V02A FRAM\r\n");
-
-	// TWIHS0
-	hwpinctrl.PinSetup(PORTNUM_A,  4, PINCFG_AF_0 | PINCFG_PULLUP); // TWIHS0: SCL/TWCK0
-	hwpinctrl.PinSetup(PORTNUM_A,  3, PINCFG_AF_0 | PINCFG_PULLUP); // TWIHS0: SDA/TWD0
-	//conuart.Init(0x000); // UART0
-
-	// Enable TWIHS0
-	PMC->PMC_PCER0 = (1 << 19);  // 20, 41
-
-	Twihs * regs = TWIHS0;
-
-	// reset:
-	regs->TWIHS_CR = 0
-		| (1 << 29)  // FIFO disable
-		| (1 << 26)  // lock clear
-		| (1 << 24)  // THR clear
-		| (1 << 17)  // ACM disable
-		| (1 << 11)  // SMB disable
-		| (1 <<  9)  // HighSpeed disable
-		| (1 <<  5)  // Slave mode disable
-		| (1 <<  3)  // Master mode disable
-	;
-
-	// setup 400 kHz clock
-	unsigned speed = 400000;
-	unsigned periphclock = SystemCoreClock;
-	if (SystemCoreClock > 150000000)
-	{
-		periphclock = (SystemCoreClock >> 1);
-	}
-
-	unsigned halfclockdiv = ((periphclock / speed) >> 1);
-	unsigned ckdiv = 0;
-	while (halfclockdiv > 255)
-	{
-		ckdiv += 1;
-		halfclockdiv = (halfclockdiv >> 1);
-	}
-
-	regs->TWIHS_CWGR = 0
-		| (0 << 24)  // HOLD(5)
-		| (0 << 20)  // CKSRC: 0 = periph. clock
-		| (ckdiv << 16)  // CKDIV(3): big prescaler
-		| (halfclockdiv << 8)  // CHDIV
-		| (halfclockdiv << 0)  // CLDIV
-  ;
-
-	regs->TWIHS_CR = (1 << 2);  // Master mode enable
-
-	// set device address
-	unsigned dadr = 0x50;
-
-	regs->TWIHS_IADR = 0x00000000;
-
-	regs->TWIHS_MMR = 0
-		| (dadr << 16)
-		| (1 << 12)  // MREAD: 1 = read
-		| (2 <<  8)  // 0 = No internal address bytes, 2 = 2 byte internal address
-	;
-
-	// send something:
-
-	regs->TWIHS_CR = (1 << 0);   // send a start condition
-
-	unsigned char data;
-
-	unsigned cnt = 0;
-
-	while (cnt < 16)
-	{
-		while ((regs->TWIHS_SR & (1 << 1)) == 0)
-		{
-			// wait until something received
-		}
-
-		data = regs->TWIHS_RHR;
-		TRACE("Received data: %02X\r\n", data);
-
-		++cnt;
-	}
-
-	regs->TWIHS_CR = (1 << 1);   // send a stop condition
-
-	while ((regs->TWIHS_SR & (1 << 1)) == 0)
-	{
-		// wait until something received
-	}
-
-	data = regs->TWIHS_RHR;
-	TRACE("Last Received data: %02X\r\n", data);
-
-	while ((regs->TWIHS_SR & (1 << 1)) == 0)
-	{
-		// wait until something received
-	}
-
-	data = regs->TWIHS_RHR;
-	TRACE("Last Received data: %02X\r\n", data);
-
-	TRACE("I2C Test finished.\r\n");
-}
-
-
 void i2c_test()
 {
 	TRACE("I2C test for FM20V02A FRAM\r\n");
 
+#if 0
+#elif defined(BOARD_MIBO100_ATSAME70)
 	// TWIHS0
 	hwpinctrl.PinSetup(PORTNUM_A,  4, PINCFG_AF_0 | PINCFG_PULLUP); // TWIHS0: SCL/TWCK0
 	hwpinctrl.PinSetup(PORTNUM_A,  3, PINCFG_AF_0 | PINCFG_PULLUP); // TWIHS0: SDA/TWD0
 
 	i2c.Init(0); // TWIHS0
+
+#elif defined(BOARD_MIBO64_ATSAM4S)
+	// TWI0
+	hwpinctrl.PinSetup(PORTNUM_A,  4, PINCFG_AF_0 | PINCFG_PULLUP); // TWI0: SCL/TWCK0
+	hwpinctrl.PinSetup(PORTNUM_A,  3, PINCFG_AF_0 | PINCFG_PULLUP); // TWI0: SDA/TWD0
+
+	i2c.Init(0); // TWIHS0
+#else
+  #error "unknown board."
+#endif
 
 	uint8_t rxbuf[32];
 	uint8_t txbuf[32];
@@ -180,10 +86,10 @@ void i2c_test()
 
 	TRACE("Writing memory to 0x0008...\r\n", addr);
 
-	txbuf[0] = 0x91;
-	txbuf[1] = 0x92;
-	txbuf[2] = 0x93;
-	txbuf[3] = 0x94;
+	txbuf[0] = 0x71;
+	txbuf[1] = 0x72;
+	txbuf[2] = 0x73;
+	txbuf[3] = 0x74;
 
 	i2c.StartWriteData(0x50, 8 | I2CEX_2, &txbuf[0], 4);
 	i2c.WaitFinish();

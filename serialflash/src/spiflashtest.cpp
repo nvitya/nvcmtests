@@ -95,6 +95,26 @@ void spi_flash_test()
 	spiflash.txdma.Init(1, 1);  // perid = 1: SPI0_TX
 	spiflash.rxdma.Init(2, 2);  // perid = 2: SPI0_RX
 
+#elif defined(BOARD_MIBO64_ATSAM4S)
+
+	// SPI0 setup
+
+	unsigned pinflags = PINCFG_OUTPUT | PINCFG_AF_A | PINCFG_PULLUP;
+
+	hwpinctrl.PinSetup(PORTNUM_A, 13, pinflags);  // MOSI
+	hwpinctrl.PinSetup(PORTNUM_A, 12, pinflags);  // MISO
+	hwpinctrl.PinSetup(PORTNUM_A, 14, pinflags);  // SCK
+
+	spiflash.pin_cs.Assign(PORTNUM_A, 11, false);
+	spiflash.pin_cs.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	//spiflash.spi.datasample_late = false;
+	spiflash.spi.speed = 16000000;
+	spiflash.spi.Init(0);
+
+	spiflash.txdma.InitPeriphDma(true,  spiflash.spi.regs, spiflash.spi.usartregs);
+	spiflash.rxdma.InitPeriphDma(false, spiflash.spi.regs, spiflash.spi.usartregs);
+
 #elif defined(BOARD_DEV_STM32F407ZE)
 
 	// SPI Flash on the F407ZE board
