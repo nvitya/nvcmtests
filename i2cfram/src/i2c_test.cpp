@@ -56,18 +56,22 @@ void i2c_test()
 #if 0
 #elif defined(BOARD_MIBO100_ATSAME70)
 	// TWIHS0
-	hwpinctrl.PinSetup(PORTNUM_A,  4, PINCFG_AF_0 | PINCFG_PULLUP); // TWIHS0: SCL/TWCK0
 	hwpinctrl.PinSetup(PORTNUM_A,  3, PINCFG_AF_0 | PINCFG_PULLUP); // TWIHS0: SDA/TWD0
+	hwpinctrl.PinSetup(PORTNUM_A,  4, PINCFG_AF_0 | PINCFG_PULLUP); // TWIHS0: SCL/TWCK0
 
 	i2c.Init(0); // TWIHS0
+
+	i2c.txdma.Init(14, 14);  // 14 = TWIHS0.TX (see XDMAC controller peripheral connections)
+	i2c.rxdma.Init(15, 15);  // 15 = TWIHS0.RX
 
 #elif defined(BOARD_MIBO64_ATSAM4S)
 	// TWI0
-	hwpinctrl.PinSetup(PORTNUM_A,  4, PINCFG_AF_0 | PINCFG_PULLUP); // TWI0: SCL/TWCK0
 	hwpinctrl.PinSetup(PORTNUM_A,  3, PINCFG_AF_0 | PINCFG_PULLUP); // TWI0: SDA/TWD0
+	hwpinctrl.PinSetup(PORTNUM_A,  4, PINCFG_AF_0 | PINCFG_PULLUP); // TWI0: SCL/TWCK0
 
 	i2c.Init(0); // TWIHS0
 
+	// PdmaInit must be called after i2c.Init !!!
 	i2c.PdmaInit(true,  nullptr);   // use internal
 	i2c.PdmaInit(false,  nullptr);  // use internal
 
@@ -90,13 +94,13 @@ void i2c_test()
 
 	TRACE("Writing memory to 0x0008...\r\n", addr);
 
-	txbuf[0] = 0x51;
-	txbuf[1] = 0x52;
-	txbuf[2] = 0x53;
-	txbuf[3] = 0x54;
-	txbuf[4] = 0x58;
-	txbuf[5] = 0x58;
-	txbuf[6] = 0x58;
+	txbuf[0] = 0x61;
+	txbuf[1] = 0x62;
+	txbuf[2] = 0x63;
+	txbuf[3] = 0x64;
+	txbuf[4] = 0x68;
+	txbuf[5] = 0x68;
+	txbuf[6] = 0x68;
 
 	i2c.StartWriteData(0x50, 8 | I2CEX_2, &txbuf[0], 4);
 	i2c.WaitFinish();
