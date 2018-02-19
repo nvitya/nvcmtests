@@ -112,8 +112,10 @@ void spi_flash_test()
 	spiflash.spi.speed = 16000000;
 	spiflash.spi.Init(0);
 
-	spiflash.txdma.InitPeriphDma(true,  spiflash.spi.regs, spiflash.spi.usartregs);
-	spiflash.rxdma.InitPeriphDma(false, spiflash.spi.regs, spiflash.spi.usartregs);
+	spiflash.spi.PdmaInit(true,  &spiflash.txdma);
+	// alternative: spiflash.txdma.InitPeriphDma(true,  spiflash.spi.regs, spiflash.spi.usartregs);
+	spiflash.spi.PdmaInit(false, &spiflash.rxdma);
+	// alternative: spiflash.rxdma.InitPeriphDma(false, spiflash.spi.regs, spiflash.spi.usartregs);
 
 #elif defined(BOARD_DEV_STM32F407ZE)
 

@@ -67,6 +67,10 @@ void i2c_test()
 	hwpinctrl.PinSetup(PORTNUM_A,  3, PINCFG_AF_0 | PINCFG_PULLUP); // TWI0: SDA/TWD0
 
 	i2c.Init(0); // TWIHS0
+
+	i2c.PdmaInit(true,  nullptr);   // use internal
+	i2c.PdmaInit(false,  nullptr);  // use internal
+
 #else
   #error "unknown board."
 #endif
@@ -86,10 +90,13 @@ void i2c_test()
 
 	TRACE("Writing memory to 0x0008...\r\n", addr);
 
-	txbuf[0] = 0x71;
-	txbuf[1] = 0x72;
-	txbuf[2] = 0x73;
-	txbuf[3] = 0x74;
+	txbuf[0] = 0x51;
+	txbuf[1] = 0x52;
+	txbuf[2] = 0x53;
+	txbuf[3] = 0x54;
+	txbuf[4] = 0x58;
+	txbuf[5] = 0x58;
+	txbuf[6] = 0x58;
 
 	i2c.StartWriteData(0x50, 8 | I2CEX_2, &txbuf[0], 4);
 	i2c.WaitFinish();
