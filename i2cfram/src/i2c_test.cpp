@@ -75,6 +75,17 @@ void i2c_test()
 	i2c.PdmaInit(true,  nullptr);   // use internal
 	i2c.PdmaInit(false,  nullptr);  // use internal
 
+#elif defined(BOARD_MIN_F103)
+	// I2C1
+	// open drain mode have to be used!
+	hwpinctrl.PinSetup(PORTNUM_B,  6, PINCFG_AF_0 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SCL
+	hwpinctrl.PinSetup(PORTNUM_B,  7, PINCFG_AF_0 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SDA
+
+	i2c.Init(1); // I2C1
+
+	//i2c.txdma.Init(14, 14);  // 14 = TWIHS0.TX (see XDMAC controller peripheral connections)
+	//i2c.rxdma.Init(15, 15);  // 15 = TWIHS0.RX
+
 #else
   #error "unknown board."
 #endif
@@ -82,15 +93,19 @@ void i2c_test()
 	uint8_t rxbuf[32];
 	uint8_t txbuf[32];
 
-	unsigned addr = 0;
+  #define I2CADDR  0x50
+
+	unsigned addr = 0x0000; // byte order = MSB First
 	unsigned len = 16;
 
 	TRACE("Reading memory at %04X...\r\n", addr);
 
-	i2c.StartReadData(0x50, addr | I2CEX_2, &rxbuf[0], len);
+	i2c.StartReadData(I2CADDR, addr | I2CEX_2, &rxbuf[0], len);
 	i2c.WaitFinish();
 
 	show_mem(&rxbuf[0], len);
+
+#if 0
 
 	TRACE("Writing memory to 0x0008...\r\n", addr);
 
@@ -102,18 +117,19 @@ void i2c_test()
 	txbuf[5] = 0x68;
 	txbuf[6] = 0x68;
 
-	i2c.StartWriteData(0x50, 8 | I2CEX_2, &txbuf[0], 4);
+	i2c.StartWriteData(I2CADDR, 8 | I2CEX_2, &txbuf[0], 4);
 	i2c.WaitFinish();
 
 	TRACE("Write finished.\r\n");
 
 	TRACE("Reading memory at %04X...\r\n", addr);
 
-	i2c.StartReadData(0x50, addr | I2CEX_2, &rxbuf[0], len);
+	i2c.StartReadData(I2CADDR, addr | I2CEX_2, &rxbuf[0], len);
 	i2c.WaitFinish();
 
 	show_mem(&rxbuf[0], len);
 
+#endif
 
 	TRACE("I2C test finished.\r\n");
 }
