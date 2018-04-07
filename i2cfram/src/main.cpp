@@ -104,6 +104,33 @@ void setup_board()
 }
 #endif
 
+#if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
+
+TGpioPin  led1pin(1, 0, false);
+TGpioPin  led2pin(1, 7, false);
+TGpioPin  led3pin(1, 14, false);
+
+#define LED_COUNT 3
+
+void setup_board()
+{
+	// nucleo board leds
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+  // USART3: Stlink USB / Serial converter
+	// USART3_TX: PD.8
+	hwpinctrl.PinSetup(3, 8,  PINCFG_OUTPUT | PINCFG_AF_7);
+	// USART3_RX: Pd.9
+	hwpinctrl.PinSetup(3, 9,  PINCFG_INPUT  | PINCFG_AF_7);
+
+	conuart.Init(3); // USART3
+}
+
+#endif
+
+
 #ifndef LED_COUNT
   #define LED_COUNT 1
 #endif

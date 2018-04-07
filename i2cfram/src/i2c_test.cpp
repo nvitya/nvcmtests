@@ -86,6 +86,17 @@ void i2c_test()
 	i2c.txdma.Init(1, 6, 3);  // DMA1/CH6 = I2C1_TX
 	i2c.rxdma.Init(1, 7, 3);  // DMA1/CH7 = I2C1_RX
 
+#elif defined(BOARD_NUCLEO_F746)
+
+	// I2C1
+	hwpinctrl.PinSetup(PORTNUM_B,  6, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SCL
+	hwpinctrl.PinSetup(PORTNUM_B,  7, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SDA
+
+	i2c.Init(1); // I2C1
+
+	//i2c.txdma.Init(1, 7, 1);  // DMA1/ST7/CH1 = I2C1_TX
+	//i2c.rxdma.Init(1, 0, 1);  // DMA1/ST0/CH1 = I2C1_RX
+
 #else
   #error "unknown board."
 #endif
