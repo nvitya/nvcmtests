@@ -105,19 +105,20 @@ void i2c_test()
 
 	show_mem(&rxbuf[0], len);
 
-#if 0
+	unsigned incoffs = 4;
 
-	TRACE("Writing memory to 0x0008...\r\n", addr);
+	TRACE("Incrementing memory at +%i...\r\n", incoffs);
 
-	txbuf[0] = 0x61;
-	txbuf[1] = 0x62;
-	txbuf[2] = 0x63;
-	txbuf[3] = 0x64;
-	txbuf[4] = 0x68;
-	txbuf[5] = 0x68;
-	txbuf[6] = 0x68;
+	txbuf[0] = rxbuf[incoffs+0] + 1;
+	txbuf[1] = rxbuf[incoffs+1] + 1;
+	txbuf[2] = rxbuf[incoffs+2] + 1;
+	txbuf[3] = rxbuf[incoffs+3] + 1;
+	txbuf[4] = rxbuf[incoffs+4] + 1;
+	txbuf[5] = rxbuf[incoffs+5] + 1;
+	txbuf[6] = rxbuf[incoffs+6] + 1;
+	txbuf[7] = rxbuf[incoffs+7] + 1;
 
-	i2c.StartWriteData(I2CADDR, 8 | I2CEX_2, &txbuf[0], 4);
+	i2c.StartWriteData(I2CADDR, addr + incoffs | I2CEX_2, &txbuf[0], 4);
 	i2c.WaitFinish();
 
 	TRACE("Write finished.\r\n");
@@ -128,8 +129,6 @@ void i2c_test()
 	i2c.WaitFinish();
 
 	show_mem(&rxbuf[0], len);
-
-#endif
 
 	TRACE("I2C test finished.\r\n");
 }
