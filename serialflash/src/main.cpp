@@ -209,33 +209,6 @@ void heartbeat_task() // invoked every 0.5 s
 	//swo_printf("hbcounter = %i\r\n", hbcounter);
 }
 
-void uart_dma_test()
-{
-	TRACE("Testing DMA\r\n");
-
-	char txbuf[128];
-
-	sprintf(&txbuf[0], "Text sended with DMA...\r\n");
-
-	THwDmaChannel txdma;
-	txdma.InitPeriphDma(true, conuart.regs, conuart.usartregs);
-	conuart.DmaAssign(true, &txdma);
-
-	THwDmaTransfer txfer;
-
-	txfer.srcaddr = &txbuf[0];
-	txfer.count = strlen(&txbuf[0]);
-	txfer.addrinc = true;
-	txfer.bytewidth = 1;
-
-	conuart.DmaStartSend(&txfer);
-
-	while (txdma.Enabled())
-	{
-		// wait..
-	}
-}
-
 // the C libraries require "_start" so we keep it as the entry point
 extern "C" __attribute__((noreturn)) void _start(void)
 {

@@ -83,8 +83,8 @@ void i2c_test()
 
 	i2c.Init(1); // I2C1
 
-	//i2c.txdma.Init(14, 14);  // 14 = TWIHS0.TX (see XDMAC controller peripheral connections)
-	//i2c.rxdma.Init(15, 15);  // 15 = TWIHS0.RX
+	i2c.txdma.Init(1, 6, 3);  // DMA1/CH6 = I2C1_TX
+	i2c.rxdma.Init(1, 7, 3);  // DMA1/CH7 = I2C1_RX
 
 #else
   #error "unknown board."

@@ -131,8 +131,8 @@ void spi_flash_test()
 	spiflash.spi.speed = 16000000;
 	spiflash.spi.Init(1);
 
-	spiflash.txdma.Init(0x020503);  // dma2/stream5/ch3
-	spiflash.rxdma.Init(0x020003);  // dma2/stream0/ch3
+	spiflash.txdma.Init(2, 5, 3);  // dma2/stream5/ch3
+	spiflash.rxdma.Init(2, 0, 3);  // dma2/stream0/ch3
 
 #elif defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
 
