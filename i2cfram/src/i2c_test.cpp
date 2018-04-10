@@ -77,7 +77,8 @@ void i2c_test()
 
 #elif defined(BOARD_MIN_F103)
 	// I2C1
-	// open drain mode have to be used!
+	// open drain mode have to be used, otherwise it won't work
+	// External pull-ups are required !
 	hwpinctrl.PinSetup(PORTNUM_B,  6, PINCFG_AF_0 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SCL
 	hwpinctrl.PinSetup(PORTNUM_B,  7, PINCFG_AF_0 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SDA
 
@@ -89,9 +90,10 @@ void i2c_test()
 #elif defined(BOARD_NUCLEO_F746)
 
 	// I2C1
-	hwpinctrl.PinSetup(PORTNUM_B,  6, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SCL
-	hwpinctrl.PinSetup(PORTNUM_B,  7, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SDA
-
+	hwpinctrl.PinSetup(PORTNUM_B,  8, PINCFG_AF_4 | PINCFG_OPENDRAIN); // I2C1_SCL
+	hwpinctrl.PinSetup(PORTNUM_B,  9, PINCFG_AF_4 | PINCFG_OPENDRAIN); // I2C1_SDA
+	//hwpinctrl.PinSetup(PORTNUM_B,  8, PINCFG_AF_4 | PINCFG_PULLUP); // I2C1_SCL
+	//hwpinctrl.PinSetup(PORTNUM_B,  9, PINCFG_AF_4 | PINCFG_PULLUP); // I2C1_SDA
 	i2c.Init(1); // I2C1
 
 	//i2c.txdma.Init(1, 7, 1);  // DMA1/ST7/CH1 = I2C1_TX
@@ -115,6 +117,8 @@ void i2c_test()
 	i2c.WaitFinish();
 
 	show_mem(&rxbuf[0], len);
+
+#if 0
 
 	unsigned incoffs = 4;
 
@@ -140,6 +144,8 @@ void i2c_test()
 	i2c.WaitFinish();
 
 	show_mem(&rxbuf[0], len);
+
+#endif
 
 	TRACE("I2C test finished.\r\n");
 }
