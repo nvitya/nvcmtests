@@ -96,8 +96,8 @@ void i2c_test()
 	//hwpinctrl.PinSetup(PORTNUM_B,  9, PINCFG_AF_4 | PINCFG_PULLUP); // I2C1_SDA
 	i2c.Init(1); // I2C1
 
-	//i2c.txdma.Init(1, 7, 1);  // DMA1/ST7/CH1 = I2C1_TX
-	//i2c.rxdma.Init(1, 0, 1);  // DMA1/ST0/CH1 = I2C1_RX
+	i2c.txdma.Init(1, 7, 1);  // DMA1/ST7/CH1 = I2C1_TX
+	i2c.rxdma.Init(1, 0, 1);  // DMA1/ST0/CH1 = I2C1_RX
 
 #else
   #error "unknown board."
@@ -118,7 +118,7 @@ void i2c_test()
 
 	show_mem(&rxbuf[0], len);
 
-#if 0
+#if 1
 
 	unsigned incoffs = 4;
 
