@@ -145,6 +145,27 @@ void i2c_test()
 
 	show_mem(&rxbuf[0], len);
 
+	TRACE("Testing wrong device read\r\n");
+
+	i2c.StartReadData(0x7E, addr | I2CEX_2, &rxbuf[0], len);
+	i2c.WaitFinish();
+	if (i2c.error)
+	{
+		TRACE("I2C read error: %i\r\n", i2c.error);
+	}
+	else
+	{
+		TRACE("I2C ERROR MISSING!\\r\n");
+		show_mem(&rxbuf[0], len);
+	}
+
+	TRACE("Reading memory after error again at %04X...\r\n", addr);
+
+	i2c.StartReadData(I2CADDR, addr | I2CEX_2, &rxbuf[0], len);
+	i2c.WaitFinish();
+
+	show_mem(&rxbuf[0], len);
+
 #endif
 
 	TRACE("I2C test finished.\r\n");
