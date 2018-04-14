@@ -8,6 +8,9 @@ TOledDisp_i2c  oled;
 
 uint8_t oled_disp_buf[128*64 >> 3];
 
+#include "FreeSans9pt7b.h"
+#include "TomThumb.h"
+
 void oled_test()
 {
 	TRACE("OLED display test\r\n");
@@ -64,6 +67,12 @@ void oled_test()
 		return;
 	}
 
+#if 0
+	oled.SetFont(&FreeSans9pt7b);
+#else
+	oled.SetFont(&TomThumb);
+#endif
+
 	TRACE("OLED display initialized.\r\n");
 
 	uint32_t * dd = (uint32_t *)&oled_disp_buf[4];
@@ -78,39 +87,45 @@ void oled_test()
 	oled_disp_buf[128*8-1] = 0xFF;
 
 	uint16_t x = 0, y = 0;
+	uint32_t ccnt = 0;
 	unsigned t0, t1;
 	TRACE("Starting display test.\r\n");
 	t0 = CLOCKCNT;
 	while (true)
 	{
 		t1 = CLOCKCNT;
-		(*dd)++;
 
-		oled.FillScreen(0);
-		//oled.DrawPixel(x, y, 1);
-		oled.FillRect(x, y, 20, 20, 1);
-
-#if 0
-		while (!oled.UpdateFinished())
+		if (oled.UpdateFinished())
 		{
-			// wait;
-		}
-#else
-		oled.Run();
+			oled.FillScreen(0);
+			//oled.DrawPixel(x, y, 1);
+			//oled.FillRect(x, y, 20, 20, 1);
+
+			//oled.DrawChar(x, y + oled.GetFontHeight(), 'A');
+#if 1
+			oled.SetCursor(x, y + oled.GetFontHeight());
+			oled.DrawString((char *)"AgfM.");
+			oled.SetCursor(x, y + 2 * oled.GetFontHeight());
+			oled.DrawString((char *)"gAMtimilL");
 #endif
 
-		++x;
-		if (x >= oled.width)
-		{
-			x = 0;
-			++y;
-			if (y >= oled.height)
+			oled.SetCursor(1, 40);
+			oled.printf("%u", ccnt);
+
+			++x;
+			if (x >= oled.width)
 			{
-				y = 0;
+				x = 0;
+				//++y;
+				if (y >= oled.height)
+				{
+					y = 0;
+				}
 			}
 		}
 
-		delay_us(100);  // this can make huge difference between DMA and DMA-less mode
+		//delay_us(10);  // this can make huge difference between DMA and DMA-less mode
+		++ccnt;
 	}
 
 	TRACE("OLED display test finished.\r\n");
