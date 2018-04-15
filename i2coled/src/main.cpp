@@ -104,6 +104,32 @@ void setup_board()
 }
 #endif
 
+#if defined(BOARD_DISCOVERY_F072)
+
+TGpioPin  led1pin(PORTNUM_C, 6, false);
+TGpioPin  led2pin(PORTNUM_C, 8, false);
+TGpioPin  led3pin(PORTNUM_C, 9, false);
+TGpioPin  led4pin(PORTNUM_C, 7, false);
+
+#define LED_COUNT 4
+#undef USE_DWT_CYCCNT
+
+void setup_board()
+{
+	// direction leds
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led4pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_1);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_1);  // USART1_RX
+	conuart.Init(1);
+}
+
+#endif
+
 #if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
 
 TGpioPin  led1pin(1, 0, false);

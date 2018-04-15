@@ -46,6 +46,16 @@ void oled_test()
 	oled.i2c.Init(1); // I2C1
 	oled.i2c.txdma.Init(1, 6, 3);  // DMA1/CH6 = I2C1_TX
 
+#elif defined(BOARD_DISCOVERY_F072)
+	// I2C1
+	// open drain mode have to be used, otherwise it won't work
+	// External pull-ups are required !
+	hwpinctrl.PinSetup(PORTNUM_B,  6, PINCFG_AF_1 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SCL
+	hwpinctrl.PinSetup(PORTNUM_B,  7, PINCFG_AF_1 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SDA
+
+	oled.i2c.Init(1); // I2C1
+	oled.i2c.txdma.Init(1, 2, 0);  // DMA1/CH2 = I2C1_TX
+
 #elif defined(BOARD_NUCLEO_F746)
 
 	// I2C1
