@@ -135,6 +135,7 @@ void i2c_test()
 
 	i2c.StartWriteData(I2CADDR, addr + incoffs | I2CEX_2, &txbuf[0], 4);
 	i2c.WaitFinish();
+	if (i2c.error)	{ TRACE(" I2C error = %i\r\n", i2c.error); }
 
 	TRACE("Write finished.\r\n");
 
@@ -142,6 +143,7 @@ void i2c_test()
 
 	i2c.StartReadData(I2CADDR, addr | I2CEX_2, &rxbuf[0], len);
 	i2c.WaitFinish();
+	if (i2c.error)	{ TRACE(" I2C error = %i\r\n", i2c.error); }
 
 	show_mem(&rxbuf[0], len);
 
@@ -163,6 +165,7 @@ void i2c_test()
 
 	i2c.StartReadData(I2CADDR, addr | I2CEX_2, &rxbuf[0], len);
 	i2c.WaitFinish();
+	if (i2c.error)	{ TRACE(" I2C error = %i\r\n", i2c.error); }
 
 	show_mem(&rxbuf[0], len);
 

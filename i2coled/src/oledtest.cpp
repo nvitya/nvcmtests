@@ -67,7 +67,7 @@ void oled_test()
 		return;
 	}
 
-#if 0
+#if 1
 	oled.SetFont(&FreeSans9pt7b);
 #else
 	oled.SetFont(&TomThumb);
@@ -75,16 +75,11 @@ void oled_test()
 
 	TRACE("OLED display initialized.\r\n");
 
-	uint32_t * dd = (uint32_t *)&oled_disp_buf[4];
+	uint8_t fontadvancey, fontascend, fontdescend, fontheight;
 
-	oled_disp_buf[0] = 0x55;
-	oled_disp_buf[1] = 0xaa;
-	oled_disp_buf[2] = 0x55;
-	oled_disp_buf[3] = 0xaa;
-
-
-	oled_disp_buf[128*2] = 0x0F;
-	oled_disp_buf[128*8-1] = 0xFF;
+	fontadvancey = oled.GetFontMetrics(oled.pfont, &fontascend, &fontdescend);
+	fontheight = fontascend + fontdescend;
+	TRACE("Current font metrics:\r\n yadvance = %u, ascend = %u, descend = %u\r\n", fontadvancey, fontascend, fontdescend);
 
 	uint16_t x = 0, y = 0;
 	uint32_t ccnt = 0;
@@ -104,9 +99,12 @@ void oled_test()
 			//oled.DrawChar(x, y + oled.GetFontHeight(), 'A');
 #if 1
 			oled.SetCursor(x, y + oled.GetFontHeight());
-			oled.DrawString((char *)"AgfM.");
+			oled.DrawString((char *)"AgfMAVLTd.");
 			oled.SetCursor(x, y + 2 * oled.GetFontHeight());
 			oled.DrawString((char *)"gAMtimilL");
+
+			oled.DrawLine(0, 0, 127, 63);
+			oled.DrawRect(10, 10, 100, 30);
 #endif
 
 			oled.SetCursor(1, 40);
