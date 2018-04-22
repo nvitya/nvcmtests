@@ -10,6 +10,7 @@ uint8_t oled_disp_buf[128*64 >> 3];
 
 #include "FreeSans9pt7b.h"
 #include "TomThumb.h"
+#include "stdmonofont.h"
 
 void oled_test()
 {
@@ -80,7 +81,7 @@ void oled_test()
 #if 1
 	oled.SetFont(&FreeSans9pt7b);
 #else
-	oled.SetFont(&TomThumb);
+	oled.SetFont(&stdmonofont);
 #endif
 
 	TRACE("OLED display initialized.\r\n");
@@ -103,12 +104,13 @@ void oled_test()
 		if (oled.UpdateFinished())
 		{
 			oled.FillScreen(0);
+			//oled.FillRect(0,0, oled.width, oled.height, 0);
 			//oled.DrawPixel(x, y, 1);
 			//oled.FillRect(x, y, 20, 20, 1);
 
 			//oled.DrawChar(x, y + oled.GetFontHeight(), 'A');
 #if 1
-			oled.SetCursor(x, y + oled.GetFontHeight());
+			oled.SetCursor(x, 44 + y + oled.GetFontHeight());
 			oled.DrawString((char *)"AgfMAVLTd.");
 			oled.SetCursor(x, y + 2 * oled.GetFontHeight());
 			oled.DrawString((char *)"gAMtimilL");

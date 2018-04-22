@@ -198,6 +198,7 @@ void heartbeat_task() // invoked every 0.5 s
 	//TRACE("hbcounter = %i\r\n", hbcounter);
 
 	scr.WriteChar(32 + (hbcounter & 127));
+	scr.lcd->DrawLine(0,0, scr.lcd->width, scr.lcd->height);
 }
 
 // the C libraries require "_start" so we keep it as the entry point
