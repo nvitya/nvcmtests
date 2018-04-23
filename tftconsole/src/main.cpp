@@ -198,8 +198,12 @@ void heartbeat_task() // invoked every 0.5 s
 	//TRACE("hbcounter = %i\r\n", hbcounter);
 
 	scr.WriteChar(32 + (hbcounter & 127));
-	scr.lcd->DrawLine(0,0, scr.lcd->width, scr.lcd->height);
+	//scr.disp->DrawLine(0,0, scr.disp->width, scr.disp->height);
 }
+
+#include "font_FreeMono9pt7b.h"
+
+TGfxFont font_mono(&FreeMono9pt7b);
 
 // the C libraries require "_start" so we keep it as the entry point
 extern "C" __attribute__((noreturn)) void _start(void)
@@ -247,7 +251,11 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	//mcu_enable_interrupts();
 
 	lcd.FillScreen(0x0000);
-	scr.Init(&lcd);
+
+	TGfxFont * consolefont = &font_mono;
+	//TGfxFont * consolefont = &font_gfx_standard;
+
+	scr.Init(&lcd, 1, 1, lcd.width - 2, lcd.height - 2, consolefont);
 
 	TRACE("\r\n------------------------------------------\r\n");
 	TRACE("TFT LCD Test\r\n");
