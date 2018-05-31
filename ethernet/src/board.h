@@ -19,41 +19,45 @@
  * 3. This notice may not be removed or altered from any source distribution.
  * --------------------------------------------------------------------------- */
 /*
- *  file:     traces.h (serialflash)
- *  brief:    Trace message redirected to LCD
+ *  file:     board.h (uart)
+ *  brief:    Required board definition by the NVCM core (platform.h)
  *  version:  1.00
  *  date:     2018-02-10
  *  authors:  nvitya
 */
 
-#ifndef __Traces__h
-#define __Traces__h
+#ifndef BOARD_H_
+#define BOARD_H_
 
-#include "swo.h"
+// Special, non-builtin boards
 
-#include "textscreen.h"
-extern TTextScreen scr;
+#if 0
 
-#define TRACES
+#elif defined(BOARD_NONE_STM32F301)
 
-#ifdef TRACES
-  // add trace calls
-  //#define TRACE(...)  		{ scr.printf( __VA_ARGS__ ); scr.Update(); }
-  //#define TRACE(...)  		{ swo_printf( __VA_ARGS__ ); }
-  #define TRACE(...)  		{ conuart.printf( __VA_ARGS__ ); }
+  #define BOARD_NAME "STM32F301K6 in adapter"
+  #define MCU_STM32F301K6
+
+  #define MCU_INTRC_SPEED    8000000
+  #define MAX_CLOCK_SPEED   64000000
+
+#elif defined(BOARD_NONE_MKV30F)
+
+  #define BOARD_NAME "Breakout board for MKV30F (32 pin)"
+  #define MCU_MKV30F
+  #define MCU_CLOCK_SPEED   96000000
+  #define MCU_INTRC_SPEED   48000000
+
+#elif defined(BOARD_NONE_LPC822)
+
+  #define BOARD_NAME "Breakout board for LPC822 (20 pin)"
+  #define MCU_LPC822
+
 #else
-  // ignore traces
-  #define TRACE(...)
+
+  #include "boards_builtin.h"
+
 #endif
 
-#ifdef LTRACES
- #define LTRACE(...)  TRACE( __VA_ARGS__ )
-#else
- #define LTRACE(...)
-#endif
 
-#undef LTRACES
-
-#endif //!defined(Traces__h)
-
-//--- End Of file --------------------------------------------------------------
+#endif /* BOARD_H_ */

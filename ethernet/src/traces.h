@@ -19,8 +19,8 @@
  * 3. This notice may not be removed or altered from any source distribution.
  * --------------------------------------------------------------------------- */
 /*
- *  file:     traces.h (serialflash)
- *  brief:    Trace message redirected to LCD
+ *  file:     traces.h (uart)
+ *  brief:    Trace message redirection to UART
  *  version:  1.00
  *  date:     2018-02-10
  *  authors:  nvitya
@@ -30,15 +30,14 @@
 #define __Traces__h
 
 #include "swo.h"
+#include "hwuart.h"
 
-#include "textscreen.h"
-extern TTextScreen scr;
+extern THwUart   conuart;  // console uart
 
 #define TRACES
 
 #ifdef TRACES
   // add trace calls
-  //#define TRACE(...)  		{ scr.printf( __VA_ARGS__ ); scr.Update(); }
   //#define TRACE(...)  		{ swo_printf( __VA_ARGS__ ); }
   #define TRACE(...)  		{ conuart.printf( __VA_ARGS__ ); }
 #else

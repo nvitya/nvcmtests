@@ -19,10 +19,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  * --------------------------------------------------------------------------- */
 /*
- *  file:     main.cpp (uart)
- *  brief:    Multi-board uart example (with MCU speed test) for NVCM
+ *  file:     main.cpp (ethernet)
+ *  brief:    Multi-board ethernet example for NVCM
  *  version:  1.00
- *  date:     2018-02-10
+ *  date:     2018-05-30
  *  authors:  nvitya
 */
 
@@ -30,19 +30,28 @@
 #include "hwpins.h"
 #include "hwclkctrl.h"
 #include "hwuart.h"
+#include "hweth.h"
 #include "cppinit.h"
 #include "clockcnt.h"
-#include "hwusbctrl.h"
-#include "usbdevice.h"
-#include "usbhiddevice.h"
-
-TUsbHidDevice  hiddev;
 
 #include "traces.h"
 
 THwUart   conuart;  // console uart
 
-#if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
+#define ETH_RX_PACKETS  16
+#define ETH_TX_PACKETS   4
+
+__attribute__((aligned(32)))
+uint8_t   eth_rx_desc_mem[sizeof(HW_ETH_DMA_DESC) * ETH_RX_PACKETS];
+
+__attribute__((aligned(32)))
+uint8_t   eth_tx_desc_mem[sizeof(HW_ETH_DMA_DESC) * ETH_TX_PACKETS];
+
+uint8_t   eth_rx_packet_mem[HWETH_MAX_PACKET_SIZE * ETH_RX_PACKETS]   __attribute__((aligned(16)));
+
+THwEth    eth;
+
+#if defined(BOARD_NUCLEO_F746)
 
 TGpioPin  led1pin(1, 0, false);
 TGpioPin  led2pin(1, 7, false);
@@ -105,42 +114,6 @@ void setup_board()
 
 #endif
 
-#if defined(BOARD_MIBO64_ATSAM4S)
-
-TGpioPin  led1pin(PORTNUM_A, 1, false);
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
-	conuart.Init(0);
-}
-
-#endif
-
-#if defined(BOARD_DISCOVERY_F072)
-
-TGpioPin  led1pin(PORTNUM_C, 6, false);
-TGpioPin  led2pin(PORTNUM_C, 8, false);
-TGpioPin  led3pin(PORTNUM_C, 9, false);
-TGpioPin  led4pin(PORTNUM_C, 7, false);
-
-#define LED_COUNT 4
-#undef USE_DWT_CYCCNT
-
-void setup_board()
-{
-	// direction leds
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led4pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-}
-
-#endif
-
 #if defined(BOARD_DEV_STM32F407VG)
 
 #define SKIP_DTCRAM_EXEC_TEST
@@ -179,63 +152,6 @@ void setup_board()
 
 #endif
 
-#if defined(BOARD_ARDUINO_DUE)
-
-TGpioPin  led1pin(1, 27, false); // D13
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// UART - On the Arduino programmer interface
-	hwpinctrl.PinSetup(0, 8, PINCFG_INPUT | PINCFG_AF_0);  // UART_RXD
-	hwpinctrl.PinSetup(0, 9, PINCFG_OUTPUT | PINCFG_AF_0); // UART_TXD
-	conuart.Init(0);  // UART
-}
-
-#endif
-
-#if defined(BOARD_MIN_F103)
-
-TGpioPin  led1pin(2, 13, false); // PC13
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
-	conuart.Init(1);
-
-	// USART2
-	//hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART2_TX
-	//hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_0 | PINCFG_PULLUP);  // USART2_RX
-	//conuart.Init(2);
-}
-#endif
-
-#if defined(BOARD_MIBO64_ATSAME5X)
-
-TGpioPin  led1pin(PORTNUM_A, 1, false);
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// SERCOM0
-	hwpinctrl.PinSetup(PORTNUM_A, 4, PINCFG_OUTPUT | PINCFG_AF_3);  // PAD[0] = TX
-	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_INPUT  | PINCFG_AF_3);  // PAD[1] = RX
-	conuart.Init(0);
-
-	// SERCOM2
-	//hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_AF_2);  // PAD[0] = TX
-	//hwpinctrl.PinSetup(PORTNUM_A, 13, PINCFG_AF_2);  // PAD[1] = RX
-	//conuart.Init(2);
-}
-#endif
-
-
 #if defined(BOARD_XPRESSO_LPC4337)
 
 TGpioPin  led1pin(3, 5, true);
@@ -263,7 +179,6 @@ void setup_board()
 
 #endif
 
-
 #if defined(BOARD_XPRESSO_LPC54608)
 
 TGpioPin  led1pin(2, 2, true);
@@ -285,26 +200,6 @@ void setup_board()
 
 #endif
 
-#if defined(BOARD_MIBO100_LPC546XX)
-
-TGpioPin  led1pin(1, 3, false);
-
-#define LED_COUNT 1
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinSetup(0, 30, PINCFG_OUTPUT | PINCFG_AF_1); // UART_TX:
-	hwpinctrl.PinSetup(0, 29, PINCFG_INPUT  | PINCFG_AF_1); // UART_RX:
-	conuart.Init(0);
-
-}
-
-#endif
-
-// ---------------------------------------------------------------------------------------
-
 #ifndef LED_COUNT
   #define LED_COUNT 1
 #endif
@@ -318,6 +213,27 @@ extern "C" void SysTick_Handler(void)
 
 void idle_task()
 {
+	uint32_t n;
+	uint32_t idx;
+	uint8_t * pdata;
+	uint32_t  datalen;
+
+	eth.PhyStatusPoll(); // must be called regularly
+
+	if (eth.TryRecv(&idx, (void * *)&pdata, &datalen))
+	{
+		TRACE("Eth frame received, len = %u\r\n", datalen);
+#if 0
+		for (n = 0; n < datalen; ++n)
+		{
+			if ((n > 0) && ((n % 15) == 0)) TRACE("\r\n");
+			TRACE(" %02X", pdata[n]);
+		}
+		TRACE("\r\n");
+#endif
+
+		eth.ReleaseRxBuf(idx); // must be called !
+	}
 }
 
 unsigned hbcounter = 0;
@@ -341,6 +257,64 @@ void heartbeat_task() // invoked every 0.5 s
 #endif
 
 	//TRACE("hbcounter = %u, systick = %u\r\n", hbcounter, systick);
+
+	//conuart.TrySendChar(0x55);
+}
+
+void ethernet_init()
+{
+	uint32_t n;
+
+
+	/* Ethernet pins configuration ************************************************
+
+	        RMII_REF_CLK ----------------------> PA1
+	        RMII_MDIO -------------------------> PA2
+	        RMII_MDC --------------------------> PC1
+	        RMII_MII_CRS_DV -------------------> PA7
+	        RMII_MII_RXD0 ---------------------> PC4
+	        RMII_MII_RXD1 ---------------------> PC5
+	        RMII_MII_RXER ---------------------> PG2
+	        RMII_MII_TX_EN --------------------> PG11
+	        RMII_MII_TXD0 ---------------------> PG13
+	        RMII_MII_TXD1 ---------------------> PB13
+	*/
+
+	uint32_t pinfl = PINCFG_SPEED_FAST | PINCFG_AF_11;
+
+	hwpinctrl.PinSetup(PORTNUM_A,  1, pinfl); // REF CLK
+	hwpinctrl.PinSetup(PORTNUM_A,  2, pinfl); // MDIO
+	hwpinctrl.PinSetup(PORTNUM_C,  1, pinfl); // MDC
+	hwpinctrl.PinSetup(PORTNUM_A,  7, pinfl); // CRS_DV
+	hwpinctrl.PinSetup(PORTNUM_C,  4, pinfl); // RXD0
+	hwpinctrl.PinSetup(PORTNUM_C,  5, pinfl); // RXD1
+	hwpinctrl.PinSetup(PORTNUM_G,  2, pinfl); // RXER
+	hwpinctrl.PinSetup(PORTNUM_G, 11, pinfl); // TX_EN
+	hwpinctrl.PinSetup(PORTNUM_G, 13, pinfl); // TXD0
+	hwpinctrl.PinSetup(PORTNUM_B, 13, pinfl); // TXD1
+
+	/* Enable the Ethernet global Interrupt */
+	//HAL_NVIC_SetPriority(ETH_IRQn, 0x7, 0);
+	//HAL_NVIC_EnableIRQ(ETH_IRQn);
+
+	eth.phy_address = 0;
+	if (!eth.Init(&eth_rx_desc_mem, ETH_RX_PACKETS, &eth_tx_desc_mem, ETH_TX_PACKETS))
+	{
+		TRACE("ETH INIT FAILED !!!\r\n");
+	}
+	else
+	{
+		TRACE("ETH init ok.\r\n");
+	}
+
+	// there is no valid rx buffer yet!
+
+	for (n = 0; n < ETH_RX_PACKETS; ++n)
+	{
+		eth.AssignRxBuf(n, &eth_rx_packet_mem[HWETH_MAX_PACKET_SIZE * n], HWETH_MAX_PACKET_SIZE);
+	}
+
+	eth.Start();
 }
 
 // the C libraries require "_start" so we keep it as the entry point
@@ -387,20 +361,17 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	setup_board();
 
 	TRACE("\r\n--------------------------\r\n");
-	TRACE("NVCM USB HID TEST\r\n");
+	TRACE("NVCM ETHERNET TEST\r\n");
 	TRACE("Board: \"%s\"\r\n", BOARD_NAME);
 	TRACE("SystemCoreClock: %u\r\n", SystemCoreClock);
 
-	hiddev.Init();
+	ethernet_init();
 
 	TRACE("\r\nStarting main cycle...\r\n");
 
 	SysTick_Config(SystemCoreClock / 1000);
 
 	mcu_enable_interrupts();
-
-	//unsigned * ptr = (unsigned * )0x3000000;
-	//*ptr = 1;
 
 	unsigned hbclocks = SystemCoreClock;
 

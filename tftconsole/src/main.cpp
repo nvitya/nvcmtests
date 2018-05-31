@@ -29,6 +29,7 @@
 #include "platform.h"
 #include "hwclkctrl.h"
 #include "hwpins.h"
+#include "hwuart.h"
 #include "cppinit.h"
 #include "clockcnt.h"
 #include "textscreen.h"
@@ -36,6 +37,8 @@
 #include "traces.h"
 
 TTextScreen scr;
+
+THwUart   conuart;  // console uart
 
 #if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
 
@@ -159,6 +162,11 @@ void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
+	// UART - On the Arduino programmer interface
+	hwpinctrl.PinSetup(0, 8, PINCFG_INPUT | PINCFG_AF_0);  // UART_RXD
+	hwpinctrl.PinSetup(0, 9, PINCFG_OUTPUT | PINCFG_AF_0); // UART_TXD
+	conuart.Init(0);  // UART
+
 	lcd.mirrorx = true;
 	lcd.Init(LCD_CTRL_HX8357B, 320, 480);
 	lcd.SetRotation(0);
@@ -176,9 +184,18 @@ extern "C" void SysTick_Handler(void)
 	++systick;
 }
 
+unsigned min_scr_update = 0;
+unsigned max_scr_update = 0;
+
 void idle_task()
 {
+	unsigned t0, t1;
+	t0 = CLOCKCNT;
 	scr.Update();
+	t1 = CLOCKCNT;
+	unsigned sut = t1 - t0;
+	if (sut < min_scr_update)  min_scr_update = sut;
+	if (sut > max_scr_update)  max_scr_update = sut;
 }
 
 unsigned hbcounter = 0;
@@ -197,7 +214,12 @@ void heartbeat_task() // invoked every 0.5 s
 
 	//TRACE("hbcounter = %i\r\n", hbcounter);
 
-	scr.WriteChar(32 + (hbcounter & 127));
+	TRACE("%u scr update min = %u, max = %u\r\n", hbcounter, min_scr_update, max_scr_update);
+
+	min_scr_update = 999999999;
+	max_scr_update = 0;
+
+	//scr.WriteChar(32 + (hbcounter & 127));
 	//scr.disp->DrawLine(0,0, scr.disp->width, scr.disp->height);
 }
 
@@ -266,11 +288,14 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 #if CLOCKCNT_BITS >= 32
 
-	unsigned hbclocks = SystemCoreClock / 100;
+	unsigned hbclocks = SystemCoreClock / 1;
 
 	unsigned t0, t1;
 
 	t0 = CLOCKCNT;
+
+	uint32_t chcnt = 0;
+	unsigned cht = CLOCKCNT;
 
 	// Infinite loop
 	while (1)
@@ -283,6 +308,13 @@ extern "C" __attribute__((noreturn)) void _start(void)
 		{
 			heartbeat_task();
 			t0 = t1;
+		}
+
+		if (t1 - cht > SystemCoreClock / 100)
+		{
+			scr.WriteChar(32 + (chcnt & 127));
+			++chcnt;
+			cht = t1;
 		}
 	}
 

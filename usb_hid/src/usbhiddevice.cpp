@@ -209,7 +209,7 @@ bool TUsbHidDevice::InitDevice()
   hiddata.dy = 0;
   hiddata.data2 = 0;
 
-  usbctrl.AssignEndpoint(&ep_hidreport, 1, 4, USBEF_DIR_HIDO | USBEF_TYPE_INTERRUPT);
+  usbctrl.AddEndpoint(&ep_hidreport, 1, 4, 0, USBEF_TYPE_INTERRUPT);
 
 	return true;
 }
