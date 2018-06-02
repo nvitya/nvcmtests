@@ -73,6 +73,37 @@ void setup_board()
 	hwpinctrl.PinSetup(3, 9,  PINCFG_INPUT  | PINCFG_AF_7);
 
 	conuart.Init(3); // USART3
+
+	/* Ethernet pins configuration ************************************************
+
+	        RMII_REF_CLK ----------------------> PA1
+	        RMII_MDIO -------------------------> PA2
+	        RMII_MDC --------------------------> PC1
+	        RMII_MII_CRS_DV -------------------> PA7
+	        RMII_MII_RXD0 ---------------------> PC4
+	        RMII_MII_RXD1 ---------------------> PC5
+	        RMII_MII_RXER ---------------------> PG2
+	        RMII_MII_TX_EN --------------------> PG11
+	        RMII_MII_TXD0 ---------------------> PG13
+	        RMII_MII_TXD1 ---------------------> PB13
+	*/
+
+	uint32_t pinfl = PINCFG_SPEED_FAST | PINCFG_AF_11;
+
+	hwpinctrl.PinSetup(PORTNUM_A,  1, pinfl); // REF CLK
+	hwpinctrl.PinSetup(PORTNUM_A,  2, pinfl); // MDIO
+	hwpinctrl.PinSetup(PORTNUM_C,  1, pinfl); // MDC
+	hwpinctrl.PinSetup(PORTNUM_A,  7, pinfl); // CRS_DV
+	hwpinctrl.PinSetup(PORTNUM_C,  4, pinfl); // RXD0
+	hwpinctrl.PinSetup(PORTNUM_C,  5, pinfl); // RXD1
+	hwpinctrl.PinSetup(PORTNUM_G,  2, pinfl); // RXER
+	hwpinctrl.PinSetup(PORTNUM_G, 11, pinfl); // TX_EN
+	hwpinctrl.PinSetup(PORTNUM_G, 13, pinfl); // TXD0
+	hwpinctrl.PinSetup(PORTNUM_B, 13, pinfl); // TXD1
+
+	/* Enable the Ethernet global Interrupt */
+	//HAL_NVIC_SetPriority(ETH_IRQn, 0x7, 0);
+	//HAL_NVIC_EnableIRQ(ETH_IRQn);
 }
 
 #endif
@@ -95,6 +126,37 @@ void setup_board()
 	//hwpinctrl.PinSetup(3, 28, PINCFG_INPUT | PINCFG_AF_0);  // UART3_RXD
 	//hwpinctrl.PinSetup(3, 30, PINCFG_OUTPUT | PINCFG_AF_0); // UART3_TXD
 	//uartx2.Init(3); // UART3
+
+	/* Ethernet pins configuration ************************************************
+
+	        RMII_REF_CLK ----------------------> PD0
+	        RMII_MDIO -------------------------> PD9
+	        RMII_MDC --------------------------> PD8
+	        RMII_MII_CRS_DV -------------------> PD4
+	        RMII_MII_RXD0 ---------------------> PD5
+	        RMII_MII_RXD1 ---------------------> PD6
+	        RMII_MII_RXER ---------------------> PD7
+	        RMII_MII_TX_EN --------------------> PD1
+	        RMII_MII_TXD0 ---------------------> PD2
+	        RMII_MII_TXD1 ---------------------> PD3
+	*/
+
+	uint32_t pinfl = PINCFG_SPEED_FAST | PINCFG_AF_0;
+
+	hwpinctrl.PinSetup(PORTNUM_D, 0, pinfl); // REF CLK
+	hwpinctrl.PinSetup(PORTNUM_D, 9, pinfl); // MDIO
+	hwpinctrl.PinSetup(PORTNUM_D, 8, pinfl); // MDC
+	hwpinctrl.PinSetup(PORTNUM_D, 4, pinfl); // CRS_DV
+	hwpinctrl.PinSetup(PORTNUM_D, 5, pinfl); // RXD0
+	hwpinctrl.PinSetup(PORTNUM_D, 6, pinfl); // RXD1
+	hwpinctrl.PinSetup(PORTNUM_D, 7, pinfl); // RXER
+	hwpinctrl.PinSetup(PORTNUM_D, 1, pinfl); // TX_EN
+	hwpinctrl.PinSetup(PORTNUM_D, 2, pinfl); // TXD0
+	hwpinctrl.PinSetup(PORTNUM_D, 3, pinfl); // TXD1
+
+	// Extra PHY Signals
+	hwpinctrl.PinSetup(PORTNUM_C, 10, PINCFG_OUTPUT | PINCFG_GPIO_INIT_1); // PHY RESET
+	hwpinctrl.PinSetup(PORTNUM_A, 14, PINCFG_INPUT | PINCFG_PULLUP); // PHY INTERRUPT
 }
 
 #endif
@@ -264,38 +326,6 @@ void heartbeat_task() // invoked every 0.5 s
 void ethernet_init()
 {
 	uint32_t n;
-
-
-	/* Ethernet pins configuration ************************************************
-
-	        RMII_REF_CLK ----------------------> PA1
-	        RMII_MDIO -------------------------> PA2
-	        RMII_MDC --------------------------> PC1
-	        RMII_MII_CRS_DV -------------------> PA7
-	        RMII_MII_RXD0 ---------------------> PC4
-	        RMII_MII_RXD1 ---------------------> PC5
-	        RMII_MII_RXER ---------------------> PG2
-	        RMII_MII_TX_EN --------------------> PG11
-	        RMII_MII_TXD0 ---------------------> PG13
-	        RMII_MII_TXD1 ---------------------> PB13
-	*/
-
-	uint32_t pinfl = PINCFG_SPEED_FAST | PINCFG_AF_11;
-
-	hwpinctrl.PinSetup(PORTNUM_A,  1, pinfl); // REF CLK
-	hwpinctrl.PinSetup(PORTNUM_A,  2, pinfl); // MDIO
-	hwpinctrl.PinSetup(PORTNUM_C,  1, pinfl); // MDC
-	hwpinctrl.PinSetup(PORTNUM_A,  7, pinfl); // CRS_DV
-	hwpinctrl.PinSetup(PORTNUM_C,  4, pinfl); // RXD0
-	hwpinctrl.PinSetup(PORTNUM_C,  5, pinfl); // RXD1
-	hwpinctrl.PinSetup(PORTNUM_G,  2, pinfl); // RXER
-	hwpinctrl.PinSetup(PORTNUM_G, 11, pinfl); // TX_EN
-	hwpinctrl.PinSetup(PORTNUM_G, 13, pinfl); // TXD0
-	hwpinctrl.PinSetup(PORTNUM_B, 13, pinfl); // TXD1
-
-	/* Enable the Ethernet global Interrupt */
-	//HAL_NVIC_SetPriority(ETH_IRQn, 0x7, 0);
-	//HAL_NVIC_EnableIRQ(ETH_IRQn);
 
 	eth.phy_address = 0;
 	if (!eth.Init(&eth_rx_desc_mem, ETH_RX_PACKETS, &eth_tx_desc_mem, ETH_TX_PACKETS))
