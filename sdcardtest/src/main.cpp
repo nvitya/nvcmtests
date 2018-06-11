@@ -70,6 +70,7 @@ void setup_board()
 
 	hwpinctrl.PinSetup(PORTNUM_C, 16, PINCFG_INPUT | PINCFG_PULLUP); // Card detect input
 
+	sdcard.dma.Init(9, 0); // 0 = HSMCI DMA Peripheral Id (Transmit and Receive)
 	sdcard.Init();
 }
 
