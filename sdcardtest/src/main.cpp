@@ -234,6 +234,12 @@ void sdcard_test()
 
 #endif
 
+int teststate = 0;
+
+uint8_t testbuf[16384] __attribute__((aligned(4)));
+uint32_t testlen = 1024;
+uint32_t testcnt = 0;
+
 // the C libraries require "_start" so we keep it as the entry point
 extern "C" __attribute__((noreturn)) void _start(void)
 {
@@ -294,6 +300,10 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	unsigned t0, t1;
 
+	unsigned rstart, rend;
+
+	int i;
+
 	t0 = CLOCKCNT;
 
 	// Infinite loop
@@ -302,6 +312,55 @@ extern "C" __attribute__((noreturn)) void _start(void)
 		t1 = CLOCKCNT;
 
 		idle_task();
+
+		if (0 == teststate)
+		{
+			if (sdcard.card_initialized)
+			{
+				TRACE("APP: SD Card initialized.\r\n");
+				teststate = 1;
+			}
+		}
+		else if (1 == teststate)
+		{
+			// start block read
+			sdcard.StartReadBlocks(2561, &testbuf[0], testlen);
+			rstart = CLOCKCNT;
+			teststate = 2;
+		}
+		else if (2 == teststate)
+		{
+			// wait until read completed
+			if (sdcard.completed)
+			{
+				if (sdcard.errorcode)
+				{
+					TRACE("Read error!\r\n");
+					teststate = 10;
+				}
+				else
+				{
+					rend = CLOCKCNT;
+					TRACE("Read ok, clocks = %u\r\n", rend - rstart);
+#if 1
+					for (i = 0; i < testlen; ++i)
+					{
+						if ((i != 0) && ((i % 16) == 0))  TRACE("\r\n");
+						TRACE(" %02X", testbuf[i]);
+					}
+					TRACE("\r\n");
+#endif
+
+					teststate = 10;
+				}
+			}
+		}
+		else if (10 == teststate)
+		{
+			// the end.
+			++testcnt;
+			if (testcnt < 2)  teststate = 1;
+		}
 
 		if (t1-t0 > hbclocks)
 		{
