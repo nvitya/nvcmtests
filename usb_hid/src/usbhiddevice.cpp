@@ -191,13 +191,13 @@ bool TUsbHidDevice::InitDevice()
 	devdesc.vendor_id = 0x0483; // ST
 	devdesc.product_id = 0x5710;
 
+#if 0
 	stringtable[USBD_STRIDX_MANUFACTURER] = (char *)"STMicroelectronics";
 	stringtable[USBD_STRIDX_PRODUCT] = (char *)"HID Joystick in FS Mode";
 	stringtable[USBD_STRIDX_SERIAL] = (char *)"498F20793932";
 
 	//  4     9     8     F     2     0     7     9     3     9     3     2
 	// 34 00 39 00 38 00 46 00 32 00 30 00 37 00 39 00 33 00 39 00 33 00 32 00
-
   SetDesc(USB_DESC_TYPE_CONFIGURATION, (void *)&USBD_HID_CfgDesc[0], USB_HID_CONFIG_DESC_SIZ);
   SetDesc(USB_DESC_TYPE_DEVICE_QUALIFIER, (void *)&USBD_HID_DeviceQualifierDesc[0], USB_LEN_DEV_QUALIFIER_DESC);
 
@@ -210,6 +210,7 @@ bool TUsbHidDevice::InitDevice()
   hiddata.data2 = 0;
 
   usbctrl.AddEndpoint(&ep_hidreport, 1, 4, 0, USBEF_TYPE_INTERRUPT);
+#endif
 
 	return true;
 }

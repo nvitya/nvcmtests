@@ -31,6 +31,7 @@
 
 #include "usbdevice.h"
 
+
 typedef struct THidData
 {
 	uint8_t  data1;

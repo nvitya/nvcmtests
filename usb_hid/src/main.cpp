@@ -19,10 +19,10 @@
  * 3. This notice may not be removed or altered from any source distribution.
  * --------------------------------------------------------------------------- */
 /*
- *  file:     main.cpp (uart)
- *  brief:    Multi-board uart example (with MCU speed test) for NVCM
+ *  file:     main.cpp (USB HID Test)
+ *  brief:    Multi-board USB HID example for NVCM
  *  version:  1.00
- *  date:     2018-02-10
+ *  date:     2018-06-23
  *  authors:  nvitya
 */
 
@@ -33,10 +33,7 @@
 #include "cppinit.h"
 #include "clockcnt.h"
 #include "hwusbctrl.h"
-#include "usbdevice.h"
-#include "usbhiddevice.h"
-
-TUsbHidDevice  hiddev;
+#include "usb_hid_test.h"
 
 #include "traces.h"
 
@@ -318,6 +315,7 @@ extern "C" void SysTick_Handler(void)
 
 void idle_task()
 {
+	usb_hid_test_run();
 }
 
 unsigned hbcounter = 0;
@@ -391,7 +389,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	TRACE("Board: \"%s\"\r\n", BOARD_NAME);
 	TRACE("SystemCoreClock: %u\r\n", SystemCoreClock);
 
-	hiddev.Init();
+	usb_hid_test_init();
 
 	TRACE("\r\nStarting main cycle...\r\n");
 

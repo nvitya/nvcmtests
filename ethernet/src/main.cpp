@@ -164,6 +164,64 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_VERTIBO_A)
+
+TGpioPin  led1pin(PORTNUM_A, 29, false);
+
+TGpioPin  pin_fpga_cfg(PORTNUM_C, 9, false);
+
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	pin_fpga_cfg.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+#if 1
+	hwpinctrl.PinSetup(PORTNUM_A,  6,  PINCFG_OUTPUT | PINCFG_AF_1);  // PCK0 = FPGA.CLK_IN
+
+	PMC->PMC_SCER = (1 << 8); // enable PCK0
+
+	PMC->PMC_PCK[0] = 0
+		| (1 << 0)  // CSS(3): 1 = MAIN CLK
+		| (9 << 4)  // PRES(8): divisor - 1
+	;
+#endif
+
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
+	conuart.baudrate = 115200;
+	conuart.Init(0);
+
+	/* Ethernet pins configuration ************************************************
+
+	        RMII_REF_CLK ----------------------> PD0
+	        RMII_MDIO -------------------------> PD9
+	        RMII_MDC --------------------------> PD8
+	        RMII_MII_CRS_DV -------------------> PD4
+	        RMII_MII_RXD0 ---------------------> PD5
+	        RMII_MII_RXD1 ---------------------> PD6
+	        RMII_MII_RXER ---------------------> PD7
+	        RMII_MII_TX_EN --------------------> PD1
+	        RMII_MII_TXD0 ---------------------> PD2
+	        RMII_MII_TXD1 ---------------------> PD3
+	*/
+
+	uint32_t pinfl = PINCFG_SPEED_FAST | PINCFG_AF_0;
+
+	hwpinctrl.PinSetup(PORTNUM_D, 0, pinfl); // REF CLK
+	hwpinctrl.PinSetup(PORTNUM_D, 9, pinfl); // MDIO
+	hwpinctrl.PinSetup(PORTNUM_D, 8, pinfl); // MDC
+	hwpinctrl.PinSetup(PORTNUM_D, 4, pinfl); // CRS_DV
+	hwpinctrl.PinSetup(PORTNUM_D, 5, pinfl); // RXD0
+	hwpinctrl.PinSetup(PORTNUM_D, 6, pinfl); // RXD1
+	hwpinctrl.PinSetup(PORTNUM_D, 7, pinfl); // RXER
+	hwpinctrl.PinSetup(PORTNUM_D, 1, pinfl); // TX_EN
+	hwpinctrl.PinSetup(PORTNUM_D, 2, pinfl); // TXD0
+	hwpinctrl.PinSetup(PORTNUM_D, 3, pinfl); // TXD1
+}
+
+#endif
+
 #if defined(BOARD_MIBO100_ATSAME70)
 
 TGpioPin  led1pin(PORTNUM_D, 13, false);
