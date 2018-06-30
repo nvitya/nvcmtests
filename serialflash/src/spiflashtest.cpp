@@ -149,7 +149,7 @@ void spi_flash_test()
 	spiflash.txdma.Init(0x020503);  // dma2/stream5/ch3
 	spiflash.rxdma.Init(0x020003);  // dma2/stream0/ch3
 
-#elif defined(BOARD_XPRESSO_LPC54608)
+#elif defined(BOARD_XPRESSO_LPC54608) || defined(BOARD_MIBO100_LPC540)
 	//hwpinctrl.PinSetup(3, 30, PINCFG_AF_1); // D10 = F9_SSEL0 (as GPIO)
 	spiflash.pin_cs.Assign(3, 30, false);
 	spiflash.pin_cs.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
@@ -158,7 +158,7 @@ void spi_flash_test()
 	hwpinctrl.PinSetup(3, 21, PINCFG_AF_1); // D12 = F9_MOSI
 	hwpinctrl.PinSetup(3, 22, PINCFG_AF_1); // D11 = F9_MISO
 
-	spiflash.spi.speed = 32000000;
+	spiflash.spi.speed = 8000000;
 	spiflash.spi.Init(9);
 
 	// DMA setup
@@ -181,6 +181,7 @@ void spi_flash_test()
 
 	TRACE("SPI Flash initialized, ID CODE = %06X, kbyte size = %u\r\n", spiflash.idcode, (spiflash.bytesize >> 10));
 
+
 /*
 	TRACE("Reading memory...\r\n");
 
@@ -197,10 +198,12 @@ void spi_flash_test()
 	//TRACE("Issuing reset...\r\n");
 	//spiflash.ResetChip();
 
+#if 1
 	TRACE("Erasing whole chip...\r\n");
 	spiflash.StartEraseAll();
 	spiflash.WaitForComplete();
 	TRACE("Erase complete.\r\n");
+#endif
 
 	// try to clear the busy flag
 /*

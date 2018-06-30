@@ -36,6 +36,7 @@ TQspiFlash  qspiflash;
 
 //unsigned readlen = 256;
 
+__attribute__((aligned(16)))
 unsigned char qdatabuf[8192];
 
 extern void show_mem(void * addr, unsigned len);
@@ -49,7 +50,7 @@ void qspi_flash_test()
 	TRACE("QSPI Flash Test\r\n");
 
 	qspiflash.qspi.speed = 8000000;
-	qspiflash.qspi.multi_line_count = 4;
+	qspiflash.qspi.multi_line_count = 1;
 	qspiflash.has4kerase = true;
 	if (!qspiflash.Init())
 	{
@@ -59,12 +60,16 @@ void qspi_flash_test()
 
 	TRACE("QSPI Flash initialized, ID CODE = %06X, kbyte size = %u\r\n", qspiflash.idcode, (qspiflash.bytesize >> 10));
 
+#if 1
 	TRACE("Erasing whole chip...\r\n");
 	qspiflash.StartEraseAll();
 	qspiflash.WaitForComplete();
 	TRACE("Erase complete.\r\n");
+#endif
 
 	TRACE("Reading memory...\r\n");
+
+	for (i = 0; i < sizeof(qdatabuf); ++i)	qdatabuf[i] = 0x55 + i;
 
 	qspiflash.StartReadMem(addr, &qdatabuf[0], len);
 	qspiflash.WaitForComplete();

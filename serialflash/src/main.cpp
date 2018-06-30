@@ -177,6 +177,24 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_MIBO100_LPC540)
+
+TGpioPin  led1pin(1, 3, true);
+
+#define LED_COUNT 1
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(0, 30, PINCFG_OUTPUT | PINCFG_AF_1); // UART_TX:
+	hwpinctrl.PinSetup(0, 29, PINCFG_INPUT  | PINCFG_AF_1); // UART_RX:
+	conuart.Init(0);
+}
+
+#endif
+
+
 #ifndef LED_COUNT
   #define LED_COUNT 1
 #endif
@@ -209,8 +227,18 @@ void heartbeat_task() // invoked every 0.5 s
 	//swo_printf("hbcounter = %i\r\n", hbcounter);
 }
 
+extern unsigned int __stack;  // defined in the linker script
+
+extern "C" void _start(void)
+{
+	asm("ldr r0, =__stack");
+	asm("mov sp, r0");
+	asm("ldr r0, =main");
+	asm("bx r0");
+}
+
 // the C libraries require "_start" so we keep it as the entry point
-extern "C" __attribute__((noreturn)) void _start(void)
+extern "C" __attribute__((noreturn)) void main(void)
 {
 	// the processor jumps here right after the reset
 	// the MCU runs slower, using the internal RC oscillator
@@ -224,8 +252,10 @@ extern "C" __attribute__((noreturn)) void _start(void)
   mcu_preinit_code(); // inline code for preparing the MCU, RAM regions. Without this even the stack does not work on some MCUs.
 
   unsigned clockspeed = MAX_CLOCK_SPEED;
+  //unsigned clockspeed = 4000000;
 
 #ifdef MCU_INPUT_FREQ
+  //if (false)
 	if (!hwclkctrl.InitCpuClock(MCU_INPUT_FREQ, MAX_CLOCK_SPEED))  // activate the external crystal oscillator with multiplication x2
 #else
 	if (!hwclkctrl.InitCpuClockIntRC(MCU_INTRC_SPEED, MAX_CLOCK_SPEED))  // activate the external crystal oscillator with multiplication x2
@@ -259,8 +289,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	//uart_dma_test();
 
-	spi_flash_test();
-	//qspi_flash_test();
+	//spi_flash_test();
+	qspi_flash_test();
 
 	TRACE("Starting main cycle...\r\n");
 
