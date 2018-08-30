@@ -11,6 +11,9 @@ uint8_t disp_buf[128*64 >> 3];
 #include "font_FreeSans9pt7b.h"
 TGfxFont font_sans(&FreeSans9pt7b);
 
+#include "font_FreeSansBold9pt7b.h"
+TGfxFont font_bold(&FreeSansBold9pt7b);
+
 #include "stdmonofont.h"
 TGfxFont font_mono(&stdmonofont);
 
@@ -36,6 +39,9 @@ void monolcd_test()
 	disp.pin_cd.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
 	// SPI1
+
+	//disp.txdma.Init(1, 3, 1);  // SPI1/TX = DMA channel 3
+
 	disp.spi.idleclk_high = false;
 	disp.spi.datasample_late = false;
 	disp.spi.speed = 4000000; // 4 MHz
@@ -83,7 +89,7 @@ void monolcd_test()
 */
 
 
-#if 1
+#if 0
 	disp.SetFont(&font_sans);
 #else
 	disp.SetFont(&font_mono);
@@ -94,6 +100,11 @@ void monolcd_test()
 	uint16_t x = 0, y = 0;
 	uint32_t ccnt = 0;
 	unsigned t0, t1;
+
+#if 0 // moving test
+
+	TRACE("LCD Update test\r\n");
+
 	TRACE("Starting display test.\r\n");
 	t0 = CLOCKCNT;
 	while (true)
@@ -109,33 +120,76 @@ void monolcd_test()
 
 			//disp.DrawChar(x, y + disp.GetFontHeight(), 'A');
 #if 1
-			disp.SetCursor(x, 44 + y + disp.font->height);
-			disp.DrawString((char *)"AgfMAVLTd.");
-			disp.SetCursor(x, y + 2 * disp.font->height);
-			disp.DrawString((char *)"gAMtimilL");
-
 			disp.DrawLine(0, 0, 127, 63);
 			disp.DrawRect(10, 10, 100, 30);
+
+			disp.SetCursor(x, 2 + y + disp.font->height);
+			disp.DrawString((char *)"AgfMAVLTd.");
+			disp.SetCursor(x, 2 + y + 2 * disp.font->height);
+			disp.DrawString((char *)"gAMtimilL");
+
 #endif
+
+			//disp.DrawRect(0, 0, disp.width, disp.height);
 
 			disp.SetCursor(1, 40);
 			disp.printf("%u", ccnt);
 
 			++x;
+			++y;
 			if (x >= disp.width)
 			{
 				x = 0;
-				//++y;
+				++y;
 				if (y >= disp.height)
 				{
 					y = 0;
 				}
 			}
+
+			if (y > 16)  y = 0;
+
+			delay_us(200000);
+
 		}
 
-		delay_us(10000);
 		++ccnt;
 	}
+
+#endif
+
+#if 1
+
+	TRACE("Static LCD test\r\n");
+
+	t0 = CLOCKCNT;
+	while (true)
+	{
+		t1 = CLOCKCNT;
+
+		if (disp.UpdateFinished())
+		{
+			disp.FillScreen(0);
+
+			disp.SetFont(&font_mono);
+			disp.SetCursor(2, 2);
+			disp.DrawString((char *)"Small Full Font 1234 km");
+
+			disp.SetFont(&font_sans);
+			disp.SetCursor(2, 16);
+			disp.DrawString((char *)"Big 1234 km");
+
+			disp.SetFont(&font_bold);
+			disp.SetCursor(2, 40);
+			disp.DrawString((char *)"Big 1234 km");
+
+ 			delay_us(200000);
+		}
+
+		++ccnt;
+	}
+
+#endif
 
 	TRACE("LCD display test finished.\r\n");
 }
