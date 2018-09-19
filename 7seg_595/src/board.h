@@ -19,40 +19,35 @@
  * 3. This notice may not be removed or altered from any source distribution.
  * --------------------------------------------------------------------------- */
 /*
- *  file:     traces.h (serialflash)
- *  brief:    Trace message redirected to LCD
+ *  file:     board.h (blinkled)
+ *  brief:    Required board definition by the NVCM core (platform.h)
  *  version:  1.00
  *  date:     2018-02-10
  *  authors:  nvitya
 */
 
-#ifndef __Traces__h
-#define __Traces__h
+#ifndef BOARD_H_
+#define BOARD_H_
 
-#define TRACES
+// Special, non-builtin boards
 
-#include "hwuart.h"
+#if defined(BOARD_NONE_MK20DN128)
 
-extern THwUart   conuart;  // console uart
+  #define BOARD_NAME "Breakout board for K20 (48 pin)"
+  #define MCU_MK20DN
+  #define MCU_INPUT_FREQ   12000000
 
-#ifdef TRACES
-  // add trace calls
-  //#define TRACE(...)  		{ scr.printf( __VA_ARGS__ ); scr.Update(); }
-  //#define TRACE(...)  		{ swo_printf( __VA_ARGS__ ); }
-  #define TRACE(...)  		{ conuart.printf( __VA_ARGS__ ); }
+#elif defined(BOARD_NONE_F070F6)
+
+  #define BOARD_NAME "Breakout board for STM32F070F6"
+  #define MCU_STM32F070F6
+  #define MCU_INPUT_FREQ   12000000
+
 #else
-  // ignore traces
-  #define TRACE(...)
+
+  #include "boards_builtin.h"
+
 #endif
 
-#ifdef LTRACES
- #define LTRACE(...)  TRACE( __VA_ARGS__ )
-#else
- #define LTRACE(...)
-#endif
 
-#undef LTRACES
-
-#endif //!defined(Traces__h)
-
-//--- End Of file --------------------------------------------------------------
+#endif /* BOARD_H_ */

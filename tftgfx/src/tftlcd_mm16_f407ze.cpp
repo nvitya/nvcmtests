@@ -115,8 +115,8 @@ bool TTftLcd_mm16_F407ZE::InitInterface()
 
 	// Timing Register
 
-//#define SLOW_BUS_TIMING
-#define FASTEST_BUS_TIMING
+#define SLOW_BUS_TIMING
+//#define FASTEST_BUS_TIMING
 //#define NODELAY_BUS_TIMING
 
 #ifdef SLOW_BUS_TIMING

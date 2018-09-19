@@ -104,6 +104,22 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_VERTIBO_A)
+
+TGpioPin  led1pin(PORTNUM_A, 29, false);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
+	conuart.baudrate = 115200;
+	conuart.Init(0);
+}
+
+#endif
+
 #if defined(BOARD_MIBO100_ATSAME70)
 
 TGpioPin  led1pin(PORTNUM_D, 13, false);

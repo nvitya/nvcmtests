@@ -365,8 +365,6 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	SysTick_Config(SystemCoreClock / 1000);
 
-#if CLOCKCNT_BITS >= 32
-
 	unsigned hbclocks = SystemCoreClock / 20;  // start blinking fast
 
 	unsigned t0, t1;
@@ -388,30 +386,6 @@ extern "C" __attribute__((noreturn)) void _start(void)
 			if (hbcounter > 20)  hbclocks = SystemCoreClock / 2;  // slow down to 0.5 s
 		}
 	}
-
-#else
-
-	// use the SysTick for millisec counting
-
-	unsigned hbticks = 1000 / 20;
-
-	unsigned t0 = systick;
-
-	// Infinite loop
-	while (1)
-	{
-		idle_task();
-
-		if (systick - t0 > hbticks)
-		{
-			heartbeat_task();
-			t0 = systick;
-
-			if (hbcounter > 20)  hbticks = 500 / 2;  // slow down to 0.5 s
-		}
-	}
-
-#endif
 }
 
 // ----------------------------------------------------------------------------

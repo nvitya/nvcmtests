@@ -75,7 +75,7 @@ void spi_flash_test()
 	spiflash.txdma.Init(0x030301);  // ch1, dmamux 3/3
 	spiflash.rxdma.Init(0x030402);  // ch2, dmamux 4/3
 
-#elif defined(BOARD_MIBO100_ATSAME70)
+#elif defined(BOARD_MIBO100_ATSAME70) || defined(BOARD_VERTIBO_A)
 
 	// SPI0 setup
 

@@ -107,6 +107,8 @@ void setup_board()
 	/* Enable the Ethernet global Interrupt */
 	//HAL_NVIC_SetPriority(ETH_IRQn, 0x7, 0);
 	//HAL_NVIC_EnableIRQ(ETH_IRQn);
+
+	eth.phy_address = 0;
 }
 
 #endif
@@ -160,6 +162,8 @@ void setup_board()
 	// Extra PHY Signals
 	hwpinctrl.PinSetup(PORTNUM_C, 10, PINCFG_OUTPUT | PINCFG_GPIO_INIT_1); // PHY RESET
 	hwpinctrl.PinSetup(PORTNUM_A, 14, PINCFG_INPUT | PINCFG_PULLUP); // PHY INTERRUPT
+
+	eth.phy_address = 0;
 }
 
 #endif
@@ -214,10 +218,12 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_D, 4, pinfl); // CRS_DV
 	hwpinctrl.PinSetup(PORTNUM_D, 5, pinfl); // RXD0
 	hwpinctrl.PinSetup(PORTNUM_D, 6, pinfl); // RXD1
-	hwpinctrl.PinSetup(PORTNUM_D, 7, pinfl); // RXER
+	hwpinctrl.PinSetup(PORTNUM_D, 7, pinfl); // RXER       // Tie to the GND !!!
 	hwpinctrl.PinSetup(PORTNUM_D, 1, pinfl); // TX_EN
 	hwpinctrl.PinSetup(PORTNUM_D, 2, pinfl); // TXD0
 	hwpinctrl.PinSetup(PORTNUM_D, 3, pinfl); // TXD1
+
+	eth.phy_address = 1;
 }
 
 #endif
@@ -233,92 +239,36 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
 	conuart.Init(0);
-}
 
-#endif
+	/* Ethernet pins configuration ************************************************
 
-#if defined(BOARD_DEV_STM32F407VG)
+	        RMII_REF_CLK ----------------------> PD0
+	        RMII_MDIO -------------------------> PD9
+	        RMII_MDC --------------------------> PD8
+	        RMII_MII_CRS_DV -------------------> PD4
+	        RMII_MII_RXD0 ---------------------> PD5
+	        RMII_MII_RXD1 ---------------------> PD6
+	        RMII_MII_RXER ---------------------> PD7
+	        RMII_MII_TX_EN --------------------> PD1
+	        RMII_MII_TXD0 ---------------------> PD2
+	        RMII_MII_TXD1 ---------------------> PD3
+	*/
 
-#define SKIP_DTCRAM_EXEC_TEST
+	uint32_t pinfl = PINCFG_SPEED_FAST | PINCFG_AF_0;
 
-TGpioPin  led1pin(4, 0, true);  // PE0
+	hwpinctrl.PinSetup(PORTNUM_D, 0, pinfl); // REF CLK
+	hwpinctrl.PinSetup(PORTNUM_D, 9, pinfl); // MDIO
+	hwpinctrl.PinSetup(PORTNUM_D, 8, pinfl); // MDC
+	hwpinctrl.PinSetup(PORTNUM_D, 4, pinfl); // CRS_DV
+	hwpinctrl.PinSetup(PORTNUM_D, 5, pinfl); // RXD0
+	hwpinctrl.PinSetup(PORTNUM_D, 6, pinfl); // RXD1
+	hwpinctrl.PinSetup(PORTNUM_D, 7, pinfl); // RXER
+	hwpinctrl.PinSetup(PORTNUM_D, 1, pinfl); // TX_EN
+	hwpinctrl.PinSetup(PORTNUM_D, 2, pinfl); // TXD0
+	hwpinctrl.PinSetup(PORTNUM_D, 3, pinfl); // TXD1
 
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
-	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
-	conuart.Init(1);
-}
-
-#endif
-
-#if defined(BOARD_DEV_STM32F407ZE)
-
-#define SKIP_DTCRAM_EXEC_TEST
-
-TGpioPin  led1pin(5, 9, true);  // PF9
-TGpioPin  led2pin(5, 10, true);  // PF10
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
-	conuart.Init(1);
-}
-
-#endif
-
-#if defined(BOARD_XPRESSO_LPC4337)
-
-TGpioPin  led1pin(3, 5, true);
-TGpioPin  led2pin(0, 7, true);
-TGpioPin  led3pin(3, 7, true);
-
-#define LED_COUNT 3
-
-void setup_board()
-{
-	// RGB LED
-	hwpinctrl.PinSetup(6,  9, PINCFG_OUTPUT | PINCFG_DRIVE_WEAK | PINCFG_AF_0);  // GPIO_3_5
-	hwpinctrl.PinSetup(2,  7, PINCFG_OUTPUT | PINCFG_DRIVE_WEAK | PINCFG_AF_0);  // GPIO_0_7
-	hwpinctrl.PinSetup(6, 11, PINCFG_OUTPUT | PINCFG_DRIVE_WEAK | PINCFG_AF_0);  // GPIO_3_7
-
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// UART
-	hwpinctrl.PinSetup(6, 4, PINCFG_OUTPUT | PINCFG_AF_2);  // UART0_TXD
-	hwpinctrl.PinSetup(2, 1, PINCFG_INPUT  | PINCFG_AF_1);  // UART0_RXD
-	conuart.Init(0);
-}
-
-#endif
-
-#if defined(BOARD_XPRESSO_LPC54608)
-
-TGpioPin  led1pin(2, 2, true);
-TGpioPin  led2pin(3, 3, true);
-TGpioPin  led3pin(3, 14, true);
-
-#define LED_COUNT 3
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinSetup(0, 30, PINCFG_OUTPUT | PINCFG_AF_1); // UART_TX:
-	hwpinctrl.PinSetup(0, 29, PINCFG_INPUT  | PINCFG_AF_1); // UART_RX:
-	conuart.Init(0);
+	eth.phy_address = 1;
 }
 
 #endif
@@ -556,7 +506,7 @@ void idle_task()
 			answer_ip(pdata, datalen);
 		}
 
-#if 0
+#if 1
 		for (n = 0; n < datalen; ++n)
 		{
 			if ((n > 0) && ((n % 15) == 0)) TRACE("\r\n");
@@ -592,13 +542,29 @@ void heartbeat_task() // invoked every 0.5 s
 	//TRACE("hbcounter = %u, systick = %u\r\n", hbcounter, systick);
 
 	//conuart.TrySendChar(0x55);
+
+#if 0
+
+	memset(&pbuf[0], 0x11, 256);
+	pbuf[0] = 0xff;
+	pbuf[1] = 0xff;
+	pbuf[2] = 0xff;
+	pbuf[3] = 0xff;
+	pbuf[4] = 0xff;
+	pbuf[5] = 0xff;
+	uint32_t idx;
+
+	pbuf[63] = (hbcounter & 0xFF);
+
+	bool b = eth.TrySend(&idx, &pbuf[0], 64);
+	TRACE("%u send result = %i\r\n", hbcounter, b);
+#endif
 }
 
 void ethernet_init()
 {
 	uint32_t n;
 
-	eth.phy_address = 0;
 	if (!eth.Init(&eth_rx_desc_mem, ETH_RX_PACKETS, &eth_tx_desc_mem, ETH_TX_PACKETS))
 	{
 		TRACE("ETH INIT FAILED !!!\r\n");

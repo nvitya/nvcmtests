@@ -33,8 +33,18 @@
 #include "cppinit.h"
 #include "clockcnt.h"
 #include "textscreen.h"
+#include "hwdma.h"
+
+#include "sdram.h"
+
+#include "mmtests.h"
 
 #include "traces.h"
+
+THwDmaChannel  dma;
+THwDmaTransfer dmaxfer;
+
+uint32_t lcdfill[100*100 / 2];
 
 THwUart   conuart;  // console uart
 
@@ -99,6 +109,8 @@ TGpioPin  led2pin(5, 10, true);  // PF10
 
 TTftLcd_mm16_F407ZE  lcd;
 
+TGpioPin pin_reset;
+
 void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
@@ -109,8 +121,20 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
 	conuart.Init(1);
 
+/*
+	pin_reset.Assign(PORTNUM_A, 1, false);
+	pin_reset.Setup(PINCFG_OUTPUT);
+	pin_reset.Set0();
+	delay_us(100000);
+	pin_reset.Set1();
+	delay_us(100000);
+*/
+
+
 	lcd.mirrorx = true;
 	lcd.Init(LCD_CTRL_UNKNOWN, 240, 320);
+	//lcd.Init(LCD_CTRL_HX8357B, 320, 480);
+	//lcd.Init(LCD_CTRL_ILI9486, 320, 480);
 	lcd.SetRotation(1);
 }
 
@@ -194,6 +218,57 @@ void setup_board()
 }
 #endif
 
+#if defined(BOARD_VERTIBO_A)
+
+TGpioPin  led1pin(PORTNUM_A, 29, false);
+
+TGpioPin  pin_fpga_cfg(PORTNUM_C, 9, false);
+
+//TGpioPin  pin_fpga_clk(PORTNUM_A, 6, false);
+TGpioPin  pin_fpga_clk(PORTNUM_A, 22, false);
+//TGpioPin  pin_fpga_irq(PORTNUM_A, 22, false);
+
+#if 1
+  #include "tftlcd_mm16_vertibo_a.h"
+  TTftLcd_mm16_vertibo_a  lcd;
+#else
+  #include "tftlcd_gp16_vertibo_a.h"
+  TTftLcd_gp16_vertibo_a  lcd;
+#endif
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	pin_fpga_cfg.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	//pin_fpga_irq.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	//pin_fpga_clk.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+#if 1
+	hwpinctrl.PinSetup(PORTNUM_A,  6,  PINCFG_OUTPUT | PINCFG_AF_1);  // PCK0 = FPGA.CLK_IN
+
+	PMC->PMC_SCER = (1 << 8); // enable PCK0
+
+	PMC->PMC_PCK[0] = 0
+		| (1 << 0)  // CSS(3): 1 = MAIN CLK
+		| (9 << 4)  // PRES(8): divisor - 1
+	;
+#endif
+
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
+	conuart.baudrate = 115200;
+	conuart.Init(0);
+
+	lcd.mirrorx = true;
+	//lcd.Init(LCD_CTRL_ILI9486, 320, 480);
+	lcd.Init(LCD_CTRL_HX8357B, 320, 480);
+	//lcd.Init(LCD_CTRL_UNKNOWN, 320, 480);
+	lcd.SetRotation(0);
+}
+
+#endif
+
+
 #ifndef LED_COUNT
   #define LED_COUNT 1
 #endif
@@ -203,29 +278,6 @@ volatile unsigned systick = 0;
 extern "C" void SysTick_Handler(void)
 {
 	++systick;
-}
-
-void idle_task()
-{
-
-}
-
-unsigned hbcounter = 0;
-
-void heartbeat_task() // invoked every 0.5 s
-{
-	++hbcounter;
-
-	led1pin.SetTo(hbcounter >> 0);
-#if LED_COUNT > 1
-	led2pin.SetTo(hbcounter >> 1);
-#endif
-#if LED_COUNT > 2
-	led3pin.SetTo(hbcounter >> 2);
-#endif
-
-	//TRACE("hbcounter = %i\r\n", hbcounter);
-
 }
 
 #include "font_FreeSans9pt7b.h"
@@ -246,6 +298,54 @@ TGfxFont font_mono(&FreeMono9pt7b);
 #include "font_FreeMonoBold9pt7b.h"
 TGfxFont font_mono_bold(&FreeMonoBold9pt7b);
 
+unsigned hbcounter = 0;
+
+const uint16_t testcolors[4] = {0x000F, 0xF000, 0x03C0, 0xFF00};
+
+uint8_t fillcnt = 0;
+
+
+void heartbeat_task() // invoked every 0.5 s
+{
+	++hbcounter;
+
+	led1pin.SetTo(hbcounter >> 0);
+#if LED_COUNT > 1
+	led2pin.SetTo(hbcounter >> 1);
+#endif
+#if LED_COUNT > 2
+	led3pin.SetTo(hbcounter >> 2);
+#endif
+
+	//mm_setaddrwindow(10, 10, 100, 100);
+	//mm_fillcolor(testcolors[fillcnt & 0x3], 100 * 100); //lcd.width * lcd.height / 2);
+
+#if 0
+	lcd.SetAddrWindow(10, 10, 100, 100);
+	lcd.FillColor(testcolors[fillcnt & 0x3], 100 * 100); //lcd.width * lcd.height / 2);
+#endif
+
+	++fillcnt;
+
+	//lcd.FillScreen(hbcounter);
+
+	//TRACE("hbcounter = %i\r\n", hbcounter);
+
+	lcd.SetFont(&font_mono_bold);
+	lcd.SetCursor(10, 200);
+	lcd.printf("hbcounter = %i", hbcounter);
+
+}
+
+void idle_task()
+{
+	//lcd.FillColor(testcolors[hbcounter & 0x3], lcd.width * lcd.height);
+	//lcd.FillScreen(testcolors[hbcounter & 0x3]);
+
+	//mm_fillcolor(testcolors[fillcnt & 0x3], lcd.width * lcd.height - 2);
+
+	//++fillcnt;
+}
 
 // the C libraries require "_start" so we keep it as the entry point
 extern "C" __attribute__((noreturn)) void _start(void)
@@ -292,10 +392,22 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	//mcu_enable_interrupts();
 
+	unsigned t0, t1;
+
 	TRACE("\r\n------------------------------------------\r\n");
 	TRACE("TFT LCD Test\r\n");
 
+	sdram_init();
+
+	t0 = CLOCKCNT;
 	lcd.FillScreen(0x0000);
+	t1 = CLOCKCNT;
+	TRACE("LCD fill clocks: %u\r\n", t1-t0);
+
+	lcd.color = 0xffff;
+	lcd.DrawLine(0, 0, lcd.width-1, lcd.height-1);
+
+#if 1
 
 	const char * testtext = "ThgApIL";
 
@@ -305,7 +417,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	lcd.SetFont(&font_sans);
 
-	lcd.bgcolor = 0; //RGB16(0, 0, 255);
+	lcd.bgcolor = RGB16(0, 0, 255);
 	lcd.SetCursor(x + 1, y + 1);
 	lcd.color = RGB16(0, 50, 0);
 	lcd.DrawRect(x, y, lcd.TextWidth(testtext)+2, lcd.font->height+2);
@@ -315,7 +427,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	y += lcd.font->height + 5;
 
-	lcd.SetFont(&gfx_standard_font);
+	lcd.SetFont(&font_gfx_standard);
 	lcd.SetCursor(x, y);
 	lcd.printf("ySome text to display with standard font ...");
 	y += lcd.font->height + 5;
@@ -350,16 +462,120 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	lcd.printf("Font Mono Bold Text yAg ");
 	y += lcd.font->height + 5;
 
+#endif
+
+	uint32_t wlen = 100;
+
+	lcd.SetAddrWindow(0,0,wlen,wlen);
+
+	for (y = 0; y < wlen; ++y)
+	{
+		for (x = 0; x < wlen; ++x)
+		{
+
+			if (x & 1)
+			{
+				lcd.WriteData16(0xFFFF);
+				//*(uint32_t *)lcd.datareg = 0x0000FFFF;
+				//__DSB();
+			}
+			else
+			{
+				lcd.WriteData16(0x0000);
+				//*lcd.datareg = 0x0000;
+			}
+		}
+	}
+
+#if 1
+
+	lcd.SetAddrWindow(200,200,wlen,wlen + 10);
+
+//#define FILL_COLOR_32  0xFFFFFFFF
+#define FILL_COLOR_32  0x0000FFFF
+//#define FILL_COLOR_32  0xffffFFFF
+
+
+	for (x = 0; x < wlen*wlen / 2; ++x)  lcdfill[x] = FILL_COLOR_32;
+
+#if 0
+	uint32_t remaining = wlen * wlen / 2;
+	while (remaining > 0)
+	{
+
+#if 1
+		MM_DATAREG32 = 0x0000FFFF;
+		__DSB();
+#else
+		MM_DATAREG = 0x0FF0;
+		__DSB();
+		MM_DATAREG = 0x0000;
+		__DSB();
+#endif
+
+		--remaining;
+	}
+#else
+	dma.Init(1, 0);
+	dmaxfer.srcaddr = &lcdfill[0];
+	dmaxfer.dstaddr = (void *)&MM_DATAREG32;
+	dmaxfer.bytewidth = 4;
+	dmaxfer.count = wlen * wlen / 2;
+	dmaxfer.flags = DMATR_MEM_TO_MEM | DMATR_NO_DST_INC;
+	dma.StartTransfer(&dmaxfer);
+#endif
+
+#endif
+
+#if 1
+	// full screen fill with dma
+
+	int i;
+
+	uint32_t * sdd = (uint32_t *)	0x70000000;
+
+	for (i = 0; i < lcd.width * lcd.height / 2; ++i)
+	{
+		sdd[i] = FILL_COLOR_32; //;  + (i << 16);
+		//sdd[i] = (i << 16);
+	}
+
+	lcd.SetAddrWindow(0, 0, lcd.width, lcd.height);
+
+	dmaxfer.srcaddr = (void *)0x70000000;
+	dmaxfer.dstaddr = (void *)&MM_DATAREG32;
+	dmaxfer.bytewidth = 4;
+	dmaxfer.count = lcd.width * lcd.height / 2;
+	dmaxfer.flags = DMATR_MEM_TO_MEM | DMATR_NO_DST_INC;
+
+#if 1
+	//dmaxfer.srcaddr = (void *)0x20400000;
+	//dmaxfer.srcaddr = (void *)0x70000000;
+	dmaxfer.srcaddr = &lcdfill[0];
+	//dmaxfer.count = 128 * 1024 / 4;
+	dmaxfer.flags = DMATR_MEM_TO_MEM | DMATR_NO_ADDR_INC;
+#endif
+
+	t0 = CLOCKCNT;
+	dma.StartTransfer(&dmaxfer);
+	while (dma.Active()) { } // wait until DMA finishes.
+	t1 = CLOCKCNT;
+	TRACE("LCD DMA fill clocks from SDRAM: %u\r\n", t1-t0);
+
+#endif
+
+	//lcd.FillScreen(0x0004);
+
+	//mm_init();
+
+	//heartbeat_task();
 
 	TRACE("Starting main cycle...\r\n");
 
-	SysTick_Config(SystemCoreClock / 1000);
+	//SysTick_Config(SystemCoreClock / 1000);
 
-#if CLOCKCNT_BITS >= 32
+	unsigned hbclocks = SystemCoreClock / 2;
 
-	unsigned hbclocks = SystemCoreClock / 100;
-
-	unsigned t0, t1;
 
 	t0 = CLOCKCNT;
 
@@ -376,30 +592,6 @@ extern "C" __attribute__((noreturn)) void _start(void)
 			t0 = t1;
 		}
 	}
-
-#else
-
-	// use the SysTick for millisec counting
-
-	unsigned hbticks = 1000 / 20;
-
-	unsigned t0 = systick;
-
-	// Infinite loop
-	while (1)
-	{
-		idle_task();
-
-		if (systick - t0 > hbticks)
-		{
-			heartbeat_task();
-			t0 = systick;
-
-			if (hbcounter > 20)  hbticks = 500 / 2;  // slow down to 0.5 s
-		}
-	}
-
-#endif
 }
 
 // ----------------------------------------------------------------------------

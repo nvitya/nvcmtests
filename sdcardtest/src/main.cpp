@@ -76,6 +76,34 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_VERTIBO_A)
+
+TGpioPin  led1pin(PORTNUM_A, 29, false);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
+	conuart.baudrate = 115200;
+	conuart.Init(0);
+
+	// SDCARD Pins
+	hwpinctrl.PinSetup(PORTNUM_A, 28, PINCFG_AF_2); // MCCDA
+	hwpinctrl.PinSetup(PORTNUM_A, 25, PINCFG_AF_3); // MCCK
+	hwpinctrl.PinSetup(PORTNUM_A, 30, PINCFG_AF_2); // MCDA0
+	hwpinctrl.PinSetup(PORTNUM_A, 31, PINCFG_AF_2); // MCDA1
+	hwpinctrl.PinSetup(PORTNUM_A, 26, PINCFG_AF_2); // MCDA2
+	hwpinctrl.PinSetup(PORTNUM_A, 27, PINCFG_AF_2); // MCDA3
+
+	sdcard.dma.Init(9, 0); // 0 = HSMCI DMA Peripheral Id (Transmit and Receive)
+	sdcard.Init();
+}
+
+#endif
+
+
 #if defined(BOARD_MIBO100_ATSAME70)
 
 TGpioPin  led1pin(PORTNUM_D, 13, false);
@@ -324,7 +352,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 		else if (1 == teststate)
 		{
 			// start block read
-			sdcard.StartReadBlocks(2561, &testbuf[0], testlen / 512);
+			//sdcard.StartReadBlocks(2561, &testbuf[0], testlen / 512);
+			sdcard.StartReadBlocks(0, &testbuf[0], testlen / 512);
 			rstart = CLOCKCNT;
 			teststate = 2;
 		}

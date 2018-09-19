@@ -60,7 +60,7 @@ void qspi_flash_test()
 
 	TRACE("QSPI Flash initialized, ID CODE = %06X, kbyte size = %u\r\n", qspiflash.idcode, (qspiflash.bytesize >> 10));
 
-#if 1
+#if 0
 	TRACE("Erasing whole chip...\r\n");
 	qspiflash.StartEraseAll();
 	qspiflash.WaitForComplete();
@@ -74,6 +74,8 @@ void qspi_flash_test()
 	qspiflash.StartReadMem(addr, &qdatabuf[0], len);
 	qspiflash.WaitForComplete();
 	show_mem(&qdatabuf[0], len);
+
+	return;
 
 	TRACE("Writing bigger memory...\r\n");
 
