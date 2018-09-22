@@ -45,7 +45,7 @@ void qspi_flash_test()
 {
 	int i;
 	unsigned addr = 0x00000;  // start at 128 k
-	unsigned len = 8;
+	unsigned len = 64;
 
 	TRACE("QSPI Flash Test\r\n");
 
@@ -65,7 +65,7 @@ void qspi_flash_test()
 #endif
 
 	qspiflash.qspi.speed = 8000000;
-	qspiflash.qspi.multi_line_count = 1;
+	qspiflash.qspi.multi_line_count = 2;
 	qspiflash.has4kerase = true;
 	if (!qspiflash.Init())
 	{
@@ -119,6 +119,8 @@ void qspi_flash_test()
 		qdatabuf[i] = 0xF0 + i;
 	}
 
+	addr = 0x00000;
+
 	qspiflash.StartWriteMem(addr, &qdatabuf[0], sizeof(qdatabuf));
 	qspiflash.WaitForComplete();
 	TRACE("Write completed.\n\r");
@@ -129,11 +131,11 @@ void qspi_flash_test()
 
 	TRACE("Testing short writes\n\r");
 
-	addr = 0x00;
+	addr = 0x0000;
 
 	while (addr < write_test_size)
 	{
-		qspiflash.StartWriteMem(addr, &qdatabuf[0], 16);
+		qspiflash.StartWriteMem(addr, &qdatabuf[0], 256);
 		qspiflash.WaitForComplete();
 
 		addr += 8192;
