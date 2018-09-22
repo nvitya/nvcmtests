@@ -631,6 +631,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/nvcm/core/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/nvcm/mcu/STM32/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/nvcm/mcu/STM32/F1}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/nvcm/modules/tm1638}&quot;"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.defs.1809469195" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.compiler.defs" useByScannerDiscovery="true" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="BOARD_MIN_F103"/>
@@ -671,8 +672,9 @@
 					</folderInfo>
 					<sourceEntries>
 						<entry excluding="nvcm" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="nvcm/mcu/STM32/src"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="nvcm/core/src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="nvcm/mcu/STM32/src"/>
+						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="nvcm/modules/tm1638"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -1766,14 +1768,12 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="BOARD_XPRESSO_LPC54608"/>
 		<configuration configurationName="BOARD_MIBO64_ATSAM4S"/>
 		<configuration configurationName="BOARD_MIN_F103"/>
+		<configuration configurationName="BOARD_DISCOVERY_F746"/>
 		<configuration configurationName="BOARD_DEV_STM32F407ZE">
 			<resource resourceType="PROJECT" workspacePath="/uart"/>
 		</configuration>
-		<configuration configurationName="BOARD_NONE_MKV30F"/>
-		<configuration configurationName="BOARD_XPLORER_LPC4330"/>
 		<configuration configurationName="BOARD_NUCLEO_F446">
 			<resource resourceType="PROJECT" workspacePath="/uart"/>
 		</configuration>
@@ -1783,11 +1783,15 @@
 		<configuration configurationName="BOARD_NUCLEO_F746">
 			<resource resourceType="PROJECT" workspacePath="/blinkled"/>
 		</configuration>
+		<configuration configurationName="BOARD_MIBO64_ATSAME5X"/>
+		<configuration configurationName="BOARD_XPRESSO_LPC54608"/>
+		<configuration configurationName="BOARD_NONE_LPC822"/>
+		<configuration configurationName="BOARD_NONE_MKV30F"/>
+		<configuration configurationName="BOARD_XPLORER_LPC4330"/>
 		<configuration configurationName="BOARD_BOOT_XMC1200"/>
 		<configuration configurationName="BOARD_ARDUINO_DUE">
 			<resource resourceType="PROJECT" workspacePath="/uart"/>
 		</configuration>
-		<configuration configurationName="BOARD_MIBO64_ATSAME5X"/>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets">

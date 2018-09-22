@@ -26,6 +26,8 @@
  *  authors:  nvitya
 */
 
+#include "main.h"
+
 #include "platform.h"
 #include "hwpins.h"
 #include "hwclkctrl.h"
@@ -34,10 +36,43 @@
 #include "clockcnt.h"
 
 #include "test_spi.h"
+extern void test_adc();
 
 #include "traces.h"
 
-THwUart   conuart;  // console uart
+#include "ledandkey.h"
+
+THwUart     conuart;  // console uart
+
+TLedAndKey  ledandkey; // some display
+
+#if defined(BOARD_MIN_F103)
+
+TGpioPin  led1pin(2, 13, false); // PC13
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
+	conuart.Init(1);
+
+	// USART2
+	//hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART2_TX
+	//hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_0 | PINCFG_PULLUP);  // USART2_RX
+	//conuart.Init(2);
+
+	// init ledandkey
+	ledandkey.controller.stb_pin.Assign(PORTNUM_B, 5, false);
+	ledandkey.controller.clk_pin.Assign(PORTNUM_B, 6, false);
+	ledandkey.controller.dio_pin.Assign(PORTNUM_B, 7, false);
+	ledandkey.Init();
+	ledandkey.DisplayDirect(0x00000080, 0x00000000); // turn on only the lowest dot
+	ledandkey.leds = 0x00;
+}
+#endif
 
 #if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
 
@@ -61,46 +96,6 @@ void setup_board()
 	hwpinctrl.PinSetup(3, 9,  PINCFG_INPUT  | PINCFG_AF_7);
 
 	conuart.Init(3); // USART3
-}
-
-#endif
-
-#if defined(BOARD_DISCOVERY_F746)
-
-TGpioPin  led1pin(PORTNUM_I, 1, false);
-
-#define LED_COUNT 1
-
-void setup_board()
-{
-	// nucleo board leds
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinSetup(PORTNUM_A, 9,  PINCFG_OUTPUT | PINCFG_AF_7);
-	hwpinctrl.PinSetup(PORTNUM_B, 7,  PINCFG_INPUT  | PINCFG_AF_7);
-	conuart.Init(1); // USART1
-}
-
-#endif
-
-#if defined(BOARD_XPLAINED_SAME70)
-
-TGpioPin  led1pin(2, 8, false);  // C8
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// USART1 - EDBG
-	hwpinctrl.PinSetup(0, 21, PINCFG_INPUT | PINCFG_AF_0);  // USART1_RXD
-	MATRIX->CCFG_SYSIO |= (1 << 4); // select PB4 instead of TDI !!!!!!!!!
-	hwpinctrl.PinSetup(1,  4, PINCFG_OUTPUT | PINCFG_AF_3); // USART1_TXD
-	conuart.Init(0x101); // USART1
-
-	// UART3 - Arduino shield
-	//hwpinctrl.PinSetup(3, 28, PINCFG_INPUT | PINCFG_AF_0);  // UART3_RXD
-	//hwpinctrl.PinSetup(3, 30, PINCFG_OUTPUT | PINCFG_AF_0); // UART3_TXD
-	//uartx2.Init(3); // UART3
 }
 
 #endif
@@ -156,50 +151,6 @@ void setup_board()
 
 #endif
 
-#if defined(BOARD_BOOT_XMC1200)
-
-TGpioPin  led1pin(0, 0, true);
-TGpioPin  led2pin(0, 2, true);
-TGpioPin  led3pin(0, 5, true);
-TGpioPin  led4pin(0, 6, true);
-TGpioPin  led5pin(0, 7, true);
-
-#define LED_COUNT 5
-#undef USE_DWT_CYCCNT
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led4pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led5pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinSetup(1,  2, PINCFG_OUTPUT | PINCFG_AF_7);  // UART_TX
-	hwpinctrl.PinSetup(1,  3, PINCFG_INPUT  | PINCFG_AF_1);  // UART_RX
-	conuart.Init(0x001);  // usic_0_ch_1
-}
-
-#endif
-
-#if defined(BOARD_DEV_STM32F407VG)
-
-#define SKIP_DTCRAM_EXEC_TEST
-
-TGpioPin  led1pin(4, 0, true);  // PE0
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
-	conuart.Init(1);
-}
-
-#endif
-
 #if defined(BOARD_DEV_STM32F407ZE)
 
 #define SKIP_DTCRAM_EXEC_TEST
@@ -236,171 +187,6 @@ void setup_board()
 
 #endif
 
-#if defined(BOARD_MIN_F103)
-
-TGpioPin  led1pin(2, 13, false); // PC13
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
-	conuart.Init(1);
-
-	// USART2
-	//hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART2_TX
-	//hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_0 | PINCFG_PULLUP);  // USART2_RX
-	//conuart.Init(2);
-}
-#endif
-
-#if defined(BOARD_MIBO64_ATSAME5X)
-
-TGpioPin  led1pin(PORTNUM_A, 1, false);
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// SERCOM0
-	hwpinctrl.PinSetup(PORTNUM_A, 4, PINCFG_OUTPUT | PINCFG_AF_3);  // PAD[0] = TX
-	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_INPUT  | PINCFG_AF_3);  // PAD[1] = RX
-	conuart.Init(0);
-
-	// SERCOM2
-	//hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_AF_2);  // PAD[0] = TX
-	//hwpinctrl.PinSetup(PORTNUM_A, 13, PINCFG_AF_2);  // PAD[1] = RX
-	//conuart.Init(2);
-}
-#endif
-
-
-#if defined(BOARD_XPRESSO_LPC4337)
-
-TGpioPin  led1pin(3, 5, true);
-TGpioPin  led2pin(0, 7, true);
-TGpioPin  led3pin(3, 7, true);
-
-#define LED_COUNT 3
-
-void setup_board()
-{
-	// RGB LED
-	hwpinctrl.PinSetup(6,  9, PINCFG_OUTPUT | PINCFG_DRIVE_WEAK | PINCFG_AF_0);  // GPIO_3_5
-	hwpinctrl.PinSetup(2,  7, PINCFG_OUTPUT | PINCFG_DRIVE_WEAK | PINCFG_AF_0);  // GPIO_0_7
-	hwpinctrl.PinSetup(6, 11, PINCFG_OUTPUT | PINCFG_DRIVE_WEAK | PINCFG_AF_0);  // GPIO_3_7
-
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// UART
-	hwpinctrl.PinSetup(6, 4, PINCFG_OUTPUT | PINCFG_AF_2);  // UART0_TXD
-	hwpinctrl.PinSetup(2, 1, PINCFG_INPUT  | PINCFG_AF_1);  // UART0_RXD
-	conuart.Init(0);
-}
-
-#endif
-
-
-#if defined(BOARD_XPRESSO_LPC54608)
-
-TGpioPin  led1pin(2, 2, true);
-TGpioPin  led2pin(3, 3, true);
-TGpioPin  led3pin(3, 14, true);
-
-#define LED_COUNT 3
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinSetup(0, 30, PINCFG_OUTPUT | PINCFG_AF_1); // UART_TX:
-	hwpinctrl.PinSetup(0, 29, PINCFG_INPUT  | PINCFG_AF_1); // UART_RX:
-	conuart.Init(0);
-}
-
-#endif
-
-#if defined(BOARD_MIBO100_LPC546XX)
-
-TGpioPin  led1pin(1, 3, false);
-
-#define LED_COUNT 1
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinSetup(0, 30, PINCFG_OUTPUT | PINCFG_AF_1); // UART_TX:
-	hwpinctrl.PinSetup(0, 29, PINCFG_INPUT  | PINCFG_AF_1); // UART_RX:
-	conuart.Init(0);
-
-}
-
-#endif
-
-// ---------------------------------------------------------------------------------------
-
-#if defined(BOARD_NONE_STM32F301)
-
-TGpioPin  led1pin(PORTNUM_A, 0, true);
-
-#define LED_COUNT 1
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX, pin 19
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX, pin 20
-	conuart.Init(1);
-
-	//// USART2
-	//hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX, pin 9
-	//hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX, pin 10
-	//conuart.Init(2);
-}
-
-#endif
-
-#if defined(BOARD_NONE_MKV30F)
-
-// QFN-32 in an adaptor
-
-TGpioPin  led1pin(PORTNUM_B, 0, true);  // pin 20
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// UART0
-	hwpinctrl.PinSetup(PORTNUM_D, 7,  PINCFG_OUTPUT | PINCFG_AF_3);  // USART0_TX, pin 32
-	hwpinctrl.PinSetup(PORTNUM_D, 6,  PINCFG_INPUT  | PINCFG_AF_3);  // USART0_RX, pin 31
-	conuart.Init(0);
-}
-
-#endif
-
-#if defined(BOARD_NONE_LPC822)
-
-TGpioPin  led1pin(0, 15, false);  // pin 11 / TSOP-20
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinFuncConnect(SWM_FUNC_U0_RXD, 0, 0);  // pin 19 / TSOP-20
-	hwpinctrl.PinFuncConnect(SWM_FUNC_U0_TXD, 0, 4);  // pin  6 / TSOP-20
-	conuart.Init(0);
-}
-#endif
-
 
 #ifndef LED_COUNT
   #define LED_COUNT 1
@@ -415,6 +201,7 @@ extern "C" void SysTick_Handler(void)
 
 void idle_task()
 {
+	ledandkey.Run();
 }
 
 unsigned hbcounter = 0;
@@ -456,7 +243,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	// Set the interrupt vector table offset, so that the interrupts and exceptions work
 	mcu_init_vector_table();
 
-  unsigned clockspeed = 64000000; //MCU_CLOCK_SPEED;
+  //unsigned clockspeed = 64000000; //MCU_CLOCK_SPEED;
+  unsigned clockspeed = MCU_CLOCK_SPEED;
 
 #ifdef MCU_INPUT_FREQ
 	if (!hwclkctrl.InitCpuClock(MCU_INPUT_FREQ, clockspeed))
@@ -492,7 +280,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 
 	// select the test
-	test_spi();
+	//test_spi();
+	test_adc();
 
 
 	TRACE("\r\nStarting main cycle...\r\n");
@@ -507,6 +296,9 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	t0 = CLOCKCNT;
 
+	unsigned prevscannum = ledandkey.controller.scancounter;
+	unsigned dcnt = 0;
+
 	// Infinite loop
 	while (1)
 	{
@@ -519,6 +311,15 @@ extern "C" __attribute__((noreturn)) void _start(void)
 			heartbeat_task();
 			t0 = t1;
 		}
+
+#if 0	 // to test the display
+		if (prevscannum != ledandkey.controller.scancounter)
+		{
+			++dcnt;
+			ledandkey.DisplayDecNum(dcnt);
+			prevscannum = ledandkey.controller.scancounter;
+		}
+#endif
 	}
 }
 
