@@ -45,9 +45,24 @@ void qspi_flash_test()
 {
 	int i;
 	unsigned addr = 0x00000;  // start at 128 k
-	unsigned len = 64;
+	unsigned len = 8;
 
 	TRACE("QSPI Flash Test\r\n");
+
+#if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746) || defined(BOARD_DISCOVERY_F746)
+
+	uint32_t qspipincfg = 0;
+
+	hwpinctrl.PinSetup(PORTNUM_B,  6, qspipincfg | PINCFG_AF_10);  // NCS
+	hwpinctrl.PinSetup(PORTNUM_B,  2, qspipincfg | PINCFG_AF_9);   // CLK
+
+	hwpinctrl.PinSetup(PORTNUM_D, 11, qspipincfg | PINCFG_AF_9);   // IO0
+	hwpinctrl.PinSetup(PORTNUM_D, 12, qspipincfg | PINCFG_AF_9);   // IO1
+
+	hwpinctrl.PinSetup(PORTNUM_E,  2, qspipincfg | PINCFG_AF_9);   // IO2
+	hwpinctrl.PinSetup(PORTNUM_D, 13, qspipincfg | PINCFG_AF_9);   // IO3
+
+#endif
 
 	qspiflash.qspi.speed = 8000000;
 	qspiflash.qspi.multi_line_count = 1;
@@ -58,15 +73,21 @@ void qspi_flash_test()
 		return;
 	}
 
-	TRACE("QSPI Flash initialized, ID CODE = %06X, kbyte size = %u\r\n", qspiflash.idcode, (qspiflash.bytesize >> 10));
+	TRACE("QSPI Flash initialized\r\n  ID CODE = %06X, kbyte size = %u\r\n", qspiflash.idcode, (qspiflash.bytesize >> 10));
 
-#if 0
-	TRACE("Erasing whole chip...\r\n");
-	qspiflash.StartEraseAll();
-	qspiflash.WaitForComplete();
-	TRACE("Erase complete.\r\n");
+#if 1
+	TRACE("repeating ID code query...\r\n");
+	if (qspiflash.ReadIdCode())
+	{
+		TRACE("  repeated ID CODE = %06X, kbyte size = %u\r\n", qspiflash.idcode, (qspiflash.bytesize >> 10));
+	}
+	else
+	{
+		TRACE("  error repeating ID code!\r\n");
+	}
 #endif
 
+#if 1
 	TRACE("Reading memory...\r\n");
 
 	for (i = 0; i < sizeof(qdatabuf); ++i)	qdatabuf[i] = 0x55 + i;
@@ -75,7 +96,21 @@ void qspi_flash_test()
 	qspiflash.WaitForComplete();
 	show_mem(&qdatabuf[0], len);
 
-	return;
+	//return;
+#endif
+
+	unsigned write_test_size = qspiflash.bytesize;
+	if (write_test_size > 512 * 1024) // limit the erase time
+	{
+		write_test_size = 512 * 1024;
+	}
+
+#if 1
+	TRACE("Erasing the first %u k...\r\n", write_test_size / 1024);
+	qspiflash.StartEraseMem(0, write_test_size);
+	qspiflash.WaitForComplete();
+	TRACE("Erase complete.\r\n");
+#endif
 
 	TRACE("Writing bigger memory...\r\n");
 
@@ -96,7 +131,7 @@ void qspi_flash_test()
 
 	addr = 0x00;
 
-	while (addr < qspiflash.bytesize)
+	while (addr < write_test_size)
 	{
 		qspiflash.StartWriteMem(addr, &qdatabuf[0], 16);
 		qspiflash.WaitForComplete();
@@ -112,7 +147,7 @@ void qspi_flash_test()
   unsigned usedcnt = 0;
   bool isempty;
 
-  while (addr < qspiflash.bytesize)
+  while (addr < write_test_size)
   {
   	qspiflash.StartReadMem(addr, &qdatabuf[0], 0x1000);
   	qspiflash.WaitForComplete();

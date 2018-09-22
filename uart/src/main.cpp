@@ -65,6 +65,24 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_DISCOVERY_F746)
+
+TGpioPin  led1pin(PORTNUM_I, 1, false);
+
+#define LED_COUNT 1
+
+void setup_board()
+{
+	// nucleo board leds
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(PORTNUM_A, 9,  PINCFG_OUTPUT | PINCFG_AF_7);
+	hwpinctrl.PinSetup(PORTNUM_B, 7,  PINCFG_INPUT  | PINCFG_AF_7);
+	conuart.Init(1); // USART1
+}
+
+#endif
+
 #if defined(BOARD_XPLAINED_SAME70)
 
 TGpioPin  led1pin(2, 8, false);  // C8
@@ -543,8 +561,6 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	//unsigned * ptr = (unsigned * )0x3000000;
 	//*ptr = 1;
 
-#if CLOCKCNT_BITS >= 32
-
 	unsigned hbclocks = SystemCoreClock;
 
 	unsigned t0, t1;
@@ -564,28 +580,6 @@ extern "C" __attribute__((noreturn)) void _start(void)
 			t0 = t1;
 		}
 	}
-
-#else
-
-	// use the SysTick for millisec counting
-
-	unsigned hbticks = 1000;
-
-	unsigned t0 = systick;
-
-	// Infinite loop
-	while (1)
-	{
-		idle_task();
-
-		if (systick - t0 > hbticks)
-		{
-			heartbeat_task();
-			t0 = systick;
-		}
-	}
-
-#endif
 }
 
 // ----------------------------------------------------------------------------

@@ -67,6 +67,25 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_DISCOVERY_F746)
+
+TGpioPin  led1pin(PORTNUM_I, 1, false);
+
+#define LED_COUNT 1
+
+void setup_board()
+{
+	// nucleo board leds
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(PORTNUM_A, 9,  PINCFG_OUTPUT | PINCFG_AF_7);
+	hwpinctrl.PinSetup(PORTNUM_B, 7,  PINCFG_INPUT  | PINCFG_AF_7);
+	conuart.Init(1); // USART1
+}
+
+#endif
+
+
 #if defined(BOARD_STM32F407ZE)
 
 TGpioPin  led1pin(5, 9, true);  // PF9
@@ -84,6 +103,26 @@ void setup_board()
 	conuart.Init(1);
 }
 
+#endif
+
+#if defined(BOARD_MIN_F103)
+
+TGpioPin  led1pin(2, 13, false); // PC13
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
+	conuart.Init(1);
+
+	//// USART2
+	//hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART2_TX
+	//hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_0 | PINCFG_PULLUP);  // USART2_RX
+	//conuart.Init(2);
+}
 #endif
 
 #if defined(BOARD_XPLORER_LPC4330)
@@ -312,8 +351,6 @@ extern "C" __attribute__((noreturn)) void main(void)
 
 	SysTick_Config(SystemCoreClock / 1000);
 
-#if CLOCKCNT_BITS >= 32
-
 	unsigned hbclocks = SystemCoreClock / 20;  // start blinking fast
 
 	unsigned t0, t1;
@@ -335,30 +372,6 @@ extern "C" __attribute__((noreturn)) void main(void)
 			if (hbcounter > 20)  hbclocks = SystemCoreClock / 2;  // slow down to 0.5 s
 		}
 	}
-
-#else
-
-	// use the SysTick for millisec counting
-
-	unsigned hbticks = 1000 / 20;
-
-	unsigned t0 = systick;
-
-	// Infinite loop
-	while (1)
-	{
-		idle_task();
-
-		if (systick - t0 > hbticks)
-		{
-			heartbeat_task();
-			t0 = systick;
-
-			if (hbcounter > 20)  hbticks = 500 / 2;  // slow down to 0.5 s
-		}
-	}
-
-#endif
 }
 
 // ----------------------------------------------------------------------------

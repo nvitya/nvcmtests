@@ -134,20 +134,35 @@ void spi_flash_test()
 	spiflash.txdma.Init(2, 5, 3);  // dma2/stream5/ch3
 	spiflash.rxdma.Init(2, 0, 3);  // dma2/stream0/ch3
 
-#elif defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
+#elif defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746) || defined(BOARD_DISCOVERY_F746)
 
 	spiflash.pin_cs.Assign(PORTNUM_D, 14, false);
+	spiflash.pin_cs.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_OUTPUT | PINCFG_AF_5);  // SPI1_SCK
+	hwpinctrl.PinSetup(PORTNUM_A, 6, PINCFG_INPUT | PINCFG_AF_5);  // SPI1_MISO
+	hwpinctrl.PinSetup(PORTNUM_A, 7, PINCFG_OUTPUT | PINCFG_AF_5);  // SPI1_MOSI
+
+	spiflash.spi.speed = 8000000;
+	spiflash.spi.Init(1);
+
+	spiflash.txdma.Init(2, 5, 3);  // dma2/stream5/ch3
+	spiflash.rxdma.Init(2, 0, 3);  // dma2/stream0/ch3
+
+#elif defined(BOARD_MIN_F103)
+
+	spiflash.pin_cs.Assign(PORTNUM_A, 4, false);
 	spiflash.pin_cs.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
 	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_AF_5);  // SPI1_SCK
 	hwpinctrl.PinSetup(PORTNUM_A, 6, PINCFG_AF_5);  // SPI1_MISO
 	hwpinctrl.PinSetup(PORTNUM_A, 7, PINCFG_AF_5);  // SPI1_MOSI
 
-	spiflash.spi.speed = 16000000;
+	spiflash.spi.speed = 8000000;
 	spiflash.spi.Init(1);
 
-	spiflash.txdma.Init(0x020503);  // dma2/stream5/ch3
-	spiflash.rxdma.Init(0x020003);  // dma2/stream0/ch3
+	spiflash.txdma.Init(1, 3, 0);  // dma1/ch3
+	spiflash.rxdma.Init(1, 2, 0);  // dma1/ch2
 
 #elif defined(BOARD_XPRESSO_LPC54608) || defined(BOARD_MIBO100_LPC540)
 	//hwpinctrl.PinSetup(3, 30, PINCFG_AF_1); // D10 = F9_SSEL0 (as GPIO)
@@ -182,7 +197,7 @@ void spi_flash_test()
 	TRACE("SPI Flash initialized, ID CODE = %06X, kbyte size = %u\r\n", spiflash.idcode, (spiflash.bytesize >> 10));
 
 
-/*
+#if 1
 	TRACE("Reading memory...\r\n");
 
 	spiflash.StartReadMem(0, &databuf[0], readlen);
@@ -193,7 +208,7 @@ void spi_flash_test()
 	show_mem(&databuf[0], readlen);
 
 	return;
-*/
+#endif
 
 	//TRACE("Issuing reset...\r\n");
 	//spiflash.ResetChip();
