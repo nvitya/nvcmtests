@@ -105,6 +105,34 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_DEV_STM32F407VG)
+
+TGpioPin  led1pin(PORTNUM_E, 0, true);  // PE0
+
+#define LED_COUNT 1
+
+void setup_board()
+{
+	// nucleo board leds
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
+	conuart.Init(1);
+
+	// init ledandkey
+	ledandkey.controller.stb_pin.Assign(PORTNUM_B, 4, false);
+	ledandkey.controller.clk_pin.Assign(PORTNUM_B, 5, false);
+	ledandkey.controller.dio_pin.Assign(PORTNUM_B, 6, false);
+	ledandkey.Init();
+	ledandkey.DisplayDirect(0x00000080, 0x00000000); // turn on only the lowest dot
+	ledandkey.leds = 0x00;
+}
+
+#endif
+
+
 #if defined(BOARD_MIBO100_ATSAME70)
 
 TGpioPin  led1pin(PORTNUM_D, 13, false);
@@ -169,8 +197,6 @@ void setup_board()
 #endif
 
 #if defined(BOARD_DEV_STM32F407ZE)
-
-#define SKIP_DTCRAM_EXEC_TEST
 
 TGpioPin  led1pin(5, 9, true);  // PF9
 TGpioPin  led2pin(5, 10, true);  // PF10
