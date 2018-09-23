@@ -90,12 +90,17 @@ void setup_board()
 	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
   // USART3: Stlink USB / Serial converter
-	// USART3_TX: PD.8
-	hwpinctrl.PinSetup(3, 8,  PINCFG_OUTPUT | PINCFG_AF_7);
-	// USART3_RX: Pd.9
-	hwpinctrl.PinSetup(3, 9,  PINCFG_INPUT  | PINCFG_AF_7);
+	hwpinctrl.PinSetup(PORTNUM_D, 8,  PINCFG_OUTPUT | PINCFG_AF_7); // USART3_TX
+	hwpinctrl.PinSetup(PORTNUM_D, 9,  PINCFG_INPUT  | PINCFG_AF_7); // USART3_RX
+	conuart.Init(3);
 
-	conuart.Init(3); // USART3
+	// init ledandkey
+	ledandkey.controller.stb_pin.Assign(PORTNUM_C, 10, false);
+	ledandkey.controller.clk_pin.Assign(PORTNUM_C, 11, false);
+	ledandkey.controller.dio_pin.Assign(PORTNUM_C, 12, false);
+	ledandkey.Init();
+	ledandkey.DisplayDirect(0x00000080, 0x00000000); // turn on only the lowest dot
+	ledandkey.leds = 0x00;
 }
 
 #endif
@@ -256,6 +261,9 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	mcu_init_vector_table();
 
   unsigned clockspeed = MCU_CLOCK_SPEED;
+
+// STM32F746
+  //clockspeed = 144000000; // maximal speed for the ADC
 
 // STM32F103
   //clockspeed = 64000000; // maximal speed without external oscillator

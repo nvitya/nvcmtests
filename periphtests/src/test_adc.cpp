@@ -9,10 +9,10 @@ void test_adc()
 {
 	TRACE("*** ADC test ***\r\n");
 
-	hwpinctrl.PinSetup(PORTNUM_A, 0, PINCFG_ANALOGUE); // ch0
-	hwpinctrl.PinSetup(PORTNUM_A, 1, PINCFG_ANALOGUE); // ch1
+	hwpinctrl.PinSetup(PORTNUM_A, 0, PINCFG_INPUT | PINCFG_ANALOGUE); // ch0
+	hwpinctrl.PinSetup(PORTNUM_A, 1, PINCFG_INPUT | PINCFG_ANALOGUE); // ch1
 
-	adc.Init(1, 0x000f);
+	adc.Init(1, 0x0003);
 
 	TRACE("ADC speed: %u conversions / s\r\n", adc.act_conv_rate);
 
