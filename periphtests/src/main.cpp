@@ -138,7 +138,6 @@ TGpioPin  led3pin(PORTNUM_C, 9, false);
 TGpioPin  led4pin(PORTNUM_C, 7, false);
 
 #define LED_COUNT 4
-#undef USE_DWT_CYCCNT
 
 void setup_board()
 {
@@ -147,6 +146,19 @@ void setup_board()
 	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 	led4pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_1);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_1);  // USART1_RX
+	conuart.Init(1);
+
+	// init ledandkey
+	ledandkey.controller.stb_pin.Assign(PORTNUM_B, 5, false);
+	ledandkey.controller.clk_pin.Assign(PORTNUM_B, 6, false);
+	ledandkey.controller.dio_pin.Assign(PORTNUM_B, 7, false);
+	ledandkey.Init();
+	ledandkey.DisplayDirect(0x00000080, 0x00000000); // turn on only the lowest dot
+	ledandkey.leds = 0x00;
 }
 
 #endif
@@ -315,7 +327,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 			t0 = t1;
 		}
 
-#if 0	 // to test the display
+#if 1	 // to test the display
 		if (prevscannum != ledandkey.controller.scancounter)
 		{
 			++dcnt;
