@@ -12,8 +12,9 @@ void test_adc()
 	hwpinctrl.PinSetup(PORTNUM_A, 0, PINCFG_ANALOGUE); // ch0
 	hwpinctrl.PinSetup(PORTNUM_A, 1, PINCFG_ANALOGUE); // ch1
 
-	adc.sampling_cycles = 3;
 	adc.Init(1, 0x000f);
+
+	TRACE("ADC speed: %u conversions / s\r\n", adc.act_conv_rate);
 
 	unsigned t0, t1;
 

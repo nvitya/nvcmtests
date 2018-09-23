@@ -243,8 +243,11 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	// Set the interrupt vector table offset, so that the interrupts and exceptions work
 	mcu_init_vector_table();
 
-  //unsigned clockspeed = 64000000; //MCU_CLOCK_SPEED;
   unsigned clockspeed = MCU_CLOCK_SPEED;
+
+// STM32F103
+  //clockspeed = 64000000; // maximal speed without external oscillator
+  //clockspeed = 56000000; // maximal speed for the ADC speed 1 M / s
 
 #ifdef MCU_INPUT_FREQ
 	if (!hwclkctrl.InitCpuClock(MCU_INPUT_FREQ, clockspeed))
