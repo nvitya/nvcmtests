@@ -18,6 +18,8 @@ void test_spi()
 	THwSpi    spi2;
 	TGpioPin  pin_cs;
 
+#if defined(MCUF_STM32)
+
 	pin_cs.Assign(PORTNUM_A, 4, false);
 	pin_cs.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
@@ -33,6 +35,8 @@ void test_spi()
 	hwpinctrl.PinSetup(PORTNUM_A, 8, PINCFG_AF_0);  // Clock out
 	RCC->CFGR &= ~(7 << 24); // MCO(3): clock out select
 	RCC->CFGR |=  (6 << 24); // 4 = system clock, 6 = HSE clock
+
+#endif
 
 	TRACE("Sending 0x5A periodically (1s)...\r\n");
 

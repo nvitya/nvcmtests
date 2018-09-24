@@ -141,8 +141,8 @@ void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
 	conuart.Init(0);
 }
 
@@ -156,9 +156,17 @@ void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
 	conuart.Init(0);
+
+	// init ledandkey
+	ledandkey.controller.stb_pin.Assign(PORTNUM_A, 28, false);
+	ledandkey.controller.clk_pin.Assign(PORTNUM_A, 29, false);
+	ledandkey.controller.dio_pin.Assign(PORTNUM_A, 30, false);
+	ledandkey.Init();
+	ledandkey.DisplayDirect(0x00000080, 0x00000000); // turn on only the lowest dot
+	ledandkey.leds = 0x00;
 }
 
 #endif
@@ -328,10 +336,13 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	TRACE("SystemCoreClock: %u\r\n", SystemCoreClock);
 
 
-	// select the test
+	// ------------------------------------------------------------------------------------
+	// TEST SELECTION
+
 	//test_spi();
 	test_adc();
 
+	// ------------------------------------------------------------------------------------
 
 	TRACE("\r\nStarting main cycle...\r\n");
 

@@ -9,8 +9,12 @@ void test_adc()
 {
 	TRACE("*** ADC test ***\r\n");
 
+#if defined(MCUF_STM32)
 	hwpinctrl.PinSetup(PORTNUM_A, 0, PINCFG_INPUT | PINCFG_ANALOGUE); // ch0
 	hwpinctrl.PinSetup(PORTNUM_A, 1, PINCFG_INPUT | PINCFG_ANALOGUE); // ch1
+#else
+	// The ATSAM4S does not require pin setup, the pins switched automatically to analogue mode on channel enabling
+#endif
 
 	adc.Init(1, 0x0003);
 
