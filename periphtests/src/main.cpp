@@ -224,7 +224,7 @@ void setup_board()
 
 #if defined(BOARD_ARDUINO_DUE)
 
-TGpioPin  led1pin(1, 27, false); // D13
+TGpioPin  led1pin(PORTNUM_B, 27, false); // D13
 
 void setup_board()
 {
@@ -234,6 +234,15 @@ void setup_board()
 	hwpinctrl.PinSetup(0, 8, PINCFG_INPUT | PINCFG_AF_0);  // UART_RXD
 	hwpinctrl.PinSetup(0, 9, PINCFG_OUTPUT | PINCFG_AF_0); // UART_TXD
 	conuart.Init(0);  // UART
+
+	// init ledandkey
+	ledandkey.controller.stb_pin.Assign(PORTNUM_C, 25, false);
+	ledandkey.controller.clk_pin.Assign(PORTNUM_C, 24, false);
+	ledandkey.controller.dio_pin.Assign(PORTNUM_C, 23, false);
+	ledandkey.Init();
+	ledandkey.DisplayDirect(0x00000080, 0x00000000); // turn on only the lowest dot
+	ledandkey.leds = 0x00;
+
 }
 
 #endif

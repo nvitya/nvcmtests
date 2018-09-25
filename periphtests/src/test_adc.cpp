@@ -14,6 +14,9 @@ void test_adc()
 	hwpinctrl.PinSetup(PORTNUM_A, 1, PINCFG_INPUT | PINCFG_ANALOGUE); // ch1
 #else
 	// The ATSAM4S does not require pin setup, the pins switched automatically to analogue mode on channel enabling
+
+	// CH0, CH1 Pins:
+	// Arduino DUE: PA2(AD7), PA3(AD6)
 #endif
 
 	adc.Init(1, 0x0003);
