@@ -10,12 +10,9 @@
 #include "traces.h"
 
 extern TGpioPin    led1pin;
-
 extern THwUart     conuart;
-
 extern TLedAndKey  ledandkey;
 
 void idle_task();
-
 
 #endif /* SRC_MAIN_H_ */

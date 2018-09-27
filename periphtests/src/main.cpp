@@ -43,214 +43,9 @@ extern void test_adc();
 #include "ledandkey.h"
 
 THwUart     conuart;  // console uart
-
 TLedAndKey  ledandkey; // some display
 
-#if defined(BOARD_MIN_F103)
-
-TGpioPin  led1pin(2, 13, false); // PC13
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
-	conuart.Init(1);
-
-	// USART2
-	//hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART2_TX
-	//hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_0 | PINCFG_PULLUP);  // USART2_RX
-	//conuart.Init(2);
-
-	// init ledandkey
-	ledandkey.controller.stb_pin.Assign(PORTNUM_B, 5, false);
-	ledandkey.controller.clk_pin.Assign(PORTNUM_B, 6, false);
-	ledandkey.controller.dio_pin.Assign(PORTNUM_B, 7, false);
-	ledandkey.Init();
-	ledandkey.DisplayDirect(0x00000080, 0x00000000); // turn on only the lowest dot
-	ledandkey.leds = 0x00;
-}
-#endif
-
-#if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
-
-TGpioPin  led1pin(1, 0, false);
-TGpioPin  led2pin(1, 7, false);
-TGpioPin  led3pin(1, 14, false);
-
-#define LED_COUNT 3
-
-void setup_board()
-{
-	// nucleo board leds
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-  // USART3: Stlink USB / Serial converter
-	hwpinctrl.PinSetup(PORTNUM_D, 8,  PINCFG_OUTPUT | PINCFG_AF_7); // USART3_TX
-	hwpinctrl.PinSetup(PORTNUM_D, 9,  PINCFG_INPUT  | PINCFG_AF_7); // USART3_RX
-	conuart.Init(3);
-
-	// init ledandkey
-	ledandkey.controller.stb_pin.Assign(PORTNUM_C, 10, false);
-	ledandkey.controller.clk_pin.Assign(PORTNUM_C, 11, false);
-	ledandkey.controller.dio_pin.Assign(PORTNUM_C, 12, false);
-	ledandkey.Init();
-	ledandkey.DisplayDirect(0x00000080, 0x00000000); // turn on only the lowest dot
-	ledandkey.leds = 0x00;
-}
-
-#endif
-
-#if defined(BOARD_DEV_STM32F407VG)
-
-TGpioPin  led1pin(PORTNUM_E, 0, true);  // PE0
-
-#define LED_COUNT 1
-
-void setup_board()
-{
-	// nucleo board leds
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
-	conuart.Init(1);
-
-	// init ledandkey
-	ledandkey.controller.stb_pin.Assign(PORTNUM_B, 4, false);
-	ledandkey.controller.clk_pin.Assign(PORTNUM_B, 5, false);
-	ledandkey.controller.dio_pin.Assign(PORTNUM_B, 6, false);
-	ledandkey.Init();
-	ledandkey.DisplayDirect(0x00000080, 0x00000000); // turn on only the lowest dot
-	ledandkey.leds = 0x00;
-}
-
-#endif
-
-
-#if defined(BOARD_MIBO100_ATSAME70)
-
-TGpioPin  led1pin(PORTNUM_D, 13, false);
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
-	conuart.Init(0);
-}
-
-#endif
-
-#if defined(BOARD_MIBO64_ATSAM4S)
-
-TGpioPin  led1pin(PORTNUM_A, 1, false);
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
-	conuart.Init(0);
-
-	// init ledandkey
-	ledandkey.controller.stb_pin.Assign(PORTNUM_A, 28, false);
-	ledandkey.controller.clk_pin.Assign(PORTNUM_A, 29, false);
-	ledandkey.controller.dio_pin.Assign(PORTNUM_A, 30, false);
-	ledandkey.Init();
-	ledandkey.DisplayDirect(0x00000080, 0x00000000); // turn on only the lowest dot
-	ledandkey.leds = 0x00;
-}
-
-#endif
-
-#if defined(BOARD_DISCOVERY_F072)
-
-TGpioPin  led1pin(PORTNUM_C, 6, false);
-TGpioPin  led2pin(PORTNUM_C, 8, false);
-TGpioPin  led3pin(PORTNUM_C, 9, false);
-TGpioPin  led4pin(PORTNUM_C, 7, false);
-
-#define LED_COUNT 4
-
-void setup_board()
-{
-	// direction leds
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led4pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_1);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_1);  // USART1_RX
-	conuart.Init(1);
-
-	// init ledandkey
-	ledandkey.controller.stb_pin.Assign(PORTNUM_B, 5, false);
-	ledandkey.controller.clk_pin.Assign(PORTNUM_B, 6, false);
-	ledandkey.controller.dio_pin.Assign(PORTNUM_B, 7, false);
-	ledandkey.Init();
-	ledandkey.DisplayDirect(0x00000080, 0x00000000); // turn on only the lowest dot
-	ledandkey.leds = 0x00;
-}
-
-#endif
-
-#if defined(BOARD_DEV_STM32F407ZE)
-
-TGpioPin  led1pin(5, 9, true);  // PF9
-TGpioPin  led2pin(5, 10, true);  // PF10
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
-	conuart.Init(1);
-}
-
-#endif
-
-#if defined(BOARD_ARDUINO_DUE)
-
-TGpioPin  led1pin(PORTNUM_B, 27, false); // D13
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// UART - On the Arduino programmer interface
-	hwpinctrl.PinSetup(0, 8, PINCFG_INPUT | PINCFG_AF_0);  // UART_RXD
-	hwpinctrl.PinSetup(0, 9, PINCFG_OUTPUT | PINCFG_AF_0); // UART_TXD
-	conuart.Init(0);  // UART
-
-	// init ledandkey
-	ledandkey.controller.stb_pin.Assign(PORTNUM_C, 25, false);
-	ledandkey.controller.clk_pin.Assign(PORTNUM_C, 24, false);
-	ledandkey.controller.dio_pin.Assign(PORTNUM_C, 23, false);
-	ledandkey.Init();
-	ledandkey.DisplayDirect(0x00000080, 0x00000000); // turn on only the lowest dot
-	ledandkey.leds = 0x00;
-
-}
-
-#endif
-
-
-#ifndef LED_COUNT
-  #define LED_COUNT 1
-#endif
+#include "board_setup.h" // contains code too
 
 volatile unsigned systick = 0;
 
@@ -307,6 +102,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 // STM32F746
   //clockspeed = 144000000; // maximal speed for the ADC
+  //clockspeed = 144000000; // maximal speed for the ADC
 
 // STM32F103
   //clockspeed = 64000000; // maximal speed without external oscillator
@@ -336,8 +132,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	clockcnt_init();
 
-	// go on with the hardware initializations
-	setup_board();
+	// go on with the boards specific initializations
+	board_setup();  // from board_setup.h
 
 	TRACE("\r\n--------------------------\r\n");
 	TRACE("NVCM Peripheral Tests\r\n");
@@ -350,6 +146,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	//test_spi();
 	test_adc();
+
+	//test_division();
 
 	// ------------------------------------------------------------------------------------
 
