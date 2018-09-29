@@ -37,6 +37,7 @@
 
 #include "test_spi.h"
 extern void test_adc();
+extern void test_stepper();
 
 #include "traces.h"
 
@@ -145,7 +146,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	// TEST SELECTION
 
 	//test_spi();
-	test_adc();
+	//test_adc();
+	test_stepper();
 
 	//test_division();
 
