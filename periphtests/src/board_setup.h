@@ -202,6 +202,43 @@ void board_setup()
 
 #endif
 
+#if defined(BOARD_XPLORER_LPC4330)
+
+TGpioPin  led1pin(1, 12, true); // D2 (GPIO numbering)
+TGpioPin  led2pin(1, 11, true); // D3
+
+#define LED_COUNT 2
+
+void board_setup()
+{
+	// By the classic LPC (V1) MCUs the pin numbering and the GPIO numbering differs!
+
+	hwpinctrl.PinSetup(2, 12, PINCFG_OUTPUT | PINCFG_AF_0);  // D2: GPIO_1_12, pad B9
+	hwpinctrl.PinSetup(2, 11, PINCFG_OUTPUT | PINCFG_AF_0);  // D3: GPIO_1_11, pad A9
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// uart console
+
+	hwpinctrl.PinSetup(6,  4, PINCFG_OUTPUT | PINCFG_AF_2);  // U0_TXD, J8/9
+	hwpinctrl.PinSetup(6,  5, PINCFG_INPUT  | PINCFG_AF_2);  // U0_RXD, J8/10
+	conuart.Init(0);
+
+	// ledandkey
+
+	hwpinctrl.PinSetup(2,  2, PINCFG_OUTPUT | PINCFG_AF_4);  // GPIO_5_2, J8/11
+	hwpinctrl.PinSetup(2,  5, PINCFG_OUTPUT | PINCFG_AF_4);  // GPIO_5_5, J8/12
+	hwpinctrl.PinSetup(2,  8, PINCFG_OUTPUT | PINCFG_AF_4);  // GPIO_5_7, J8/15
+
+	ledandkey.controller.stb_pin.Assign(5, 2, false);
+	ledandkey.controller.clk_pin.Assign(5, 5, false);
+	ledandkey.controller.dio_pin.Assign(5, 7, false);
+	ledandkey.Init();
+}
+
+#endif
+
+
 #if defined(BOARD_ARDUINO_DUE)
 
 TGpioPin  led1pin(PORTNUM_B, 27, false); // D13

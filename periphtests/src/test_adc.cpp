@@ -14,21 +14,35 @@ void test_adc()
 
 	uint8_t adc_num = 0;
 
+	uint8_t adc_shift = 6; // keep only the highest 10 bits
+
 #if defined(MCUF_STM32)
+	adc_num = 1;
 	hwpinctrl.PinSetup(PORTNUM_A, 0, PINCFG_INPUT | PINCFG_ANALOGUE); // ch0
 	hwpinctrl.PinSetup(PORTNUM_A, 1, PINCFG_INPUT | PINCFG_ANALOGUE); // ch1
 
-	adc_num = 1;
+#if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
+
+	hwpinctrl.PinSetup(PORTNUM_A, 4, PINCFG_INPUT | PINCFG_ANALOGUE); // ch4
+	adc_ch_y = 4;
+#endif
+
 
 #elif defined(BOARD_XPLAINED_SAME70)
 
 	adc_ch_x = 0; // PD30
 	adc_ch_y = 6; // PA17
 
+#elif defined(BOARD_XPLORER_LPC4330)
+
+	adc_ch_x = 1; // ADC0_1 = J8/19
+	adc_ch_y = 2; // ADC0_2 = J8/20
+
 #else
 	// The ATSAM4S does not require pin setup, the pins switched automatically to analogue mode on channel enabling
 
 	// CH0, CH1 Pins:
+	// Atsam-4S: PA17, PA18
 	// Arduino DUE: PA2(AD7), PA3(AD6)
 	// ATSAM-E70: PD30, PA21
 
@@ -54,8 +68,8 @@ void test_adc()
 		t1 = CLOCKCNT;
 		if (t1 - t0 > SystemCoreClock / sampspeed)
 		{
-			uint16_t advx = (adc.ChValue(adc_ch_x) >> 2);
-			uint16_t advy = (adc.ChValue(adc_ch_y) >> 2);
+			uint16_t advx = (adc.ChValue(adc_ch_x) >> adc_shift);
+			uint16_t advy = (adc.ChValue(adc_ch_y) >> adc_shift);
 
 			//ledandkey.DisplayHexNum(adc.ChValue(0) | (adc.ChValue(1) << 16));
 			ledandkey.DisplayDecNum(advx + 10000 * advy);
