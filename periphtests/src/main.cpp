@@ -36,8 +36,11 @@
 #include "clockcnt.h"
 
 #include "test_spi.h"
+
 extern void test_adc();
 extern void test_stepper();
+extern void test_dht11();
+extern void test_keymatrix();
 
 #include "traces.h"
 
@@ -147,7 +150,9 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	//test_spi();
 	//test_adc();
-	test_stepper();
+	//test_stepper();
+	//test_dht11();
+	test_keymatrix();
 
 	//test_division();
 
