@@ -37,7 +37,8 @@
 
 #include "test_spi.h"
 
-extern void test_adc();
+extern void adc_test_freerun();
+extern void adc_test_record();
 extern void test_stepper();
 extern void test_dht11();
 extern void test_keymatrix();
@@ -149,10 +150,11 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	// TEST SELECTION
 
 	//test_spi();
-	//test_adc();
+  adc_test_record();
+  //adc_test_freerun();
 	//test_stepper();
 	//test_dht11();
-	test_keymatrix();
+	//test_keymatrix();
 
 	//test_division();
 
