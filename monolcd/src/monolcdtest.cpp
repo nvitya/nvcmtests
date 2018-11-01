@@ -51,12 +51,26 @@ void monolcd_test()
   #error "unknown board."
 #endif
 
+
+#if 0
 	disp.rotation = 0;
 	if (!disp.Init(MLCD_CTRL_UC1701, 128, 64, &disp_buf[0]))
 	{
 		TRACE("Error Initializing LCD display!\r\n");
 		return;
 	}
+#endif
+
+#if 1
+	disp.rotation = 0;
+	disp.contrast = 40;
+	if (!disp.Init(MLCD_CTRL_NOKIA5110, 84, 48, &disp_buf[0]))
+	{
+		TRACE("Error Initializing LCD display!\r\n");
+		return;
+	}
+#endif
+
 
 /*
 	disp.pin_cd.Set1();
@@ -174,14 +188,17 @@ void monolcd_test()
 			disp.SetFont(&font_mono);
 			disp.SetCursor(2, 2);
 			disp.DrawString((char *)"Small Full Font 1234 km");
-
+#if 1
 			disp.SetFont(&font_sans);
 			disp.SetCursor(2, 16);
 			disp.DrawString((char *)"Big 1234 km");
+			//disp.DrawString((char *)"kkkkkkkkkkkkkk");
+			//disp.DrawString((char *)"iiiiiiiiiiiiiiiiii");
 
 			disp.SetFont(&font_bold);
 			disp.SetCursor(2, 40);
 			disp.DrawString((char *)"Big 1234 km");
+#endif
 
  			delay_us(200000);
 		}
