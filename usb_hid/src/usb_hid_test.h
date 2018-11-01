@@ -14,7 +14,7 @@ typedef struct THidData
 //
 } THidData;
 
-class TUsbHidTest : public TUsbInterface
+class TUifHidTest : public TUsbInterface
 {
 public:
 	THidData        hiddata;
@@ -26,7 +26,7 @@ public:
 
 };
 
-extern TUsbHidTest hidtest;
+extern TUifHidTest hidtest;
 
 void usb_hid_test_init();
 void usb_hid_test_run();

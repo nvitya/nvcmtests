@@ -5,10 +5,8 @@
 #include "usbdevice.h"
 #include "hwusbctrl.h"
 
-THwUsbCtrl  usbctrl;
-TUsbDevice  usbdev;
-
-TUsbHidTest hidtest;
+TUsbDevice    usbdev;
+TUifHidTest   hidtest;
 
 #define HID_DESCRIPTOR_TYPE           0x21
 #define HID_REPORT_DESC               0x22
@@ -81,7 +79,7 @@ const uint8_t USBD_HID_Desc[] =
 };
 
 
-bool TUsbHidTest::InitInterface()
+bool TUifHidTest::InitInterface()
 {
 	intfdesc.interface_class = 3; // HID
 	intfdesc.interface_subclass = 1; // boot
@@ -92,15 +90,18 @@ bool TUsbHidTest::InitInterface()
 	AddDesc(HID_DESCRIPTOR_TYPE, (void *)&USBD_HID_Desc[0], sizeof(USBD_HID_Desc), USBDESCF_CONFIG);
 	AddDesc(HID_REPORT_DESC, (void *)&HID_MOUSE_ReportDesc[0], sizeof(HID_MOUSE_ReportDesc), 0);
 
-	ep_hidreport.Init(USB_EP_TYPE_INTERRUPT, 0, 4);
+	ep_hidreport.Init(HWUSB_EP_TYPE_INTERRUPT, 0, 4);
 	AddEndpoint(&ep_hidreport);
 
-	return InitInterface();
+	return true;
 }
 
-void TUsbHidTest::SendReport(int8_t adx, int8_t ady)
+void TUifHidTest::SendReport(int8_t adx, int8_t ady)
 {
+	hiddata.dx = adx;
+	hiddata.dy = ady;
 
+	ep_hidreport.StartSend(&hiddata, sizeof(hiddata));
 }
 
 void usb_hid_test_init()
@@ -113,15 +114,9 @@ void usb_hid_test_init()
 	usbdev.device_name = "HID Joystick in FS Mode";
 	usbdev.device_serial_number = "498F20793932";
 
-	if (!hidtest.Init())
-	{
-		TRACE("Error Initializing HIDTEST interface\r\n");
-		return;
-	}
-
 	usbdev.AddInterface(&hidtest);
 
-	if (!usbdev.Init()) // this must be the last one, when everything is prepared
+	if (!usbdev.Init()) // this must be the last one, when the interfaces added
 	{
 		TRACE("Error initializing USB device!\r\n");
 		return;
@@ -130,6 +125,6 @@ void usb_hid_test_init()
 
 void usb_hid_test_run()
 {
-
+	usbdev.HandleIrq();
 }
 

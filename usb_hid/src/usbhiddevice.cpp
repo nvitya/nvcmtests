@@ -220,5 +220,5 @@ void TUsbHidDevice::SendReport(int8_t adx, int8_t ady)
 	hiddata.dx = adx;
 	hiddata.dy = ady;
 
-	ep_hidreport.Send(&hiddata, sizeof(hiddata), 0);
+	ep_hidreport.StartSend(&hiddata, sizeof(hiddata));
 }

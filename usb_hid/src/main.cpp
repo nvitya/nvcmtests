@@ -212,27 +212,6 @@ void setup_board()
 }
 #endif
 
-#if defined(BOARD_MIBO64_ATSAME5X)
-
-TGpioPin  led1pin(PORTNUM_A, 1, false);
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// SERCOM0
-	hwpinctrl.PinSetup(PORTNUM_A, 4, PINCFG_OUTPUT | PINCFG_AF_3);  // PAD[0] = TX
-	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_INPUT  | PINCFG_AF_3);  // PAD[1] = RX
-	conuart.Init(0);
-
-	// SERCOM2
-	//hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_AF_2);  // PAD[0] = TX
-	//hwpinctrl.PinSetup(PORTNUM_A, 13, PINCFG_AF_2);  // PAD[1] = RX
-	//conuart.Init(2);
-}
-#endif
-
-
 #if defined(BOARD_XPRESSO_LPC4337)
 
 TGpioPin  led1pin(3, 5, true);
@@ -278,24 +257,6 @@ void setup_board()
 	hwpinctrl.PinSetup(0, 30, PINCFG_OUTPUT | PINCFG_AF_1); // UART_TX:
 	hwpinctrl.PinSetup(0, 29, PINCFG_INPUT  | PINCFG_AF_1); // UART_RX:
 	conuart.Init(0);
-}
-
-#endif
-
-#if defined(BOARD_MIBO100_LPC546XX)
-
-TGpioPin  led1pin(1, 3, false);
-
-#define LED_COUNT 1
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinSetup(0, 30, PINCFG_OUTPUT | PINCFG_AF_1); // UART_TX:
-	hwpinctrl.PinSetup(0, 29, PINCFG_INPUT  | PINCFG_AF_1); // UART_RX:
-	conuart.Init(0);
-
 }
 
 #endif
