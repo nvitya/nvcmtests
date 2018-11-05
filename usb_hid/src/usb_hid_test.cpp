@@ -104,6 +104,26 @@ void TUifHidTest::SendReport(int8_t adx, int8_t ady)
 	ep_hidreport.StartSend(&hiddata, sizeof(hiddata));
 }
 
+void TUifHidTest::OnConfigured()
+{
+	// after the configuration it must send a report immediately!
+	SendReport(0, 0);
+}
+
+bool TUifHidTest::HandleTransferEvent(TUsbEndpoint * aep, bool htod)
+{
+	if (htod)
+	{
+		aep->FinishRecv(true);
+	}
+	else
+	{
+		aep->FinishSend();
+	}
+
+	return true;
+}
+
 void usb_hid_test_init()
 {
 	TRACE("Initializing USB HID Test\r\n");
@@ -128,3 +148,10 @@ void usb_hid_test_run()
 	usbdev.HandleIrq();
 }
 
+void usb_hid_test_heartbeat()
+{
+	if (hidtest.configured)
+	{
+		hidtest.SendReport(2, 3);
+	}
+}

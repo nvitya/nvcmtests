@@ -31,6 +31,7 @@
 
 #include "swo.h"
 #include "hwuart.h"
+#include "strace.h"
 
 extern THwUart   conuart;  // console uart
 
@@ -38,8 +39,8 @@ extern THwUart   conuart;  // console uart
 
 #ifdef TRACES
   // add trace calls
-  //#define TRACE(...)  		{ swo_printf( __VA_ARGS__ ); }
-  #define TRACE(...)  		{ conuart.printf( __VA_ARGS__ ); }
+  #define TRACE(...)  		{ strace( __VA_ARGS__ ); }
+  //#define TRACE(...)  		{ conuart.printf( __VA_ARGS__ ); }
 #else
   // ignore traces
   #define TRACE(...)

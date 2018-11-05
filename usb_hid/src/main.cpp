@@ -35,6 +35,7 @@
 #include "hwusbctrl.h"
 #include "usb_hid_test.h"
 
+#include "strace.h"
 #include "traces.h"
 
 THwUart   conuart;  // console uart
@@ -200,15 +201,17 @@ void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
+#if 0
 	// USART1
 	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
 	conuart.Init(1);
-
+#else
 	// USART2
-	//hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART2_TX
-	//hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_0 | PINCFG_PULLUP);  // USART2_RX
-	//conuart.Init(2);
+	hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART2_TX
+	hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_0);  // USART2_RX
+	conuart.Init(2);
+#endif
 }
 #endif
 
@@ -299,6 +302,8 @@ void heartbeat_task() // invoked every 0.5 s
 	led5pin.SetTo(hbcounter >> 4);
 #endif
 
+	usb_hid_test_heartbeat();
+
 	//TRACE("hbcounter = %u, systick = %u\r\n", hbcounter, systick);
 }
 
@@ -344,11 +349,14 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	// go on with the hardware initializations
 	setup_board();
+	strace_init(&conuart, true); // use buffered trace
 
 	TRACE("\r\n--------------------------\r\n");
 	TRACE("NVCM USB HID TEST\r\n");
 	TRACE("Board: \"%s\"\r\n", BOARD_NAME);
 	TRACE("SystemCoreClock: %u\r\n", SystemCoreClock);
+
+	strace_flush();
 
 	usb_hid_test_init();
 
@@ -371,6 +379,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	while (1)
 	{
 		t1 = CLOCKCNT;
+
+		strace_run();
 
 		idle_task();
 
