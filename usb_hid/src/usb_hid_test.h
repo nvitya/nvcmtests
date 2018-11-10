@@ -16,8 +16,14 @@ typedef struct THidData
 
 class TUifHidTest : public TUsbInterface
 {
+private:
+	typedef TUsbInterface super;
+
 public:
 	THidData        hiddata;
+
+	uint8_t         protocol = 0;
+	uint8_t         idlestate = 1;
 
 	TUsbEndpoint    ep_hidreport;
 	void            SendReport(int8_t adx, int8_t ady);
@@ -26,6 +32,7 @@ public: // mandatory functions
 	virtual bool    InitInterface();
 	virtual void    OnConfigured();
 	virtual bool    HandleTransferEvent(TUsbEndpoint * aep, bool htod);
+	virtual bool    HandleSetupRequest(TUsbSetupRequest * psrq);
 
 };
 

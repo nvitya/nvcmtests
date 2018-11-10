@@ -81,13 +81,16 @@ const uint8_t USBD_HID_Desc[] =
 
 bool TUifHidTest::InitInterface()
 {
+	hiddata.dx = 0;
+	hiddata.dy = 0;
+
 	intfdesc.interface_class = 3; // HID
 	intfdesc.interface_subclass = 1; // boot
 	intfdesc.interface_protocol = 2; // mouse
 
 	interface_name = "NVCM USB HID Test";
 
-	AddDesc(HID_DESCRIPTOR_TYPE, (void *)&USBD_HID_Desc[0], sizeof(USBD_HID_Desc), USBDESCF_CONFIG);
+	AddConfigDesc((void *)&USBD_HID_Desc[0], false);
 	AddDesc(HID_REPORT_DESC, (void *)&HID_MOUSE_ReportDesc[0], sizeof(HID_MOUSE_ReportDesc), 0);
 
 	ep_hidreport.Init(HWUSB_EP_TYPE_INTERRUPT, 0, 4);
@@ -108,6 +111,40 @@ void TUifHidTest::OnConfigured()
 {
 	// after the configuration it must send a report immediately!
 	SendReport(0, 0);
+}
+
+bool TUifHidTest::HandleSetupRequest(TUsbSetupRequest * psrq)
+{
+	uint8_t rqclass = ((psrq->rqtype >> 5) & 3);
+	if (1 == rqclass) // class requests
+	{
+		if (0x0B == psrq->request) // set protocol
+		{
+			protocol = (psrq->value & 0xFF);
+			device->SendControlAck();
+			return true;
+		}
+		else if (0x03 == psrq->request) // get protocol
+		{
+			device->ep_ctrl.StartSend(&protocol, 1);
+			return true;
+		}
+		else if (0x0A == psrq->request) // set idle (sending frequency)
+		{
+			idlestate = (psrq->value & 0xFF);
+			device->SendControlAck();
+			return true;
+		}
+		else if (0x02 == psrq->request) // get idle
+		{
+			device->ep_ctrl.StartSend(&idlestate, 1);
+			return true;
+		}
+	}
+
+	// if not handled, call parent
+
+	return super::HandleSetupRequest(psrq);
 }
 
 bool TUifHidTest::HandleTransferEvent(TUsbEndpoint * aep, bool htod)
@@ -155,3 +192,4 @@ void usb_hid_test_heartbeat()
 		hidtest.SendReport(2, 3);
 	}
 }
+
