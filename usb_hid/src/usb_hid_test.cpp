@@ -113,40 +113,6 @@ void TUifHidTest::OnConfigured()
 	SendReport(0, 0);
 }
 
-bool TUifHidTest::HandleSetupRequest(TUsbSetupRequest * psrq)
-{
-	uint8_t rqclass = ((psrq->rqtype >> 5) & 3);
-	if (1 == rqclass) // class requests
-	{
-		if (0x0B == psrq->request) // set protocol
-		{
-			protocol = (psrq->value & 0xFF);
-			device->SendControlAck();
-			return true;
-		}
-		else if (0x03 == psrq->request) // get protocol
-		{
-			device->ep_ctrl.StartSend(&protocol, 1);
-			return true;
-		}
-		else if (0x0A == psrq->request) // set idle (sending frequency)
-		{
-			idlestate = (psrq->value & 0xFF);
-			device->SendControlAck();
-			return true;
-		}
-		else if (0x02 == psrq->request) // get idle
-		{
-			device->ep_ctrl.StartSend(&idlestate, 1);
-			return true;
-		}
-	}
-
-	// if not handled, call parent
-
-	return super::HandleSetupRequest(psrq);
-}
-
 bool TUifHidTest::HandleTransferEvent(TUsbEndpoint * aep, bool htod)
 {
 	if (htod)

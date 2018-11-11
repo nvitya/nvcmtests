@@ -1,5 +1,5 @@
 /* -----------------------------------------------------------------------------
- * This file is a part of the NVCM project: https://github.com/nvitya/nvcm
+ * This file is a part of the NVCM Tests project: https://github.com/nvitya/nvcmtests
  * Copyright (c) 2018 Viktor Nagy, nvitya
  *
  * This software is provided 'as-is', without any express or implied warranty.
@@ -19,39 +19,45 @@
  * 3. This notice may not be removed or altered from any source distribution.
  * --------------------------------------------------------------------------- */
 /*
- *  file:     usbhiddevice.h
- *  brief:    USB HID Device Example
+ *  file:     board.h (uart)
+ *  brief:    Required board definition by the NVCM core (platform.h)
  *  version:  1.00
- *  date:     2018-05-19
+ *  date:     2018-02-10
  *  authors:  nvitya
 */
 
-#ifndef SRC_USBHIDDEVICE_H_
-#define SRC_USBHIDDEVICE_H_
+#ifndef BOARD_H_
+#define BOARD_H_
 
-#include "usbdevice.h"
+// Special, non-builtin boards
+
+#if 0
+
+#elif defined(BOARD_NONE_STM32F301)
+
+  #define BOARD_NAME "STM32F301K6 in adapter"
+  #define MCU_STM32F301K6
+
+  #define MCU_INTRC_SPEED    8000000
+  #define MAX_CLOCK_SPEED   64000000
+
+#elif defined(BOARD_NONE_MKV30F)
+
+  #define BOARD_NAME "Breakout board for MKV30F (32 pin)"
+  #define MCU_MKV30F
+  #define MCU_CLOCK_SPEED   96000000
+  #define MCU_INTRC_SPEED   48000000
+
+#elif defined(BOARD_NONE_LPC822)
+
+  #define BOARD_NAME "Breakout board for LPC822 (20 pin)"
+  #define MCU_LPC822
+
+#else
+
+  #include "boards_builtin.h"
+
+#endif
 
 
-typedef struct THidData
-{
-	uint8_t  data1;
-	int8_t   dx;
-	int8_t   dy;
-	uint8_t  data2;
-//
-} THidData;
-
-class TUsbHidDevice : public TUsbDevice
-{
-public:
-	THidData        hiddata;
-
-	THwUsbEndpoint  ep_hidreport;
-
-  virtual bool    InitDevice();
-
-	void            SendReport(int8_t adx, int8_t ady);
-
-};
-
-#endif /* SRC_USBHIDDEVICE_H_ */
+#endif /* BOARD_H_ */
