@@ -135,7 +135,7 @@ void setup_board()
 
 #if defined(BOARD_ARDUINO_DUE)
 
-TGpioPin  led1pin(1, 27, false); // D13
+TGpioPin  led1pin(1, 27, false);
 
 void setup_board()
 {
@@ -146,13 +146,24 @@ void setup_board()
 
 #if defined(BOARD_MIN_F103) || defined(BOARD_MIBO48_STM32F303)
 
-TGpioPin  led1pin(PORTNUM_C, 13, false); // PC13
+TGpioPin  led1pin(PORTNUM_C, 13, false);
 
 void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 }
 #endif
+
+#if defined(BOARD_MIBO20_STM32F030) || defined(BOARD_MIBO20_STM32F070)
+
+TGpioPin  led1pin(PORTNUM_B, 1, false);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+}
+#endif
+
 
 #if defined(BOARD_XPLAINED_SAME70)
 
