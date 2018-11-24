@@ -85,6 +85,20 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_EVK_IMXRT1020)
+
+TGpioPin  led1pin(1, 5, false); // GPIO_AD_B0_05 = GPIO_1_5
+
+#define LED_COUNT 1
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+}
+
+#endif
+
+
 #if defined(BOARD_BOOT_XMC1200)
 
 TGpioPin  led1pin(0, 0, true);
@@ -144,7 +158,7 @@ void setup_board()
 
 #endif
 
-#if defined(BOARD_MIN_F103) || defined(BOARD_MIBO48_STM32F303) || defined(BOARD_MIBO64_STM32F405)
+#if defined(BOARD_MIN_F103) || defined(BOARD_MIBO48_STM32F303) || defined(BOARD_MIBO64_STM32F405) || defined(BOARD_MIBO64_STM32F070)
 
 TGpioPin  led1pin(PORTNUM_C, 13, false);
 
