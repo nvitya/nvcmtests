@@ -83,6 +83,23 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_EVK_IMXRT1020)
+
+TGpioPin  led1pin(1, 5, false); // GPIO_AD_B0_05 = GPIO_1_5
+
+#define LED_COUNT 1
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PadSetup(IOMUXC_GPIO_AD_B0_06_LPUART1_TX, 0);
+	hwpinctrl.PadSetup(IOMUXC_GPIO_AD_B0_07_LPUART1_RX, 0);
+	conuart.Init(1); // UART1
+}
+
+#endif
+
 #if defined(BOARD_XPLAINED_SAME70)
 
 TGpioPin  led1pin(2, 8, false);  // C8
