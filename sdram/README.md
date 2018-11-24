@@ -1,0 +1,9 @@
+# SDRAM Test for the NVCM Framework
+
+## Ready to Use Build Configurations
+
+* BOARD_VERTIBO_A
+* BOARD_EVK_IMXRT1020
+* BOARD_XPLAINED_SAME70
+* BOARD_DISCOVERY_F746
+* BOARD_XPRESSO_LPC54608
