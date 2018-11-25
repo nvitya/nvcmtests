@@ -174,13 +174,14 @@ void sdram_test1()
 	TRACE("SDRAM READ64 speed: %uK/s\n\r", (uint32_t)ul_rw_speed);
 
 
-#if defined(MCU_ATSAME70Q20) // ATSAME70 reference speed
+	uint32_t tcm_address = 0x20000000;
+	uint32_t tcm_len = 64 * 1024;
 
 	TRACE("Measuring TCM reference...\r\n");
 
-	len = 128 * 1024;
+	len = tcm_len;
 
-	dp = (uint32_t *)0x20000000;
+	dp = (uint32_t *)tcm_address;
 	endp = dp;
 	endp += len / 4;
 
@@ -201,8 +202,6 @@ void sdram_test1()
 
 	ul_rw_speed = len * ((SystemCoreClock / 1000) / (t1 - t0));
 	TRACE("TCM RAM READ speed: %uK/s\n\r", (uint32_t)ul_rw_speed);
-
-#endif
 
 
 #if 0
@@ -480,34 +479,6 @@ void sdram_benchmarks(void)
 
 
 	TRACE("SDRAMC benchmark finished successfully.\r\n");
-}
-
-void tcm_speed()
-{
-	uint16_t i;
-	uint32_t ul_tick_start, ul_tick_end, ul_rw_speed;
-	uint32_t ul_ticks = 0;
-	volatile uint16_t * dptr;
-	volatile uint16_t * sptr;
-	uint32_t ul_page_num = 0;
-
-	/* TCM reference */
-	ul_tick_start = CLOCKCNT;
-	for (ul_page_num = 0; ul_page_num < SDRAMC_TEST_PAGE_NUM; ul_page_num++)
-	{
-		sptr = (uint16_t *)&gs_pus_mem_buff2[0];
-		dptr = &gs_pus_mem_buff[0];
-		for (i = 0; i < SDRAMC_TEST_BUFF_SIZE; i++)
-		{
-			*dptr++ = *sptr++;
-			//gs_pus_mem_buff[i] = *sptr++;
-		}
-	}
-	ul_tick_end = CLOCKCNT;
-	ul_ticks = (ul_tick_end - ul_tick_start) / (SystemCoreClock / 1000);
-	ul_rw_speed = SDRAMC_TEST_BUFF_SIZE * SDRAMC_TEST_PAGE_NUM * sizeof(uint16_t) / ul_ticks;
-	TRACE("TCM reference read speed: %uK/s\n\r", (uint32_t)ul_rw_speed);
-
 }
 
 void sdram_tests()
