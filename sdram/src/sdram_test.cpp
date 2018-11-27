@@ -357,7 +357,7 @@ void sdram_benchmarks(void)
 		{
 			*dptr++ = sptr[n];
 			//sptr++;
-			n = ((n + 31) & 0x3FFF);
+			n = ((n + 111) & 0x3FFF);
 			//gs_pus_mem_buff[i] = pus[i + ul_page_num * SDRAMC_TEST_BUFF_SIZE];
 		}
 	}
@@ -450,7 +450,7 @@ void sdram_benchmarks(void)
 		{
 			*dptr++ = sptr[n];
 			//sptr++;
-			n = ((n + 31) & 0x3FFF);
+			n = ((n + 111) & 0x3FFF);
 		}
 	}
 	ul_tick_end = CLOCKCNT;

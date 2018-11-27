@@ -39,32 +39,6 @@
 
 THwUart   conuart;  // console uart
 
-#if defined(BOARD_NUCLEO_F746)
-
-TGpioPin  led1pin(1, 0, false);
-TGpioPin  led2pin(1, 7, false);
-TGpioPin  led3pin(1, 14, false);
-
-#define LED_COUNT 3
-
-void setup_board()
-{
-	// nucleo board leds
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-  // USART3: Stlink USB / Serial converter
-	// USART3_TX: PD.8
-	hwpinctrl.PinSetup(3, 8,  PINCFG_OUTPUT | PINCFG_AF_7);
-	// USART3_RX: Pd.9
-	hwpinctrl.PinSetup(3, 9,  PINCFG_INPUT  | PINCFG_AF_7);
-
-	conuart.Init(3); // USART3
-}
-
-#endif
-
 #if defined(BOARD_DISCOVERY_F746)
 
 TGpioPin  led1pin(PORTNUM_I, 1, false);
@@ -79,6 +53,73 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A, 9,  PINCFG_OUTPUT | PINCFG_AF_7);
 	hwpinctrl.PinSetup(PORTNUM_B, 7,  PINCFG_INPUT  | PINCFG_AF_7);
 	conuart.Init(1); // USART1
+
+	// SDRAM pins
+
+	unsigned pin_flags = PINCFG_AF_12 | PINCFG_SPEED_MEDIUM; // it does not work with FAST !!!
+
+	hwpinctrl.PinSetup(PORTNUM_C,  3, pin_flags);
+
+	hwpinctrl.PinSetup(PORTNUM_D,  0, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_D,  1, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_D,  8, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_D,  9, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_D, 10, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_D, 14, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_D, 15, pin_flags);
+
+
+	hwpinctrl.PinSetup(PORTNUM_E,  0, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E,  1, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E,  7, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E,  8, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E,  9, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E, 10, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E, 11, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E, 12, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E, 13, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E, 14, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E, 15, pin_flags);
+
+	hwpinctrl.PinSetup(PORTNUM_F,  0, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F,  1, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F,  2, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F,  3, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F,  4, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F,  5, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F, 11, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F, 12, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F, 13, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F, 14, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F, 15, pin_flags);
+
+	hwpinctrl.PinSetup(PORTNUM_G,  0, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_G,  1, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_G,  4, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_G,  5, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_G,  8, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_G, 15, pin_flags);
+
+	hwpinctrl.PinSetup(PORTNUM_H,  3, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_H,  5, pin_flags);
+
+	// config the SDRAM device: 8 MByte
+
+	hwsdram.row_bits = 12;
+	hwsdram.column_bits = 8;
+	hwsdram.bank_count = 4;
+	hwsdram.cas_latency = 2;
+
+	hwsdram.row_precharge_delay = 1;
+	hwsdram.row_to_column_delay = 1;
+	hwsdram.recovery_delay = 1;
+	hwsdram.row_cycle_delay = 5;
+	hwsdram.exit_self_refresh_delay = 5;
+	hwsdram.active_to_precharge_delay = 3; // TRAS
+
+	hwsdram.burst_length = 1;  // it does not like when it bigger than 1
+
+	hwsdram.Init();
 }
 
 #endif
@@ -309,7 +350,7 @@ void setup_board()
 	hwsdram.recovery_delay = 2;
 	hwsdram.row_cycle_delay = 9;
 
-	hwsdram.burst_length = 8;
+	hwsdram.burst_length = 1;  // SDRAM does not work properly when larger than 1, but no speed degradation noticed
 
 	hwsdram.Init();
 }
@@ -426,6 +467,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	TRACE("Board: \"%s\"\r\n", BOARD_NAME);
 	TRACE("SystemCoreClock: %u\r\n", SystemCoreClock);
 
+#if 1
 	// The D-Cache must be enabled for effective SDRAM sequential (burst) transfers
 	// the SDRAM sequential read performance is 4x (!) times better this way
 
@@ -434,6 +476,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	// the NVCM libraries does not contain cache invalidation for DMA transfers so this could be
 	// a problem sometimes. This test does not use DMA transfers.
+#endif
+
 
 	if (hwsdram.initialized)
 	{
@@ -468,7 +512,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 		if (t1-t0 > hbclocks)
 		{
 			heartbeat_task();
-			//sdram_tests();
+			sdram_tests();
 			t0 = t1;
 		}
 	}
