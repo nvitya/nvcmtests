@@ -375,7 +375,8 @@ void setup_board()
 
 	// SDRAM
 
-	uint32_t pincfgbase = 0; //PINCFG_DRIVE_STRONG;
+	// it does not work with strong drive !
+	uint32_t pincfgbase = 0; // PINCFG_DRIVE_STRONG;
 
 	hwpinctrl.PinSetup(PORTNUM_A, 20, pincfgbase | PINCFG_OUTPUT | PINCFG_AF_2);  // A16/BA0
 	hwpinctrl.PinSetup(PORTNUM_A,  0, pincfgbase | PINCFG_OUTPUT | PINCFG_AF_2);  // A17/BA1
@@ -556,7 +557,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	TRACE("Board: \"%s\"\r\n", BOARD_NAME);
 	TRACE("SystemCoreClock: %u\r\n", SystemCoreClock);
 
-#if 0
+#if 1
 	// The D-Cache must be enabled for effective SDRAM sequential (burst) transfers
 	// the SDRAM sequential read performance is 4x (!) times better this way
 

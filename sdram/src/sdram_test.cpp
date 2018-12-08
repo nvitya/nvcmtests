@@ -126,14 +126,24 @@ void mpu_setup()
 	MPU->CTRL = (1 << 0) | (1 << 2); // enable MPU
 }
 
+void display_bm_res(uint32_t aclocks, uint32_t abytesize, uint32_t trsize)
+{
+	float ul_ticks = (float)aclocks / (SystemCoreClock / 1000);
+	float ul_rw_speed = (float)abytesize / ul_ticks;
+	float cpt = (float)(aclocks) / (float)(abytesize / trsize);
+	TRACE("  Speed: %8.0f K/s, Clocks/transfer: %f\n\r", ul_rw_speed, cpt);
+}
+
 void sdram_test1()
 {
 	TRACE("SDRAM test1\r\n");
 
 	TRACE("SDRAM address = %08X\r\n", hwsdram.address);
 
+#if defined(BOARD_DISCOVERY_F746)
 	//show_mpu();
-	//mpu_setup();
+	mpu_setup();
+#endif
 
 	uint32_t i;
 	uint16_t * startaddr = (uint16_t *)(hwsdram.address);
@@ -172,6 +182,8 @@ void sdram_test1()
 	uint32_t * endp;
 	unsigned ul_ticks;
 	unsigned ul_rw_speed;
+	float    clocks_per_tr;
+	float    mb_per_sec;
 
 	TRACE("Benchmarking read speed...\r\n");
 
@@ -192,11 +204,7 @@ void sdram_test1()
 
 	g_checksum += csum; // so that the optimizer keeps the code
 
-	TRACE("Clocks per d32: %u\r\n", (t1 - t0) / (hwsdram.byte_size >> 2));
-
-	ul_ticks = (t1 - t0) / (SystemCoreClock / 1000);
-	ul_rw_speed = hwsdram.byte_size / ul_ticks;
-	TRACE("SDRAM READ32 speed: %uK/s\n\r", (uint32_t)ul_rw_speed);
+	display_bm_res(t1 - t0, hwsdram.byte_size, 4);
 
 	TRACE("Benchmarking read speed with 64 bit...\r\n");
 
@@ -217,17 +225,31 @@ void sdram_test1()
 
 	g_checksum += csum; // so that the optimizer keeps the code
 
-	TRACE("Clocks per d64: %u\r\n", (t1 - t0) / (hwsdram.byte_size >> 3));
+	display_bm_res(t1 - t0, hwsdram.byte_size, 8);
 
-	ul_ticks = (t1 - t0) / (SystemCoreClock / 1000);
-	ul_rw_speed = hwsdram.byte_size / ul_ticks;
-	TRACE("SDRAM READ64 speed: %uK/s\n\r", (uint32_t)ul_rw_speed);
+	TRACE("Benchmarking WRITE32 speed...\r\n");
 
+	endp = (uint32_t *)startaddr;
+	endp += hwsdram.byte_size / 4;
+
+	csum = 0;
+	dp = (uint32_t *) startaddr;
+
+	t0 = CLOCKCNT;
+
+	while (dp < endp)
+	{
+		*dp++ = csum;
+	}
+
+	t1 = CLOCKCNT;
+
+	display_bm_res(t1 - t0, hwsdram.byte_size, 4);
 
 	uint32_t tcm_address = 0x20000000;
 	uint32_t tcm_len = 64 * 1024;
 
-	TRACE("Measuring TCM reference...\r\n");
+	TRACE("Measuring TCM reference (32 bit tr.)...\r\n");
 
 	len = tcm_len;
 
@@ -248,11 +270,7 @@ void sdram_test1()
 
 	g_checksum += csum; // so that the optimizer keeps the code
 
-	TRACE("Clocks per word: %u\r\n", (t1 - t0) / (len >> 2));
-
-	ul_rw_speed = len * ((SystemCoreClock / 1000) / (t1 - t0));
-	TRACE("TCM RAM READ speed: %uK/s\n\r", (uint32_t)ul_rw_speed);
-
+	display_bm_res(t1 - t0, len, 4);
 
 #if 0
 	TRACE("Delaying 2 s...\r\n");
