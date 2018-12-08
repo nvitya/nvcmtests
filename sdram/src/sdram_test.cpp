@@ -24,7 +24,7 @@
 void sdram_test()
 {
 	uint32_t i;
-	uint32_t *pul = (uint32_t *)HWSDRAM_ADDRESS;
+	uint32_t *pul = (uint32_t *)hwsdram.address;
 
 	for (i = 0; i < SDRAMC_TEST_LENGTH; ++i)
 	{
@@ -85,12 +85,58 @@ uint32_t sdram_test_data = 0;
 
 uint32_t g_checksum;
 
+void show_mpu()
+{
+	TRACE("MPU settings:\r\n");
+	int rcount = (MPU->TYPE >> 8);
+	TRACE("region count = %i\r\n", rcount);
+	for (int i = 0; i < rcount; ++i)
+	{
+		MPU->RNR = i;
+		TRACE("%i.: RBAR = %08X, RASR = %08X\r\n", i, MPU->RBAR, MPU->RASR);
+	}
+}
+
+void mpu_setup()
+{
+	TRACE("Enabling Caching for the SDRAM\r\n");
+
+	//show_mpu();
+	MPU->CTRL = 0; // disable the MPU
+
+	MPU->RNR = 0;
+	MPU->RBAR = hwsdram.address | (1 << 4);
+
+	uint32_t attr = 0
+		| (1 << 0) // shareable
+	  | (1 << 1) // inner cache policy(2): 0 = non-cacheable, 1 = Write back, write and Read- Allocate, 2 = Write through, no Write-Allocate, 3 = Write back, no Write-Allocate
+	  | (1 << 3) // outer cache policy(2): 0 = non-cacheable, 1 = Write back, write and Read- Allocate, 2 = Write through, no Write-Allocate, 3 = Write back, no Write-Allocate
+ 	  | (1 << 5) // cached region
+  ;
+
+	MPU->RASR = 0
+		| (1  <<  0) // ENABLE
+		| (27	<<  1) // SIZE(5): region size = 2^(1 + SIZE),  2^28 = 256 MByte
+		| (0  <<  8) // SRD(8): subregion disable bits
+		| (attr << 16) // attributes(6), B, S, C, TEX
+		| (3  << 24) // AP(3): permissions, 3 = RW/RW (full access)
+		| (0  << 28) // XN: 1 = code execution disabled
+	;
+
+	MPU->CTRL = (1 << 0) | (1 << 2); // enable MPU
+}
+
 void sdram_test1()
 {
 	TRACE("SDRAM test1\r\n");
 
+	TRACE("SDRAM address = %08X\r\n", hwsdram.address);
+
+	//show_mpu();
+	//mpu_setup();
+
 	uint32_t i;
-	uint16_t * startaddr = (uint16_t *)(HWSDRAM_ADDRESS);
+	uint16_t * startaddr = (uint16_t *)(hwsdram.address);
 
 	uint32_t * dp = (uint32_t *) startaddr;
 	uint32_t data = sdram_test_data;
@@ -122,13 +168,17 @@ void sdram_test1()
 
 
 	unsigned t0, t1;
+	uint32_t csum;
+	uint32_t * endp;
+	unsigned ul_ticks;
+	unsigned ul_rw_speed;
 
 	TRACE("Benchmarking read speed...\r\n");
 
-	uint32_t * endp = (uint32_t *)startaddr;
+	endp = (uint32_t *)startaddr;
 	endp += hwsdram.byte_size / 4;
 
-	uint32_t csum = 0;
+	csum = 0;
 	dp = (uint32_t *) startaddr;
 
 	t0 = CLOCKCNT;
@@ -144,8 +194,8 @@ void sdram_test1()
 
 	TRACE("Clocks per d32: %u\r\n", (t1 - t0) / (hwsdram.byte_size >> 2));
 
-	unsigned ul_ticks = (t1 - t0) / (SystemCoreClock / 1000);
-	unsigned ul_rw_speed = hwsdram.byte_size / ul_ticks;
+	ul_ticks = (t1 - t0) / (SystemCoreClock / 1000);
+	ul_rw_speed = hwsdram.byte_size / ul_ticks;
 	TRACE("SDRAM READ32 speed: %uK/s\n\r", (uint32_t)ul_rw_speed);
 
 	TRACE("Benchmarking read speed with 64 bit...\r\n");
@@ -233,8 +283,8 @@ void sdram_fill()
 	TRACE("Filling the SDRAM...\r\n");
 	unsigned t0, t1;
 	unsigned n;
-	unsigned * dptr = (unsigned *)HWSDRAM_ADDRESS;
-	unsigned * endptr = (unsigned *)(HWSDRAM_ADDRESS + hwsdram.byte_size);
+	unsigned * dptr = (unsigned *)hwsdram.address;
+	unsigned * endptr = (unsigned *)(hwsdram.address + hwsdram.byte_size);
 	unsigned data = 0x12345678;
 
 	t0 = CLOCKCNT;
@@ -252,8 +302,8 @@ void sdram_fullread()
 	TRACE("Reading the full SDRAM...\r\n");
 	unsigned t0, t1;
 	unsigned n;
-	unsigned * dptr = (unsigned *)HWSDRAM_ADDRESS;
-	unsigned * endptr = (unsigned *)(HWSDRAM_ADDRESS + hwsdram.byte_size);
+	unsigned * dptr = (unsigned *)hwsdram.address;
+	unsigned * endptr = (unsigned *)(hwsdram.address + hwsdram.byte_size);
 	unsigned data = 0;
 
 	t0 = CLOCKCNT;
@@ -284,7 +334,7 @@ extern "C" void (* __isr_vectors [])();
 void sdram_benchmarks(void)
 {
 	uint16_t i;
-	uint16_t *pus = (uint16_t *)HWSDRAM_ADDRESS;
+	uint16_t *pus = (uint16_t *)hwsdram.address;
 	uint32_t ul_tick_start, ul_tick_end, ul_rw_speed;
 	uint32_t ul_ticks = 0;
 	volatile uint16_t * dptr;

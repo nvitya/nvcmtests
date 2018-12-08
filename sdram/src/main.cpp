@@ -124,6 +124,95 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_DISCOVERY_F429)
+
+TGpioPin  led1pin(PORTNUM_G, 13, false);
+TGpioPin  led2pin(PORTNUM_G, 14, false);
+
+#define LED_COUNT 2
+
+void setup_board()
+{
+	// nucleo board leds
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(PORTNUM_A, 9,  PINCFG_OUTPUT | PINCFG_AF_7);
+	hwpinctrl.PinSetup(PORTNUM_B, 7,  PINCFG_INPUT  | PINCFG_AF_7);
+	conuart.Init(1); // USART1
+
+	// it does not run with PINCFG_SPEED_FAST !
+	unsigned pin_flags = PINCFG_AF_12 | PINCFG_SPEED_MED2;
+
+	hwpinctrl.PinSetup(PORTNUM_B,  5, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_B,  6, pin_flags);
+
+	hwpinctrl.PinSetup(PORTNUM_C,  0, pin_flags);
+
+	hwpinctrl.PinSetup(PORTNUM_D,  0, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_D,  1, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_D,  8, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_D,  9, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_D, 10, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_D, 14, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_D, 15, pin_flags);
+
+	hwpinctrl.PinSetup(PORTNUM_E,  0, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E,  1, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E,  7, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E,  8, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E,  9, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E, 10, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E, 11, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E, 12, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E, 13, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E, 14, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_E, 15, pin_flags);
+
+	hwpinctrl.PinSetup(PORTNUM_F,  0, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F,  1, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F,  2, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F,  3, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F,  4, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F,  5, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F, 11, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F, 12, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F, 13, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F, 14, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_F, 15, pin_flags);
+
+	hwpinctrl.PinSetup(PORTNUM_G,  0, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_G,  1, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_G,  4, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_G,  5, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_G,  8, pin_flags);
+	hwpinctrl.PinSetup(PORTNUM_G, 15, pin_flags);
+
+	// config the SDRAM device: 8 MByte
+
+	hwsdram.bank = 2; // it is connected to bank 2!
+
+	hwsdram.hclk_div = 2;
+
+	hwsdram.row_bits = 12;
+	hwsdram.column_bits = 8;
+	hwsdram.bank_count = 4;
+	hwsdram.cas_latency = 3;
+
+	hwsdram.row_precharge_delay = 2;
+	hwsdram.row_to_column_delay = 2;
+	hwsdram.recovery_delay = 2;
+	hwsdram.row_cycle_delay = 7;
+	hwsdram.exit_self_refresh_delay = 7;
+	hwsdram.active_to_precharge_delay = 4; // TRAS
+
+	hwsdram.burst_length = 1;
+
+	hwsdram.Init();
+}
+
+#endif
+
 #if defined(BOARD_EVK_IMXRT1020)
 
 TGpioPin  led1pin(1, 5, false); // GPIO_AD_B0_05 = GPIO_1_5
@@ -467,7 +556,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	TRACE("Board: \"%s\"\r\n", BOARD_NAME);
 	TRACE("SystemCoreClock: %u\r\n", SystemCoreClock);
 
-#if 1
+#if 0
 	// The D-Cache must be enabled for effective SDRAM sequential (burst) transfers
 	// the SDRAM sequential read performance is 4x (!) times better this way
 
@@ -479,6 +568,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 #endif
 
 
+#if 1
 	if (hwsdram.initialized)
 	{
 		TRACE("SDRAM initialized, size = %u kByte\r\n", hwsdram.byte_size >> 10);
@@ -488,13 +578,13 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	{
 		TRACE("SDRAM Init failed !\r\n");
 	}
-
+#endif
 
 	TRACE("\r\nStarting main cycle...\r\n");
 
-	SysTick_Config(SystemCoreClock / 1000);
+	//SysTick_Config(SystemCoreClock / 1000);
 
-	mcu_enable_interrupts();
+	//mcu_enable_interrupts();
 
 	unsigned hbclocks = SystemCoreClock / 1;
 
@@ -512,7 +602,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 		if (t1-t0 > hbclocks)
 		{
 			heartbeat_task();
-			sdram_tests();
+			//sdram_tests();
 			t0 = t1;
 		}
 	}
