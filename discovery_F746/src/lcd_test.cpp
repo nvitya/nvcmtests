@@ -7,8 +7,12 @@
 #include "traces.h"
 
 #include "hwlcdctrl.h"
+#include "hwsdram.h"
+#include "framebuffer16.h"
 
-THwLcdCtrl  lcdctrl;
+THwLcdCtrl      lcdctrl;
+
+TFrameBuffer16  disp;
 
 void lcd_init()
 {
@@ -59,7 +63,8 @@ void lcd_init()
 	uint32_t lcd_pixel_clock = 8000000;
 
 
-	lcdctrl.Init(480, 272, (void *)0x08000000);  // give the rom start as the framebuffer
+	//lcdctrl.Init(480, 272, (void *)0x08000000);  // give the rom start as the framebuffer
+	lcdctrl.Init(480, 272, (void *)hwsdram.address);
 
 }
 
@@ -69,6 +74,29 @@ void lcd_test()
 
 	lcd_init();
 
-	//hwpinctrl.GpioSet(PORTNUM_I, 12, 0);
-	//hwpinctrl.GpioSet(PORTNUM_K, 3, 0); // backlight control
+	uint16_t * pp;
+
+	uint16_t color = 0x001F;
+	uint32_t cnt = 480 * 10;
+	uint32_t n;
+
+	pp = (uint16_t *)hwsdram.address;
+	for (n = 0; n < cnt; ++n)
+	{
+		*(pp++) = color;
+	}
+
+	disp.Init(480, 272, (void *)(hwsdram.address));
+	disp.FillScreen(0);
+	disp.color = RGB16(0, 255, 0);
+	disp.FillRect(10, 10, 100, 100, disp.color);
+
+	disp.color = RGB16(255, 0, 0);
+	disp.DrawRect(0, 0, disp.width, disp.height);
+
+	disp.color = 0xffff;
+	disp.SetCursor(300, 150);
+	disp.DrawString("Hello World!");
+
+	TRACE("LCD test finished.\r\n");
 }
