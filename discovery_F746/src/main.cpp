@@ -71,8 +71,21 @@ extern "C" void SysTick_Handler(void)
 	++systick;
 }
 
+uint32_t disp_counter = 0;
+
+#include "font_FreeMonoBold9pt7b.h"
+
+TGfxFont font_mono_bold(&FreeMonoBold9pt7b);
+
 void idle_task()
 {
+	if (disp.initialized)
+	{
+		disp.SetFont(&font_mono_bold);
+		disp.SetCursor(10, 200);
+		disp.printf("%8u", disp_counter);
+		++disp_counter;
+	}
 }
 
 unsigned hbcounter = 0;
