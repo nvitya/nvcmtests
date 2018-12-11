@@ -85,9 +85,23 @@ void setup_board()
 
 #endif
 
+
 #if defined(BOARD_EVK_IMXRT1020)
 
 TGpioPin  led1pin(1, 5, false); // GPIO_AD_B0_05 = GPIO_1_5
+
+#define LED_COUNT 1
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+}
+
+#endif
+
+#if defined(BOARD_MIBO100_IMXRT1021)
+
+TGpioPin  led1pin(1, 3, false); // GPIO_AD_B0_03 = GPIO_1_3
 
 #define LED_COUNT 1
 

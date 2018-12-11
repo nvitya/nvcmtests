@@ -43,6 +43,8 @@ extern void test_stepper();
 extern void test_dht11();
 extern void test_keymatrix();
 
+extern void test_pwm();
+
 #include "traces.h"
 
 #include "ledandkey.h"
@@ -150,11 +152,12 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	// TEST SELECTION
 
 	//test_spi();
-  adc_test_record();
+  //adc_test_record();
   //adc_test_freerun();
 	//test_stepper();
 	//test_dht11();
 	//test_keymatrix();
+	test_pwm();
 
 	//test_division();
 

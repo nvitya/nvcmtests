@@ -506,7 +506,7 @@ void idle_task()
 			answer_ip(pdata, datalen);
 		}
 
-#if 1
+#if 0 // display contents
 		for (n = 0; n < datalen; ++n)
 		{
 			if ((n > 0) && ((n % 15) == 0)) TRACE("\r\n");
