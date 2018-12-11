@@ -201,17 +201,44 @@ void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
-#if 1
 	// USART1
 	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
 	conuart.Init(1);
-#else
-	// USART2
-	hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART2_TX
-	hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_0);  // USART2_RX
-	conuart.Init(2);
+}
 #endif
+
+#if defined(BOARD_MIBO48_STM32F303)
+
+TGpioPin  led1pin(PORTNUM_C, 13, false); // PC13
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
+	conuart.Init(1);
+}
+#endif
+
+#if defined(BOARD_MIBO64_STM32F070)
+
+TGpioPin  led1pin(PORTNUM_C, 13, false); // PC13
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USB PINS
+	hwpinctrl.PinSetup(PORTNUM_A, 11, PINCFG_INPUT | PINCFG_AF_0 | PINCFG_SPEED_FAST);  // USB DM
+	hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_INPUT | PINCFG_AF_0 | PINCFG_SPEED_FAST);  // USB DP
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_1);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_1);  // USART1_RX
+	conuart.Init(1);
 }
 #endif
 

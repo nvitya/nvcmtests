@@ -93,7 +93,7 @@ bool TUifHidTest::InitInterface()
 	AddConfigDesc((void *)&USBD_HID_Desc[0], false);
 	AddDesc(HID_REPORT_DESC, (void *)&HID_MOUSE_ReportDesc[0], sizeof(HID_MOUSE_ReportDesc), 0);
 
-	ep_hidreport.Init(HWUSB_EP_TYPE_INTERRUPT, 0, 4);
+	ep_hidreport.Init(HWUSB_EP_TYPE_INTERRUPT, false, 4);
 	AddEndpoint(&ep_hidreport);
 
 	return true;
@@ -111,6 +111,26 @@ void TUifHidTest::OnConfigured()
 {
 	// after the configuration it must send a report immediately!
 	SendReport(0, 0);
+}
+
+bool TUifHidTest::HandleSetupRequest(TUsbSetupRequest * psrq)
+{
+	if (psrq->rqtype == 0x21)
+	{
+		if (psrq->request == 0x0A)
+		{
+			// set idle frequency.
+			device->SendControlAck();
+			return true;
+		}
+	}
+	else if (psrq->rqtype == 0xA1) // vendor request
+	{
+		device->SendControlAck();
+		return true;
+	}
+
+	return super::HandleSetupRequest(psrq);
 }
 
 bool TUifHidTest::HandleTransferEvent(TUsbEndpoint * aep, bool htod)
@@ -158,4 +178,3 @@ void usb_hid_test_heartbeat()
 		hidtest.SendReport(2, 3);
 	}
 }
-
