@@ -41,9 +41,12 @@ extern THwUart   conuart;  // console uart
   // add trace calls
   #define TRACE(...)  		{ strace( __VA_ARGS__ ); }
   //#define TRACE(...)  		{ conuart.printf( __VA_ARGS__ ); }
+
+  #define TRACE_FLUSH()  { strace_flush(); }
 #else
   // ignore traces
   #define TRACE(...)
+  #define TRACE_FLUSH()
 #endif
 
 #ifdef LTRACES

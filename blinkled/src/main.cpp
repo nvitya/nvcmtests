@@ -122,7 +122,6 @@ TGpioPin  led4pin(0, 6, true);
 TGpioPin  led5pin(0, 7, true);
 
 #define LED_COUNT 5
-#undef USE_DWT_CYCCNT
 
 void setup_board()
 {
@@ -211,6 +210,23 @@ TGpioPin  led1pin(PORTNUM_D, 13, false);
 void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+}
+
+#endif
+
+#if defined(BOARD_ENEBO_A)
+
+TGpioPin  led1pin(PORTNUM_D, 13, true);
+TGpioPin  led2pin(PORTNUM_D, 14, true);
+TGpioPin  led3pin(PORTNUM_A, 20, true);
+
+#define LED_COUNT 3
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 }
 
 #endif
