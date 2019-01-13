@@ -166,6 +166,23 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
 	conuart.Init(1);
+
+	// CAN PINS
+
+	// Set CAN remap!
+
+	RCC->APB2ENR |= RCC_APB2ENR_AFIOEN; // enable AFIO clock
+
+	uint32_t tmp;
+	tmp = AFIO->MAPR;
+	tmp &= ~(3 << 13);
+	tmp |=  (2 << 13);  // remap CAN pints from A11, A12 to B8, B9
+	AFIO->MAPR = tmp;
+
+	hwpinctrl.PinSetup(PORTNUM_B,  8, PINCFG_INPUT  | PINCFG_AF_0);  // CAN RX
+	hwpinctrl.PinSetup(PORTNUM_B,  9, PINCFG_OUTPUT | PINCFG_AF_0);  // CAN TX
+
+	can.Init(1, &can_rxbuf[0], sizeof(can_rxbuf) / sizeof(TCanMsg), &can_txbuf[0], sizeof(can_txbuf) / sizeof(TCanMsg));
 }
 #endif
 
