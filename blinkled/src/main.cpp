@@ -242,7 +242,7 @@ void setup_board()
 
 #endif
 
-#if defined(BOARD_MIBO64_ATSAMD51)
+#if defined(BOARD_MIBO64_ATSAME5X)
 
 TGpioPin  led1pin(PORTNUM_A, 1, false);
 
