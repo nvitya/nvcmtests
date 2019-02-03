@@ -83,6 +83,97 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_MIBO64_ATSAME5X)
+
+TGpioPin  led1pin(PORTNUM_A, 1, false);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// SERCOM0
+	hwpinctrl.PinSetup(PORTNUM_A, 4, PINCFG_OUTPUT | PINCFG_AF_3);  // PAD[0] = TX
+	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_INPUT  | PINCFG_AF_3);  // PAD[1] = RX
+	conuart.Init(0);
+
+	// CAN
+	hwpinctrl.PinSetup(PORTNUM_A, 22, PINCFG_AF_I); // CAN0_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 23, PINCFG_AF_I); // CAN0_RX
+	can.Init(0, &can_rxbuf[0], sizeof(can_rxbuf) / sizeof(TCanMsg), &can_txbuf[0], sizeof(can_txbuf) / sizeof(TCanMsg));
+}
+
+#endif
+
+#if defined(BOARD_ENEBO_A)
+
+TGpioPin  led1pin(PORTNUM_D, 13, true);
+TGpioPin  led2pin(PORTNUM_D, 14, true);
+TGpioPin  led3pin(PORTNUM_A, 20, true);
+
+TGpioPin  pin_eth_reset(PORTNUM_A, 19, false);
+
+#define LED_COUNT 3
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	led3pin.Set1(); // turn on the RED
+
+	pin_eth_reset.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_0);
+
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
+	conuart.baudrate = 115200;
+	conuart.Init(0);
+
+	// Ethernet clock output:
+	hwpinctrl.PinSetup(PORTNUM_A,  18,  PINCFG_OUTPUT | PINCFG_AF_B);  // PCK2 = Ethernet 25 M Clock
+
+	PMC->PMC_SCER = (1 << 10); // enable PCK2
+
+	PMC->PMC_PCK[2] = 0
+		| (2 << 0)  // CSS(3): 2 = PLLA
+		| ((12 - 1) << 4)  // PRES(8): divisor - 1
+	;
+
+	/* Ethernet pins configuration ************************************************
+
+	        RMII_REF_CLK ----------------------> PD0
+	        RMII_MDIO -------------------------> PD9
+	        RMII_MDC --------------------------> PD8
+	        RMII_MII_CRS_DV -------------------> PD4
+	        RMII_MII_RXD0 ---------------------> PD5
+	        RMII_MII_RXD1 ---------------------> PD6
+	        RMII_MII_RXER ---------------------> PD7
+	        RMII_MII_TX_EN --------------------> PD1
+	        RMII_MII_TXD0 ---------------------> PD2
+	        RMII_MII_TXD1 ---------------------> PD3
+	*/
+
+	uint32_t pinfl = PINCFG_SPEED_FAST | PINCFG_AF_0;
+
+	hwpinctrl.PinSetup(PORTNUM_D, 0, pinfl); // REF CLK
+	hwpinctrl.PinSetup(PORTNUM_D, 9, pinfl); // MDIO
+	hwpinctrl.PinSetup(PORTNUM_D, 8, pinfl); // MDC
+	hwpinctrl.PinSetup(PORTNUM_D, 4, pinfl); // CRS_DV
+	hwpinctrl.PinSetup(PORTNUM_D, 5, pinfl); // RXD0
+	hwpinctrl.PinSetup(PORTNUM_D, 6, pinfl); // RXD1
+	hwpinctrl.PinSetup(PORTNUM_D, 7, pinfl); // RXER       // Tie to the GND !!!
+	hwpinctrl.PinSetup(PORTNUM_D, 1, pinfl); // TX_EN
+	hwpinctrl.PinSetup(PORTNUM_D, 2, pinfl); // TXD0
+	hwpinctrl.PinSetup(PORTNUM_D, 3, pinfl); // TXD1
+
+	// CAN
+	hwpinctrl.PinSetup(PORTNUM_B, 2, PINCFG_AF_A); // MCAN0_TX
+	hwpinctrl.PinSetup(PORTNUM_B, 3, PINCFG_AF_A); // MCAN0_RX
+	can.Init(0, &can_rxbuf[0], sizeof(can_rxbuf) / sizeof(TCanMsg), &can_txbuf[0], sizeof(can_txbuf) / sizeof(TCanMsg));
+}
+
+#endif
+
 #if defined(BOARD_DISCOVERY_F072)
 
 TGpioPin  led1pin(PORTNUM_C, 6, false);
@@ -296,6 +387,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	mcu_enable_interrupts();
 
+#if 1
 	can.AcceptAdd(0x000, 0x000); // accept all messages
 	can.Enable(); // start the CAN (reception)
 
@@ -311,6 +403,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	msg.data[6] = 0x17;
 	msg.data[7] = 0x18;
 	can.StartSendMessage(&msg);
+#endif
 
 	unsigned hbclocks = SystemCoreClock;
 
@@ -323,6 +416,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	{
 		t1 = CLOCKCNT;
 
+#if 1
 		if (can.TryRecvMessage(&msg))
 		{
 			TRACE("CAN msg received: COBID=%03X, LEN=%i, DATA=", msg.cobid, msg.len);
@@ -332,6 +426,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 			}
 			TRACE("\r\n");
 		}
+#endif
 
 		if (t1-t0 > hbclocks)
 		{
