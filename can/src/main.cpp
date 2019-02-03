@@ -132,7 +132,7 @@ void setup_board()
 	// Ethernet clock output:
 	hwpinctrl.PinSetup(PORTNUM_A,  18,  PINCFG_OUTPUT | PINCFG_AF_B);  // PCK2 = Ethernet 25 M Clock
 
-	PMC->PMC_SCER = (1 << 10); // enable PCK2
+	PMC->PMC_SCER = (1 << (8 + 2)); // enable PCK2
 
 	PMC->PMC_PCK[2] = 0
 		| (2 << 0)  // CSS(3): 2 = PLLA
@@ -387,12 +387,14 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	mcu_enable_interrupts();
 
+	TCanMsg  msg;
+
 #if 1
 	can.AcceptAdd(0x000, 0x000); // accept all messages
 	can.Enable(); // start the CAN (reception)
 
-	TCanMsg  msg;
-	msg.cobid = 0x200;
+#if 1
+	msg.cobid = 0x203;
 	msg.len = 8;
 	msg.data[0] = 0x11;
 	msg.data[1] = 0x12;
@@ -403,6 +405,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	msg.data[6] = 0x17;
 	msg.data[7] = 0x18;
 	can.StartSendMessage(&msg);
+#endif
+
 #endif
 
 	unsigned hbclocks = SystemCoreClock;
