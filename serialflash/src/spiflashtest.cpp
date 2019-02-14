@@ -75,7 +75,7 @@ void spi_flash_test()
 	spiflash.txdma.Init(0x030301);  // ch1, dmamux 3/3
 	spiflash.rxdma.Init(0x030402);  // ch2, dmamux 4/3
 
-#elif defined(BOARD_MIBO100_ATSAME70) || defined(BOARD_VERTIBO_A)
+#elif defined(BOARD_MIBO100_ATSAME70) || defined(BOARD_VERTIBO_A) || defined(BOARD_ENEBO_A)
 
 	// SPI0 setup
 
@@ -116,6 +116,52 @@ void spi_flash_test()
 	// alternative: spiflash.txdma.InitPeriphDma(true,  spiflash.spi.regs, spiflash.spi.usartregs);
 	spiflash.spi.PdmaInit(false, &spiflash.rxdma);
 	// alternative: spiflash.rxdma.InitPeriphDma(false, spiflash.spi.regs, spiflash.spi.usartregs);
+
+#elif defined(BOARD_MIBO64_ATSAME5X)
+
+
+#if 0
+	// SERCOM2
+
+	unsigned pinflags = PINCFG_AF_D | PINCFG_PULLUP;
+
+	hwpinctrl.PinSetup(PORTNUM_A,  8, pinflags);  // SERCOM2_PAD1: SCK
+	hwpinctrl.PinSetup(PORTNUM_A,  9, pinflags);  // SERCOM2_PAD0: MOSI
+	//hwpinctrl.PinSetup(PORTNUM_A, 10, pinflags);  // SERCOM2_PAD2: CS
+	hwpinctrl.PinSetup(PORTNUM_A, 11, PINCFG_INPUT | pinflags);  // SERCOM2_PAD3: MISO
+
+	spiflash.pin_cs.Assign(PORTNUM_A, 10, false);
+	spiflash.pin_cs.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	//spiflash.spi.datasample_late = false;
+	spiflash.spi.speed = 4000000;
+	spiflash.spi.Init(2);
+
+	spiflash.txdma.Init(4, SERCOM2_DMAC_ID_TX);
+	spiflash.rxdma.Init(5, SERCOM2_DMAC_ID_RX);
+
+#else
+	// SERCOM3
+
+	unsigned pinflags = PINCFG_AF_D | PINCFG_PULLUP;
+
+	hwpinctrl.PinSetup(PORTNUM_A, 16, pinflags);  // SERCOM3_PAD1: SCK
+	hwpinctrl.PinSetup(PORTNUM_A, 17, pinflags);  // SERCOM3_PAD0: MOSI
+	//hwpinctrl.PinSetup(PORTNUM_A, 18, pinflags);  // SERCOM3_PAD2: CS
+	hwpinctrl.PinSetup(PORTNUM_A, 19, pinflags);  // SERCOM3_PAD3: MISO
+
+	spiflash.pin_cs.Assign(PORTNUM_A, 18, false);
+	spiflash.pin_cs.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	//spiflash.spi.datasample_late = false;
+	spiflash.spi.speed = 4000000;
+	spiflash.spi.Init(3);
+
+	spiflash.txdma.Init(4, SERCOM3_DMAC_ID_TX);
+	spiflash.rxdma.Init(5, SERCOM3_DMAC_ID_RX);
+
+#endif
+
 
 #elif defined(BOARD_DEV_STM32F407ZE)
 
@@ -184,7 +230,9 @@ void spi_flash_test()
 	spiflash.rxdma.Init(22);
 
 #else
+
   #error "Unknown board!"
+
 #endif
 
 	spiflash.has4kerase = true;
@@ -196,7 +244,6 @@ void spi_flash_test()
 
 	TRACE("SPI Flash initialized, ID CODE = %06X, kbyte size = %u\r\n", spiflash.idcode, (spiflash.bytesize >> 10));
 
-
 #if 1
 	TRACE("Reading memory...\r\n");
 
@@ -207,7 +254,7 @@ void spi_flash_test()
 
 	show_mem(&databuf[0], readlen);
 
-	return;
+	//return;
 #endif
 
 	//TRACE("Issuing reset...\r\n");

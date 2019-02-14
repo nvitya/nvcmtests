@@ -159,6 +159,26 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_ENEBO_A)
+
+TGpioPin  led1pin(PORTNUM_D, 13, true);
+TGpioPin  led2pin(PORTNUM_D, 14, true);
+TGpioPin  led3pin(PORTNUM_A, 20, true);
+
+#define LED_COUNT 3
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
+	conuart.baudrate = 115200;
+	conuart.Init(0);
+}
+
+#endif
+
 #if defined(BOARD_MIBO100_ATSAME70)
 
 TGpioPin  led1pin(PORTNUM_D, 13, false);
@@ -187,6 +207,22 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A,  9, PINCFG_INPUT  | PINCFG_AF_0); // UART0_RXD
 	hwpinctrl.PinSetup(PORTNUM_A, 10, PINCFG_OUTPUT | PINCFG_AF_0); // UART0_TXD (Marked as B10 between B1 and D31 !!!)
 	conuart.Init(0x000); // UART0
+}
+
+#endif
+
+#if defined(BOARD_MIBO64_ATSAME5X)
+
+TGpioPin  led1pin(PORTNUM_A, 1, false);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// SERCOM0
+	hwpinctrl.PinSetup(PORTNUM_A, 4, PINCFG_OUTPUT | PINCFG_AF_3);  // PAD[0] = TX
+	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_INPUT  | PINCFG_AF_3);  // PAD[1] = RX
+	conuart.Init(0);
 }
 
 #endif
@@ -344,8 +380,8 @@ extern "C" __attribute__((noreturn)) void main(void)
 
 	//uart_dma_test();
 
-	//spi_flash_test();
-	qspi_flash_test();
+	spi_flash_test();
+	//qspi_flash_test();
 
 	TRACE("Starting main cycle...\r\n");
 
