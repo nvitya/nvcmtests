@@ -143,7 +143,7 @@ void spi_flash_test()
 #else
 	// SERCOM3
 
-	unsigned pinflags = PINCFG_AF_D | PINCFG_PULLUP;
+	unsigned pinflags = PINCFG_AF_D | PINCFG_PULLUP | PINCFG_DRIVE_STRONG;
 
 	hwpinctrl.PinSetup(PORTNUM_A, 16, pinflags);  // SERCOM3_PAD1: SCK
 	hwpinctrl.PinSetup(PORTNUM_A, 17, pinflags);  // SERCOM3_PAD0: MOSI
@@ -153,8 +153,9 @@ void spi_flash_test()
 	spiflash.pin_cs.Assign(PORTNUM_A, 18, false);
 	spiflash.pin_cs.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
-	//spiflash.spi.datasample_late = false;
-	spiflash.spi.speed = 4000000;
+	// the highest possible speed is 60 MHz, with datasample_late were the data still error-free using prototype wires
+	spiflash.spi.datasample_late = true;
+	spiflash.spi.speed = 30000000;
 	spiflash.spi.Init(3);
 
 	spiflash.txdma.Init(4, SERCOM3_DMAC_ID_TX);
@@ -254,7 +255,7 @@ void spi_flash_test()
 
 	show_mem(&databuf[0], readlen);
 
-	//return;
+	return;
 #endif
 
 	//TRACE("Issuing reset...\r\n");
@@ -303,7 +304,7 @@ void spi_flash_test()
 		databuf[i] = 0xF0 + i;
 	}
 
-	spiflash.StartWriteMem(0x20000, &databuf[0], sizeof(databuf));
+	spiflash.StartWriteMem(0x0000, &databuf[0], sizeof(databuf));
 	spiflash.WaitForComplete();
 
 	TRACE("Write completed.\n\r");

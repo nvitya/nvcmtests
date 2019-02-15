@@ -380,8 +380,8 @@ extern "C" __attribute__((noreturn)) void main(void)
 
 	//uart_dma_test();
 
-	spi_flash_test();
-	//qspi_flash_test();
+	//spi_flash_test();
+	qspi_flash_test();
 
 	TRACE("Starting main cycle...\r\n");
 

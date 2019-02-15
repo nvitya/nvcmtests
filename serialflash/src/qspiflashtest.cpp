@@ -64,7 +64,7 @@ void qspi_flash_test()
 
 #endif
 
-	qspiflash.qspi.speed = 8000000;
+	qspiflash.qspi.speed = 60000000;
 	qspiflash.qspi.multi_line_count = 2;
 	qspiflash.has4kerase = true;
 	if (!qspiflash.Init())
