@@ -75,6 +75,16 @@ void i2c_test()
 	i2c.PdmaInit(true,  nullptr);   // use internal
 	i2c.PdmaInit(false,  nullptr);  // use internal
 
+
+#elif defined(BOARD_MIBO64_ATSAME5X)
+
+	hwpinctrl.PinSetup(PORTNUM_B,  8, PINCFG_AF_D | PINCFG_PULLUP); // SERCOM4/PAD0 = SDA
+	hwpinctrl.PinSetup(PORTNUM_B,  9, PINCFG_AF_D | PINCFG_PULLUP); // SERCOM4/PAD1 = SCL
+	i2c.Init(4); // SERCOM4
+
+	i2c.txdma.Init(14, SERCOM4_DMAC_ID_TX);
+	i2c.rxdma.Init(15, SERCOM4_DMAC_ID_RX);
+
 #elif defined(BOARD_MIN_F103)
 	// I2C1
 	// open drain mode have to be used, otherwise it won't work
@@ -99,6 +109,15 @@ void i2c_test()
 	i2c.txdma.Init(1, 7, 1);  // DMA1/ST7/CH1 = I2C1_TX
 	i2c.rxdma.Init(1, 0, 1);  // DMA1/ST0/CH1 = I2C1_RX
 
+#elif defined(BOARD_BOOT_XMC1200)
+
+	// USIC0_CH0
+	hwpinctrl.PinSetup(2,  0, PINCFG_AF_7 | PINCFG_OPENDRAIN); // SCL: USIC0_CH0.SCLKOUT / DX1E
+	hwpinctrl.PinSetup(2,  1, PINCFG_AF_6 | PINCFG_OPENDRAIN); // SDA: USIC0_CH0.DOUT0 / DX0F
+	i2c.Init(0, 0, HWI2C_SCL_DX1E, HWI2C_SDA_DX0F);
+
+	// there is no DMA on this MCU
+
 #else
   #error "unknown board."
 #endif
@@ -117,6 +136,8 @@ void i2c_test()
 	i2c.WaitFinish();
 
 	show_mem(&rxbuf[0], len);
+
+	return;
 
 #if 1
 

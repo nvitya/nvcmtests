@@ -68,6 +68,22 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_MIBO64_ATSAME5X)
+
+TGpioPin  led1pin(PORTNUM_A, 1, false);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// SERCOM0
+	hwpinctrl.PinSetup(PORTNUM_A, 4, PINCFG_OUTPUT | PINCFG_AF_3);  // PAD[0] = TX
+	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_INPUT  | PINCFG_AF_3);  // PAD[1] = RX
+	conuart.Init(0);
+}
+
+#endif
+
 #if defined(BOARD_ARDUINO_DUE)
 
 TGpioPin  led1pin(1, 27, false); // D13
@@ -130,6 +146,31 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_BOOT_XMC1200)
+
+TGpioPin  led1pin(0, 0, true);
+TGpioPin  led2pin(0, 2, true);
+TGpioPin  led3pin(0, 5, true);
+TGpioPin  led4pin(0, 6, true);
+TGpioPin  led5pin(0, 7, true);
+
+#define LED_COUNT 5
+#undef USE_DWT_CYCCNT
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led4pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led5pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(1,  2, PINCFG_OUTPUT | PINCFG_AF_7);  // UART_TX
+	hwpinctrl.PinSetup(1,  3, PINCFG_INPUT  | PINCFG_AF_1);  // UART_RX
+	conuart.Init(0, 1, 0);  // usic_0_ch_1/DX0A
+}
+
+#endif
 
 #ifndef LED_COUNT
   #define LED_COUNT 1
