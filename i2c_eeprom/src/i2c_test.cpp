@@ -33,9 +33,12 @@
 #include "platform.h"
 #include "hwpins.h"
 #include "hwi2c.h"
+#include "i2c_eeprom.h"
 #include "traces.h"
 
-THwI2c  i2c;
+THwI2c       i2c;
+
+TI2cEeprom   eeprom;
 
 void show_mem(void * addr, unsigned len)
 {
@@ -49,9 +52,16 @@ void show_mem(void * addr, unsigned len)
 	TRACE("\r\n");
 }
 
+static uint8_t rxbuf[1024];
+static uint8_t txbuf[1024];
+
 void i2c_test()
 {
-	TRACE("I2C test for FM20V02A FRAM\r\n");
+	int i;
+
+	TRACE("I2C test for 24LC16B EEPROM\r\n");
+
+	i2c.speed = 100000; // start with 100 kHz
 
 #if 0
 #elif defined(BOARD_MIBO100_ATSAME70)
@@ -122,23 +132,32 @@ void i2c_test()
   #error "unknown board."
 #endif
 
-	uint8_t rxbuf[32];
-	uint8_t txbuf[32];
 
-  #define I2CADDR  0x50
+	// 24LC16B:
+	//   address 3..7:  1010
+	//   address 0..2:      ppp = Page address
+	//
+	//   the chip uses 8 bit addressing (followed by the control byte) within the page
+
+	if (!eeprom.Init(&i2c, 0x50, 256 * 8))
+	{
+		TRACE("Error initializing the EEPROM: %08X\r\n", eeprom.errorcode);
+		return;
+	}
+
+	TRACE("EEPROM Initialized.\r\n");
 
 	unsigned addr = 0x0000; // byte order = MSB First
-	unsigned len = 16;
+	unsigned len = 64;
 
 	TRACE("Reading memory at %04X...\r\n", addr);
 
-	i2c.StartReadData(I2CADDR, addr | I2CEX_2, &rxbuf[0], len);
-	i2c.WaitFinish();
+	eeprom.StartReadMem(addr, &rxbuf[0], len);
+	eeprom.WaitComplete();
 
 	show_mem(&rxbuf[0], len);
 
 #if 1
-
 	unsigned incoffs = 4;
 
 	TRACE("Incrementing memory at +%i...\r\n", incoffs);
@@ -152,45 +171,39 @@ void i2c_test()
 	txbuf[6] = rxbuf[incoffs+6] + 1;
 	txbuf[7] = rxbuf[incoffs+7] + 1;
 
-	i2c.StartWriteData(I2CADDR, addr + incoffs | I2CEX_2, &txbuf[0], 4);
-	i2c.WaitFinish();
-	if (i2c.error)	{ TRACE(" I2C error = %i\r\n", i2c.error); }
+	eeprom.StartWriteMem(addr + incoffs, &txbuf[0], 4);
+	eeprom.WaitComplete();
+	if (eeprom.errorcode)	{ TRACE(" EEPROM error = %i\r\n", eeprom.errorcode); }
 
 	TRACE("Write finished.\r\n");
 
 	TRACE("Reading memory at %04X...\r\n", addr);
 
-	i2c.StartReadData(I2CADDR, addr | I2CEX_2, &rxbuf[0], len);
-	i2c.WaitFinish();
-	if (i2c.error)	{ TRACE(" I2C error = %i\r\n", i2c.error); }
+	eeprom.StartReadMem(addr, &rxbuf[0], len);
+	eeprom.WaitComplete();
+
+	show_mem(&rxbuf[0], len);
+#endif
+
+	len = 1024;
+	addr = 0;
+
+	TRACE("Filling %u bytes memory with 0xA5 + n ... \r\n", len);
+	for (i = 0; i < len; ++i)
+	{
+		txbuf[i] = 0xA5 + i;
+	}
+
+	eeprom.StartWriteMem(addr, &txbuf[0], len);
+	eeprom.WaitComplete();
+	if (eeprom.errorcode)	{ TRACE(" EEPROM error = %i\r\n", eeprom.errorcode); }
+
+	TRACE("Reading %u bytes memory at %04X...\r\n", addr, len);
+
+	eeprom.StartReadMem(addr, &rxbuf[0], len);
+	eeprom.WaitComplete();
 
 	show_mem(&rxbuf[0], len);
 
-#if 1
-	TRACE("Testing wrong device read\r\n");
-
-	i2c.StartReadData(0x7E, addr | I2CEX_2, &rxbuf[0], len);
-	i2c.WaitFinish();
-	if (i2c.error)
-	{
-		TRACE("I2C read error: %i\r\n", i2c.error);
-	}
-	else
-	{
-		TRACE("I2C ERROR MISSING!\\r\n");
-		show_mem(&rxbuf[0], len);
-	}
-#endif
-
-	TRACE("Reading memory after error again at %04X...\r\n", addr);
-
-	i2c.StartReadData(I2CADDR, addr | I2CEX_2, &rxbuf[0], len);
-	i2c.WaitFinish();
-	if (i2c.error)	{ TRACE(" I2C error = %i\r\n", i2c.error); }
-
-	show_mem(&rxbuf[0], len);
-
-#endif
-
-	TRACE("I2C test finished.\r\n");
+	TRACE("EEPROM test finished.\r\n");
 }
