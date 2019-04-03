@@ -99,9 +99,9 @@ void setup_board()
 
 #endif
 
-#if defined(BOARD_MIBO100_IMXRT1021)
+#if defined(BOARD_MIBO48_XMC4100)
 
-TGpioPin  led1pin(1, 3, false); // GPIO_AD_B0_03 = GPIO_1_3
+TGpioPin  led1pin(1, 0, true);
 
 #define LED_COUNT 1
 
