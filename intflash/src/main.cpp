@@ -271,6 +271,23 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_MIBO64_STM32F405)
+
+TGpioPin  led1pin(PORTNUM_C, 13, false); // PC13
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
+	conuart.Init(1);
+}
+
+#endif
+
+
 #if defined(BOARD_MIBO20_STM32F030)
 
 TGpioPin  led1pin(PORTNUM_B, 1, false);
@@ -342,7 +359,16 @@ void test_intflash()
 		}
 	}
 
-	uint32_t testaddr = hwintflash.start_address + hwintflash.bytesize - testlen;
+	uint32_t testaddr = hwintflash.start_address + hwintflash.bytesize;  // prepare at the end of the flash
+
+	if (testlen > hwintflash.erasesize)
+	{
+		testaddr -= testlen;
+	}
+	else
+	{
+		testaddr -= hwintflash.erasesize;  // the last eraseable block
+	}
 
 	TRACE("Test parameters:\r\n");
 	TRACE("  Address: 0x%08X\r\n", testaddr);
@@ -404,12 +430,14 @@ void test_intflash()
 		p2 = (uint32_t *)(testaddr);
 		for (i = 0; i < testdwcnt; ++i)
 		{
-			if (*p1++ != *p2++)
+			if (*p1 != *p2)
 			{
 				bok = false;
 				TRACE("  Mismatch at 0x%08X !\r\n", p2);
 				break;
 			}
+			++p1;
+			++p2;
 		}
 
 		if (bok)
@@ -441,12 +469,14 @@ void test_intflash()
 		p2 = (uint32_t *)(testaddr);
 		for (i = 0; i < testdwcnt; ++i)
 		{
-			if (*p1++ != *p2++)
+			if (*p1 != *p2)
 			{
 				bok = false;
 				TRACE("  Mismatch at 0x%08X !\r\n", p2);
 				break;
 			}
+			++p1;
+			++p2;
 		}
 
 		if (bok)
