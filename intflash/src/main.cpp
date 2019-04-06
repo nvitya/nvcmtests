@@ -242,25 +242,49 @@ void setup_board()
 
 #if defined(BOARD_MIN_F103)
 
-TGpioPin  led1pin(2, 13, false); // PC13
+TGpioPin  led1pin(PORTNUM_C, 13, false); // PC13
 
 void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
-#if 1
 	// USART1
 	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
 	conuart.Init(1);
-#else
-	// USART2
-	hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART2_TX
-	hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_0 | PINCFG_PULLUP);  // USART2_RX
-	conuart.Init(2);
+}
 #endif
 
+#if defined(BOARD_MIBO48_STM32F303)
+
+TGpioPin  led1pin(PORTNUM_C, 13, false); // PC13
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
+	conuart.Init(1);
 }
+
+#endif
+
+#if defined(BOARD_MIBO20_STM32F030)
+
+TGpioPin  led1pin(PORTNUM_B, 1, false);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_1);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_1);  // USART1_RX
+	conuart.Init(1);
+}
+
 #endif
 
 #if defined(BOARD_MIBO64_ATSAME5X)
@@ -301,10 +325,6 @@ void test_intflash()
 	int i;
 	bool bok = true;
 
-	uint32_t testaddr = hwintflash.start_address + (hwintflash.bytesize >> 1);
-	TRACE("Test parameters:\r\n", testaddr);
-	TRACE("  Address: 0x%08X\r\n", testaddr);
-
 	// the test length depends on how much RAM we can allocate
 
 	uint32_t testlen  = (hwintflash.bytesize >> 1);
@@ -322,35 +342,48 @@ void test_intflash()
 		}
 	}
 
-	TRACE("  length : %u k\r\n", testlen >> 10);
+	uint32_t testaddr = hwintflash.start_address + hwintflash.bytesize - testlen;
+
+	TRACE("Test parameters:\r\n");
+	TRACE("  Address: 0x%08X\r\n", testaddr);
+	TRACE("  Length : %u k\r\n", testlen >> 10);
 
 	uint32_t testdwcnt = (testlen >> 2);
 
-	// first erase the memory
-	TRACE("Erasing test area...\r\n");
-	t0 = CLOCKCNT;
-	hwintflash.StartEraseMem(testaddr, testlen);
-	hwintflash.WaitForComplete();
-	t1 = CLOCKCNT;
-	TRACE("  Erase time = %u us\r\n", clocks_to_us(t1 - t0));
+	bok = true;
 
-	TRACE("Verifying...\r\n");
-
-	p1 = (uint32_t *)(testaddr);
-	for (i = 0; i < testdwcnt; ++i)
+	if (bok)
 	{
-		if (*p1 != 0xFFFFFFFF)
+		// first erase the memory
+		TRACE("Erasing test area...\r\n");
+		t0 = CLOCKCNT;
+		hwintflash.StartEraseMem(testaddr, testlen);
+		hwintflash.WaitForComplete();
+		t1 = CLOCKCNT;
+		TRACE("  Erase time = %u us\r\n", clocks_to_us(t1 - t0));
+
+		TRACE("Verifying...\r\n");
+
+		p1 = (uint32_t *)(testaddr);
+		for (i = 0; i < testdwcnt; ++i)
 		{
-			TRACE("  Not erased at 0x%08X !\r\n", p1);
-			bok = false;
+			if (*p1 != 0xFFFFFFFF)
+			{
+				TRACE("  Not erased at 0x%08X !\r\n", p1);
+				bok = false;
+				break;
+			}
+			++p1;
 		}
-		++p1;
+
+		if (bok)
+		{
+			TRACE("  OK.\r\n");
+		}
 	}
 
 	if (bok)
 	{
-		TRACE("  OK.\r\n");
-
 		TRACE("Filling test area...\r\n");
 
 		p1 = (uint32_t *)(pbuf);
@@ -378,12 +411,15 @@ void test_intflash()
 				break;
 			}
 		}
+
+		if (bok)
+		{
+			TRACE("  OK.\r\n");
+		}
 	}
 
 	if (bok)
 	{
-		TRACE("  OK.\r\n");
-
 		TRACE("Testing Copy...\r\n");
 
 		// prepare another content
@@ -412,14 +448,16 @@ void test_intflash()
 				break;
 			}
 		}
-	}
 
-	if (bok)
-	{
-		TRACE("  OK.\r\n");
+		if (bok)
+		{
+			TRACE("  OK.\r\n");
+		}
 	}
 
 	free(pbuf);
+
+	TRACE("Internal Flash Write Test finished.\r\n");
 }
 
 
