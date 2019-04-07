@@ -548,9 +548,16 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	hwintflash.TraceFlashInfo();
 
+#if 1
+
 	test_intflash();
-	TRACE("Reapeating Write Test\r\n");
-	test_intflash();
+
+  #if 1
+	  TRACE("Reapeating Write Test\r\n");
+	  test_intflash();
+  #endif
+
+#endif
 
 	TRACE("\r\nStarting main cycle...\r\n");
 
