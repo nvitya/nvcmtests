@@ -194,7 +194,7 @@ void setup_board()
 
 	hwpinctrl.PinSetup(1,  2, PINCFG_OUTPUT | PINCFG_AF_7);  // UART_TX
 	hwpinctrl.PinSetup(1,  3, PINCFG_INPUT  | PINCFG_AF_1);  // UART_RX
-	conuart.Init(0x001);  // usic_0_ch_1
+	conuart.Init(0, 1, 0);  // usic_0_ch_1 INPUT DX0A
 }
 
 #endif
@@ -293,6 +293,30 @@ void setup_board()
 }
 #endif
 
+#if defined(BOARD_XPLORER_LPC4330)
+
+TGpioPin  led1pin(1, 12, true); // D2 (GPIO numbering)
+TGpioPin  led2pin(1, 11, true); // D3
+
+#define LED_COUNT 2
+
+void setup_board()
+{
+	// By the classic LPC (V1) MCUs the pin numbering and the GPIO numbering differs!
+
+	hwpinctrl.PinSetup(2, 12, PINCFG_OUTPUT | PINCFG_AF_0);  // D2: GPIO_1_12, pad B9
+	hwpinctrl.PinSetup(2, 11, PINCFG_OUTPUT | PINCFG_AF_0);  // D3: GPIO_1_11, pad A9
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// uart console
+
+	hwpinctrl.PinSetup(6,  4, PINCFG_OUTPUT | PINCFG_AF_2);  // U0_TXD, J8/9
+	hwpinctrl.PinSetup(6,  5, PINCFG_INPUT  | PINCFG_AF_2);  // U0_RXD, J8/10
+	conuart.Init(0);
+}
+
+#endif
 
 #if defined(BOARD_XPRESSO_LPC4337)
 
@@ -489,6 +513,8 @@ void test_code_speed()
 	TRACE("RAM2  : %3u, %3u, %3u\r\n", r1, r2, r3);
 #endif
 
+#if __CORTEX_M >= 3
+
 	TRACE("Instruction clocks for 64 x single cycle 16bit:\r\n");
 
 	r1 = linear_run_asm_m0((uint32_t *)&CLOCKCNT);
@@ -501,6 +527,8 @@ void test_code_speed()
 	r2 = linear_run_asm_ram_m0((uint32_t *)&CLOCKCNT);
 	r3 = linear_run_asm_ram_m0((uint32_t *)&CLOCKCNT);
 	TRACE("RAM:    %3u, %3u, %3u\r\n", r1, r2, r3);
+#endif
+
 #endif
 }
 
