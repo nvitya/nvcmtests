@@ -93,7 +93,7 @@ void setup_board()
 	        RMII_MII_TXD1 ---------------------> PB13
 	*/
 
-	uint32_t pinfl = PINCFG_SPEED_FAST | PINCFG_AF_11;
+	uint32_t pinfl = PINCFG_SPEED_FAST | PINCFG_AF_11;  // do not use PINCFG_SPEED_VERYFAST !!
 
 	hwpinctrl.PinSetup(PORTNUM_A,  1, pinfl); // REF CLK
 	hwpinctrl.PinSetup(PORTNUM_A,  2, pinfl); // MDIO
@@ -488,9 +488,9 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	uint32_t n;
 
-	eth.promiscuous_mode = true;
+	//eth.promiscuous_mode = true;
 	//eth.promiscuous_mode = false;
-	eth.hw_ip_checksum = false;
+	//eth.hw_ip_checksum = false;
 	//eth.loopback = true;
 	if (!eth.Init(&eth_rx_desc_mem, ETH_RX_PACKETS, &eth_tx_desc_mem, ETH_TX_PACKETS))
 	{
