@@ -50,6 +50,19 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_NUCLEO_G474RE)
+
+TGpioPin  led1pin(PORTNUM_A, 5, false);
+
+#define LED_COUNT 1
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+}
+
+#endif
+
 #if defined(BOARD_DISCOVERY_F746)
 
 TGpioPin  led1pin(PORTNUM_I, 1, false);
