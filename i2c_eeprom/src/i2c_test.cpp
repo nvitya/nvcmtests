@@ -155,6 +155,12 @@ void i2c_test()
 	eeprom.StartReadMem(addr, &rxbuf[0], len);
 	eeprom.WaitComplete();
 
+	if (eeprom.errorcode)
+	{
+		TRACE("EEPROM Read Error %i, check connection\r\n", eeprom.errorcode);
+		return;
+	}
+
 	show_mem(&rxbuf[0], len);
 
 #if 1
@@ -173,7 +179,11 @@ void i2c_test()
 
 	eeprom.StartWriteMem(addr + incoffs, &txbuf[0], 4);
 	eeprom.WaitComplete();
-	if (eeprom.errorcode)	{ TRACE(" EEPROM error = %i\r\n", eeprom.errorcode); }
+	if (eeprom.errorcode)
+	{
+		TRACE(" EEPROM error = %i\r\n", eeprom.errorcode);
+		return;
+	}
 
 	TRACE("Write finished.\r\n");
 
