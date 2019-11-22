@@ -120,6 +120,20 @@ void setup_board()
 }
 #endif
 
+#if defined(BOARD_MIBO48_STM32F303)
+
+TGpioPin  led1pin(2, 13, false); // PC13
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7 | PINCFG_PULLUP);  // USART1_TX
+	conuart.Init(1);
+}
+#endif
+
 #if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
 
 TGpioPin  led1pin(1, 0, false);
@@ -266,8 +280,6 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	mcu_enable_interrupts();
 
-#if CLOCKCNT_BITS >= 32
-
 	unsigned hbclocks = SystemCoreClock;
 
 	unsigned t0, t1;
@@ -287,28 +299,6 @@ extern "C" __attribute__((noreturn)) void _start(void)
 			t0 = t1;
 		}
 	}
-
-#else
-
-	// use the SysTick for millisec counting
-
-	unsigned hbticks = 1000;
-
-	unsigned t0 = systick;
-
-	// Infinite loop
-	while (1)
-	{
-		idle_task();
-
-		if (systick - t0 > hbticks)
-		{
-			heartbeat_task();
-			t0 = systick;
-		}
-	}
-
-#endif
 }
 
 // ----------------------------------------------------------------------------

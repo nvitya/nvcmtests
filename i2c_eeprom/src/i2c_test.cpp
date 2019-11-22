@@ -107,6 +107,18 @@ void i2c_test()
 	i2c.txdma.Init(1, 6, 3);  // DMA1/CH6 = I2C1_TX
 	i2c.rxdma.Init(1, 7, 3);  // DMA1/CH7 = I2C1_RX
 
+#elif defined(BOARD_MIBO48_STM32F303)
+	// I2C1
+	// open drain mode have to be used, otherwise it won't work
+	// External pull-ups are required !
+	hwpinctrl.PinSetup(PORTNUM_B,  6, PINCFG_AF_4 | PINCFG_OPENDRAIN); // I2C1_SCL
+	hwpinctrl.PinSetup(PORTNUM_B,  7, PINCFG_AF_4 | PINCFG_OPENDRAIN); // I2C1_SDA
+
+	i2c.Init(1); // I2C1
+
+	i2c.txdma.Init(1, 6, 3);  // DMA1/CH6 = I2C1_TX
+	i2c.rxdma.Init(1, 7, 3);  // DMA1/CH7 = I2C1_RX
+
 #elif defined(BOARD_NUCLEO_F746)
 
 	// I2C1
@@ -137,7 +149,7 @@ void i2c_test()
 	//   address 3..7:  1010
 	//   address 0..2:      ppp = Page address
 	//
-	//   the chip uses 8 bit addressing (followed by the control byte) within the page
+	//   the chip uses 8 bit addressing (followed by the device address byte) within the page
 
 	if (!eeprom.Init(&i2c, 0x50, 256 * 8))
 	{
@@ -149,12 +161,12 @@ void i2c_test()
 
 	unsigned addr = 0x0000; // byte order = MSB First
 	unsigned len = 64;
+	unsigned len2 = 1;
+	int r;
 
 	TRACE("Reading memory at %04X...\r\n", addr);
-
 	eeprom.StartReadMem(addr, &rxbuf[0], len);
 	eeprom.WaitComplete();
-
 	if (eeprom.errorcode)
 	{
 		TRACE("EEPROM Read Error %i, check connection\r\n", eeprom.errorcode);
@@ -162,6 +174,31 @@ void i2c_test()
 	}
 
 	show_mem(&rxbuf[0], len);
+
+#if 0 // I2C driver test
+	TRACE("I2C Reading 1 byte from invalid address...\r\n");
+	i2c.StartReadData(0x40, 0, &rxbuf[0], 1);
+	r = i2c.WaitFinish();
+	TRACE("Completed: %i\r\n", r);
+
+	len2 = 1;
+	TRACE("Reading %i byte at %04X...\r\n", len2, addr);
+	eeprom.StartReadMem(addr, &rxbuf[0], len2);
+	eeprom.WaitComplete();
+	show_mem(&rxbuf[0], len2);
+
+	len2 = 2;
+	TRACE("Reading %i byte at %04X...\r\n", len2, addr);
+	eeprom.StartReadMem(addr, &rxbuf[0], len2);
+	eeprom.WaitComplete();
+	show_mem(&rxbuf[0], len2);
+
+	len2 = 3;
+	TRACE("Reading %i byte at %04X...\r\n", len2, addr);
+	eeprom.StartReadMem(addr, &rxbuf[0], len2);
+	eeprom.WaitComplete();
+	show_mem(&rxbuf[0], len2);
+#endif
 
 #if 1
 	unsigned incoffs = 4;

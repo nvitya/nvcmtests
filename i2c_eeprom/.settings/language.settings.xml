@@ -1,69 +1,158 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <project>
-	<configuration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.438791792.684798355.1086360796" name="BOARD_MIBO100_ATSAME70">
-		<extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
-			<provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
-			<provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
-			<provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
-			<provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-849776832893037156" id="ilg.gnuarmeclipse.managedbuild.cross.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT ARM Cross GCC Built-in Compiler Settings " parameter="${COMMAND} ${FLAGS} ${cross_toolchain_flags} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
-				<language-scope id="org.eclipse.cdt.core.gcc"/>
-				<language-scope id="org.eclipse.cdt.core.g++"/>
-			</provider>
-		</extension>
-	</configuration>
-	<configuration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.438791792.684798355.1086360796.500220146" name="BOARD_MIBO64_ATSAM4S">
-		<extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
-			<provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
-			<provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
-			<provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
-			<provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-805852743869363403" id="ilg.gnuarmeclipse.managedbuild.cross.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT ARM Cross GCC Built-in Compiler Settings " parameter="${COMMAND} ${FLAGS} ${cross_toolchain_flags} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
-				<language-scope id="org.eclipse.cdt.core.gcc"/>
-				<language-scope id="org.eclipse.cdt.core.g++"/>
-			</provider>
-		</extension>
-	</configuration>
-	<configuration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.438791792.684798355.1767594706" name="BOARD_MIN_F103">
-		<extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
-			<provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
-			<provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
-			<provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
-			<provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-853984028182087465" id="ilg.gnuarmeclipse.managedbuild.cross.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT ARM Cross GCC Built-in Compiler Settings " parameter="${COMMAND} ${FLAGS} ${cross_toolchain_flags} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
-				<language-scope id="org.eclipse.cdt.core.gcc"/>
-				<language-scope id="org.eclipse.cdt.core.g++"/>
-			</provider>
-		</extension>
-	</configuration>
-	<configuration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.438791792.684798355.1767594706.922105958" name="BOARD_NUCLEO_F746">
-		<extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
-			<provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
-			<provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
-			<provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
-			<provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-831846572383415345" id="ilg.gnuarmeclipse.managedbuild.cross.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT ARM Cross GCC Built-in Compiler Settings " parameter="${COMMAND} ${FLAGS} ${cross_toolchain_flags} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
-				<language-scope id="org.eclipse.cdt.core.gcc"/>
-				<language-scope id="org.eclipse.cdt.core.g++"/>
-			</provider>
-		</extension>
-	</configuration>
-	<configuration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.438791792.684798355.1086360796.500220146.940282061" name="BOARD_MIBO64_ATSAME5X">
-		<extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
-			<provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
-			<provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
-			<provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
-			<provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-797307062926210058" id="ilg.gnuarmeclipse.managedbuild.cross.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT ARM Cross GCC Built-in Compiler Settings " parameter="${COMMAND} ${FLAGS} ${cross_toolchain_flags} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
-				<language-scope id="org.eclipse.cdt.core.gcc"/>
-				<language-scope id="org.eclipse.cdt.core.g++"/>
-			</provider>
-		</extension>
-	</configuration>
-	<configuration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.438791792.684798355.1767594706.1981604972" name="BOARD_BOOT_XMC1200">
-		<extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
-			<provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
-			<provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
-			<provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
-			<provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-887217228561918953" id="ilg.gnuarmeclipse.managedbuild.cross.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT ARM Cross GCC Built-in Compiler Settings " parameter="${COMMAND} ${FLAGS} ${cross_toolchain_flags} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
-				<language-scope id="org.eclipse.cdt.core.gcc"/>
-				<language-scope id="org.eclipse.cdt.core.g++"/>
-			</provider>
-		</extension>
-	</configuration>
+    	
+    <configuration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.438791792.684798355.1086360796" name="BOARD_MIBO100_ATSAME70">
+        		
+        <extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
+            			
+            <provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-800220865618936630" id="ilg.gnuarmeclipse.managedbuild.cross.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT ARM Cross GCC Built-in Compiler Settings " parameter="${COMMAND} ${FLAGS} ${cross_toolchain_flags} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
+                				
+                <language-scope id="org.eclipse.cdt.core.gcc"/>
+                				
+                <language-scope id="org.eclipse.cdt.core.g++"/>
+                			
+            </provider>
+            		
+        </extension>
+        	
+    </configuration>
+    	
+    <configuration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.438791792.684798355.1086360796.500220146" name="BOARD_MIBO64_ATSAM4S">
+        		
+        <extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
+            			
+            <provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-881090555660400375" id="ilg.gnuarmeclipse.managedbuild.cross.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT ARM Cross GCC Built-in Compiler Settings " parameter="${COMMAND} ${FLAGS} ${cross_toolchain_flags} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
+                				
+                <language-scope id="org.eclipse.cdt.core.gcc"/>
+                				
+                <language-scope id="org.eclipse.cdt.core.g++"/>
+                			
+            </provider>
+            		
+        </extension>
+        	
+    </configuration>
+    	
+    <configuration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.438791792.684798355.1767594706" name="BOARD_MIN_F103">
+        		
+        <extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
+            			
+            <provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-808818951679486549" id="ilg.gnuarmeclipse.managedbuild.cross.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT ARM Cross GCC Built-in Compiler Settings " parameter="${COMMAND} ${FLAGS} ${cross_toolchain_flags} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
+                				
+                <language-scope id="org.eclipse.cdt.core.gcc"/>
+                				
+                <language-scope id="org.eclipse.cdt.core.g++"/>
+                			
+            </provider>
+            		
+        </extension>
+        	
+    </configuration>
+    	
+    <configuration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.438791792.684798355.1767594706.922105958" name="BOARD_NUCLEO_F746">
+        		
+        <extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
+            			
+            <provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-815170095225473885" id="ilg.gnuarmeclipse.managedbuild.cross.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT ARM Cross GCC Built-in Compiler Settings " parameter="${COMMAND} ${FLAGS} ${cross_toolchain_flags} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
+                				
+                <language-scope id="org.eclipse.cdt.core.gcc"/>
+                				
+                <language-scope id="org.eclipse.cdt.core.g++"/>
+                			
+            </provider>
+            		
+        </extension>
+        	
+    </configuration>
+    	
+    <configuration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.438791792.684798355.1086360796.500220146.940282061" name="BOARD_MIBO64_ATSAME5X">
+        		
+        <extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
+            			
+            <provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-886792262182995492" id="ilg.gnuarmeclipse.managedbuild.cross.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT ARM Cross GCC Built-in Compiler Settings " parameter="${COMMAND} ${FLAGS} ${cross_toolchain_flags} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
+                				
+                <language-scope id="org.eclipse.cdt.core.gcc"/>
+                				
+                <language-scope id="org.eclipse.cdt.core.g++"/>
+                			
+            </provider>
+            		
+        </extension>
+        	
+    </configuration>
+    	
+    <configuration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.438791792.684798355.1767594706.1981604972" name="BOARD_BOOT_XMC1200">
+        		
+        <extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
+            			
+            <provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-816132108131028949" id="ilg.gnuarmeclipse.managedbuild.cross.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT ARM Cross GCC Built-in Compiler Settings " parameter="${COMMAND} ${FLAGS} ${cross_toolchain_flags} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
+                				
+                <language-scope id="org.eclipse.cdt.core.gcc"/>
+                				
+                <language-scope id="org.eclipse.cdt.core.g++"/>
+                			
+            </provider>
+            		
+        </extension>
+        	
+    </configuration>
+    	
+    <configuration id="ilg.gnuarmeclipse.managedbuild.cross.config.elf.debug.438791792.684798355.1767594706.471966517" name="BOARD_MIBO48_STM32F303">
+        		
+        <extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
+            			
+            <provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
+            			
+            <provider class="org.eclipse.cdt.managedbuilder.language.settings.providers.GCCBuiltinSpecsDetector" console="false" env-hash="-824565743482959987" id="ilg.gnuarmeclipse.managedbuild.cross.GCCBuiltinSpecsDetector" keep-relative-paths="false" name="CDT ARM Cross GCC Built-in Compiler Settings " parameter="${COMMAND} ${FLAGS} ${cross_toolchain_flags} -E -P -v -dD &quot;${INPUTS}&quot;" prefer-non-shared="true">
+                				
+                <language-scope id="org.eclipse.cdt.core.gcc"/>
+                				
+                <language-scope id="org.eclipse.cdt.core.g++"/>
+                			
+            </provider>
+            		
+        </extension>
+        	
+    </configuration>
+    
 </project>
