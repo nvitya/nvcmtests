@@ -33,6 +33,8 @@
 #include "cppinit.h"
 #include "clockcnt.h"
 #include "traces.h"
+#include "hwdma.h"
+#include "string.h"
 
 #include "cpu_tests_asm.h"
 
@@ -175,6 +177,30 @@ void test_code_speed()
 #endif
 }
 
+const char dma_test_string[] = "This text was sent using DMA!\r\n";
+
+void test_uart_dma_tx()
+{
+	THwDmaChannel dmach;
+	THwDmaTransfer xfer;
+
+	dmach.Init(1, 1, 27);  // chnum=1..8, 27: USART2_TX
+
+	conuart.DmaAssign(true, &dmach);
+
+	xfer.srcaddr = (void *)&dma_test_string[0];
+	xfer.bytewidth = 1;
+	xfer.count = strlen(&dma_test_string[0]);
+	xfer.flags = 0;
+
+	TRACE("Testing DMA...\r\n");
+	conuart.DmaStartSend(&xfer);
+	while (dmach.Active())
+	{
+		// wait until finishes
+	}
+}
+
 // the C libraries require "_start" so we keep it as the entry point
 extern "C" __attribute__((noreturn)) void _start(void)
 {
@@ -183,6 +209,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	// all variables are unstable, they will be overridden later
 
 	mcu_disable_interrupts();
+
+	SYSCFG->MEMRMP = 3; // remap SRAM1 to 0x00000000
 
   mcu_preinit_code(); // inline code for preparing the MCU, RAM regions. Without this even the stack does not work on some MCUs.
 
@@ -227,6 +255,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	//|= (FLASH_OPTR_DBANK);  // disable dual bank mode
 
 	test_code_speed();
+
+	test_uart_dma_tx();
 
 	mcu_enable_interrupts();
 
