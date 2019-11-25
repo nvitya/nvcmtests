@@ -38,6 +38,8 @@
 
 #include "cpu_tests_asm.h"
 
+extern void qspi_test();
+
 THwUart   conuart;  // console uart
 
 #if defined(BOARD_NUCLEO_G474RE)
@@ -184,7 +186,7 @@ void test_uart_dma_tx()
 	THwDmaChannel dmach;
 	THwDmaTransfer xfer;
 
-	dmach.Init(1, 1, 27);  // chnum=1..8, 27: USART2_TX
+	dmach.Init(2, 1, 27);  // chnum=1..8, 27: USART2_TX
 
 	conuart.DmaAssign(true, &dmach);
 
@@ -257,6 +259,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	test_code_speed();
 
 	test_uart_dma_tx();
+
+	qspi_test();
 
 	mcu_enable_interrupts();
 
