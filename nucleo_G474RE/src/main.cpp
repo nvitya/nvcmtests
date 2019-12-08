@@ -36,11 +36,17 @@
 #include "hwdma.h"
 #include "string.h"
 
+#include "ledandkey.h"
+
 #include "cpu_tests_asm.h"
+
+extern void adc_test_freerun();
+extern void adc_test_record();
 
 extern void qspi_test();
 
-THwUart   conuart;  // console uart
+THwUart     conuart;   // console uart
+TLedAndKey  ledandkey; // some display
 
 #if defined(BOARD_NUCLEO_G474RE)
 
@@ -62,6 +68,15 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A, 2,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART2.TX
 	hwpinctrl.PinSetup(PORTNUM_A, 3,  PINCFG_INPUT  | PINCFG_AF_7);  // USART2.RX
 	conuart.Init(2);
+
+	// init ledandkey
+	ledandkey.controller.stb_pin.Assign(PORTNUM_C, 10, false);
+	ledandkey.controller.clk_pin.Assign(PORTNUM_C, 11, false);
+	ledandkey.controller.dio_pin.Assign(PORTNUM_C, 12, false);
+	ledandkey.Init();
+	ledandkey.DisplayDirect(0x00000080, 0x00000000); // turn on only the lowest dot
+	ledandkey.leds = 0x00;
+
 #endif
 }
 
@@ -105,6 +120,7 @@ extern "C" void SysTick_Handler(void)
 
 void idle_task()
 {
+	ledandkey.Run();
 }
 
 unsigned hbcounter = 0;
@@ -256,17 +272,22 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	TRACE("Flash DBANK=%i\r\n", (FLASH->OPTR >> 22) & 1);
 	//|= (FLASH_OPTR_DBANK);  // disable dual bank mode
 
-	test_code_speed();
 
-	test_uart_dma_tx();
+	//test_code_speed();
+	//test_uart_dma_tx();
+	//qspi_test();
+	//adc_test_freerun();
+	adc_test_record();
 
-	qspi_test();
 
 	mcu_enable_interrupts();
 
 	SysTick_Config(SystemCoreClock / 1000);
 
 	TRACE("\r\nStarting main cycle...\r\n");
+
+	unsigned prevscannum = ledandkey.controller.scancounter;
+	unsigned dcnt = 0;
 
 	unsigned hbclocks = SystemCoreClock / 20;  // start blinking fast
 
@@ -280,6 +301,15 @@ extern "C" __attribute__((noreturn)) void _start(void)
 		t1 = CLOCKCNT;
 
 		idle_task();
+
+#if 1	 // to test the display
+		if (prevscannum != ledandkey.controller.scancounter)
+		{
+			++dcnt;
+			ledandkey.DisplayDecNum(dcnt);
+			prevscannum = ledandkey.controller.scancounter;
+		}
+#endif
 
 		if (t1-t0 > hbclocks)
 		{
