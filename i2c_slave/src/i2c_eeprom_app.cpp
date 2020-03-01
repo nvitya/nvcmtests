@@ -42,7 +42,35 @@ bool TI2cEepromApp::Init(uint8_t aaddress, uint8_t aaddrmask)
 	return true;
 }
 
-void TI2cEepromApp::OnAddressRw(uint8_t aaddress)
+void TI2cEepromApp::OnAddressRw(uint8_t aaddress)  // IRQ context !
 {
-	TRACE("TI2cEepromApp:OnAddress(%02X)\r\n", aaddress);
+	if (istx)  // istx = true: Slave -> Master
+	{
+		waitmemaddr = false;
+	}
+	else
+	{
+		waitmemaddr = true;
+	}
+	//TRACE("TI2cEepromApp:OnAddress(%02X)\r\n", aaddress);
 }
+
+void TI2cEepromApp::OnByteReceived(uint8_t adata) // IRQ context !
+{
+	if (waitmemaddr)
+	{
+		memaddr = adata;
+		waitmemaddr = false;
+	}
+	else
+	{
+		data[memaddr++] = adata;
+	}
+}
+
+uint8_t TI2cEepromApp::OnTransmitRequest() // IRQ context !
+{
+	uint8_t r = data[memaddr++];
+	return r;
+}
+

@@ -36,10 +36,15 @@ class TI2cEepromApp : public THwI2cSlave
 public:
 	uint8_t             data[256];
 
+	uint8_t             memaddr = 0;
+	bool                waitmemaddr = false;
+
 public:
 	bool                Init(uint8_t aaddress, uint8_t aaddrmask);
 
 	virtual void        OnAddressRw(uint8_t aaddress);
+	virtual uint8_t     OnTransmitRequest();
+	virtual void        OnByteReceived(uint8_t adata);
 
 };
 

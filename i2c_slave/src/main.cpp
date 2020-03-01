@@ -295,6 +295,19 @@ extern "C" __attribute__((noreturn)) void _start(void)
 		TRACE("I2C Application Initialized.\r\n");
 	}
 
+	// initialize the data with some content
+	i2capp.data[0] = 0x33;
+	i2capp.data[1] = 0x44;
+	i2capp.data[2] = 0x55;
+	i2capp.data[3] = 0x66;
+	i2capp.data[4] = 0x77;
+	i2capp.data[5] = 0x88;
+	i2capp.data[6] = 0x99;
+	i2capp.data[7] = 0xAA;
+	i2capp.data[8] = 0xBB;
+	i2capp.data[9] = 0xCC;
+	i2capp.data[10] = 0xDD;
+
 	// Enable The I2C IRQ
 
 	IRQn_Type irqnum = IRQn_Type(I2C_IRQ_NUM);
