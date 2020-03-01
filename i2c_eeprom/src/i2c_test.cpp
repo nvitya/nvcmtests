@@ -280,7 +280,11 @@ void i2c_test()
 
 	eeprom.StartWriteMem(addr + incoffs, &txbuf[0], 4);
 	eeprom.WaitComplete();
-	if (eeprom.errorcode)	{ TRACE(" EEPROM error = %i\r\n", eeprom.errorcode); }
+	if (eeprom.errorcode)
+	{
+		TRACE(" EEPROM error = %i\r\n", eeprom.errorcode);
+		return;
+	}
 
 	TRACE("Write finished.\r\n");
 

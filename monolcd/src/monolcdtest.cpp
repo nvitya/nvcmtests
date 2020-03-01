@@ -1,10 +1,17 @@
 // monolcdtest.cpp
 
 #include "monolcd_spi.h"
+#include "monolcd_bb.h"
 #include "traces.h"
 #include "clockcnt.h"
 
-TMonoLcd_spi  disp;
+#define DISPLAY_BITBANG 1
+
+#if DISPLAY_BITBANG
+  TMonoLcd_bb   disp;
+#else
+  TMonoLcd_spi  disp;
+#endif
 
 uint8_t disp_buf[128*64 >> 3];
 
@@ -47,28 +54,54 @@ void monolcd_test()
 	disp.spi.speed = 4000000; // 4 MHz
 	disp.spi.Init(1);
 
+#elif defined(BOARD_MIBO64_ATSAM4S)
+
+	disp.pin_clk.Assign(PORTNUM_B, 0, false);
+	disp.pin_clk.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_0);
+
+	disp.pin_din.Assign(PORTNUM_B, 1, false);
+	disp.pin_din.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_0);
+
+	disp.pin_ce.Assign(PORTNUM_B, 2, false);
+	disp.pin_ce.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_0);
+
+	disp.pin_reset.Assign(PORTNUM_B, 3, false);
+	disp.pin_reset.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1); // B0: RESET
+
 #else
   #error "unknown board."
 #endif
 
 
-#if 0
-	disp.rotation = 0;
-	if (!disp.Init(MLCD_CTRL_UC1701, 128, 64, &disp_buf[0]))
-	{
-		TRACE("Error Initializing LCD display!\r\n");
-		return;
-	}
-#endif
+#if DISPLAY_BITBANG
 
-#if 1
 	disp.rotation = 0;
-	disp.contrast = 40;
-	if (!disp.Init(MLCD_CTRL_NOKIA5110, 84, 48, &disp_buf[0]))
+	if (!disp.Init(MLCD_CTRL_HX1230, 96, 68, &disp_buf[0]))
 	{
 		TRACE("Error Initializing LCD display!\r\n");
 		return;
 	}
+
+#else
+
+	#if 0
+		disp.rotation = 0;
+		if (!disp.Init(MLCD_CTRL_UC1701, 128, 64, &disp_buf[0]))
+		{
+			TRACE("Error Initializing LCD display!\r\n");
+			return;
+		}
+	#endif
+
+	#if 0
+		disp.rotation = 0;
+		disp.contrast = 40;
+		if (!disp.Init(MLCD_CTRL_NOKIA5110, 84, 48, &disp_buf[0]))
+		{
+			TRACE("Error Initializing LCD display!\r\n");
+			return;
+		}
+	#endif
 #endif
 
 
@@ -115,12 +148,14 @@ void monolcd_test()
 	uint32_t ccnt = 0;
 	unsigned t0, t1;
 
-#if 0 // moving test
+#if 1 // moving test
 
 	TRACE("LCD Update test\r\n");
 
 	TRACE("Starting display test.\r\n");
 	t0 = CLOCKCNT;
+	unsigned st = CLOCKCNT;
+	unsigned dupdclocks = 0;
 	while (true)
 	{
 		t1 = CLOCKCNT;
@@ -149,6 +184,10 @@ void monolcd_test()
 			disp.SetCursor(1, 40);
 			disp.printf("%u", ccnt);
 
+			disp.SetCursor(1, 54);
+			disp.printf("Dupd.: %6u us", dupdclocks / (SystemCoreClock / 1000000));
+
+
 			++x;
 			++y;
 			if (x >= disp.width)
@@ -163,8 +202,11 @@ void monolcd_test()
 
 			if (y > 16)  y = 0;
 
+			dupdclocks = CLOCKCNT - st;
+
 			delay_us(200000);
 
+			st = CLOCKCNT;
 		}
 
 		++ccnt;
