@@ -2,7 +2,7 @@
 
 #include "traces.h"
 
-char trace_buffer[4096];
+char trace_buffer[1024];
 
 void traces_init()
 {

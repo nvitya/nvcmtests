@@ -115,14 +115,9 @@ void setup_board()
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
 	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0 | PINCFG_PULLUP);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_1);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_1);  // USART1_RX
 	conuart.Init(1);
-
-	// USART2
-	//hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
-	//hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
-	//conuart.Init(2);
 
 	// I2C1
 	// open drain mode have to be used, otherwise it won't work
@@ -134,6 +129,32 @@ void setup_board()
 
   #define I2C_IRQ_NUM       31
   #define I2C_IRQ_HANDLER   IRQ_Handler_31
+}
+#endif
+
+#if defined(BOARD_MIBO20_STM32F070)
+
+TGpioPin  led1pin(PORTNUM_B, 1, false);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART2
+	hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_1);  // USART2_TX
+	hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_1 | PINCFG_PULLUP);  // USART2_RX
+	conuart.Init(2);
+
+	// I2C1
+	// open drain mode have to be used, otherwise it won't work
+	// External pull-ups are required !
+	hwpinctrl.PinSetup(PORTNUM_A,  9, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SCL
+	hwpinctrl.PinSetup(PORTNUM_A, 10, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SDA
+
+	i2capp.devnum = 1;
+
+  #define I2C_IRQ_NUM       23
+  #define I2C_IRQ_HANDLER   IRQ_Handler_23
 }
 #endif
 
@@ -314,6 +335,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	NVIC_SetPriority(irqnum, IRQPRIO_I2C);
 	NVIC_ClearPendingIRQ(irqnum);
 	NVIC_EnableIRQ(irqnum);
+	//NVIC_SetPendingIRQ(irqnum);
 
   TRACE("\r\nStarting main cycle...\r\n");
 
