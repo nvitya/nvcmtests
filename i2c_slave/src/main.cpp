@@ -158,6 +158,33 @@ void setup_board()
 }
 #endif
 
+#if defined(BOARD_MIBO20_STM32F030)
+
+TGpioPin  led1pin(PORTNUM_B, 1, false);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_1);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_1 | PINCFG_PULLUP);  // USART1_RX
+	conuart.Init(1);
+
+	// I2C1
+	// open drain mode have to be used, otherwise it won't work
+	// External pull-ups are required !
+	hwpinctrl.PinSetup(PORTNUM_A,  9, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SCL
+	hwpinctrl.PinSetup(PORTNUM_A, 10, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_SPEED_FAST); // I2C1_SDA
+
+	i2capp.devnum = 1;
+
+  #define I2C_IRQ_NUM       23
+  #define I2C_IRQ_HANDLER   IRQ_Handler_23
+}
+#endif
+
+
 #if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
 
 TGpioPin  led1pin(1, 0, false);
