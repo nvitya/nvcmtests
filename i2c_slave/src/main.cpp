@@ -184,6 +184,32 @@ void setup_board()
 }
 #endif
 
+#if defined(BOARD_MIBO64_STM32F405)
+
+TGpioPin  led1pin(PORTNUM_C, 13, false); // PC13
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
+	conuart.Init(1);
+
+	// I2C1
+	// open drain mode have to be used, otherwise it won't work
+	// External pull-ups are required !
+	hwpinctrl.PinSetup(PORTNUM_B,  6, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_PULLUP); // I2C1_SCL
+	hwpinctrl.PinSetup(PORTNUM_B,  7, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_PULLUP); // I2C1_SDA
+
+	i2capp.devnum = 1;
+
+  #define I2C_IRQ_NUM       31
+  #define I2C_IRQ_HANDLER   IRQ_Handler_31
+}
+#endif
+
 
 #if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
 
@@ -201,12 +227,20 @@ void setup_board()
 	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
   // USART3: Stlink USB / Serial converter
-	// USART3_TX: PD.8
-	hwpinctrl.PinSetup(3, 8,  PINCFG_OUTPUT | PINCFG_AF_7);
-	// USART3_RX: Pd.9
-	hwpinctrl.PinSetup(3, 9,  PINCFG_INPUT  | PINCFG_AF_7);
+	hwpinctrl.PinSetup(PORTNUM_D, 8,  PINCFG_OUTPUT | PINCFG_AF_7); // USART3_TX
+	hwpinctrl.PinSetup(PORTNUM_D, 9,  PINCFG_INPUT  | PINCFG_AF_7); // USART3_RX
+	conuart.Init(3);
 
-	conuart.Init(3); // USART3
+	// I2C1
+	// open drain mode have to be used, otherwise it won't work
+	// External pull-ups are required !
+	hwpinctrl.PinSetup(PORTNUM_B,  8, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_PULLUP); // I2C1_SCL
+	hwpinctrl.PinSetup(PORTNUM_B,  9, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_PULLUP); // I2C1_SDA
+
+	i2capp.devnum = 1;
+
+  #define I2C_IRQ_NUM       31
+  #define I2C_IRQ_HANDLER   IRQ_Handler_31
 }
 
 #endif
