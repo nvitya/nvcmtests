@@ -245,6 +245,44 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_NUCLEO_G474RE)
+
+TGpioPin  led1pin(PORTNUM_A, 5, false);
+
+#define LED_COUNT 1
+
+void setup_board()
+{
+	// nucleo board leds
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+#if 0
+  // USART2: Stlink USB / Serial converter
+	hwpinctrl.PinSetup(PORTNUM_A, 2,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART2.TX
+	hwpinctrl.PinSetup(PORTNUM_A, 3,  PINCFG_INPUT  | PINCFG_AF_7);  // USART2.RX
+	conuart.Init(2);
+#else
+  // USART1: alternative, using external debugger probe
+	hwpinctrl.PinSetup(PORTNUM_C, 4,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1.TX
+	hwpinctrl.PinSetup(PORTNUM_C, 5,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1.RX
+	conuart.Init(1);
+#endif
+
+	// I2C1
+	// open drain mode have to be used, otherwise it won't work
+	// External pull-ups are required !
+	hwpinctrl.PinSetup(PORTNUM_B,  8, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_PULLUP); // I2C1_SCL
+	hwpinctrl.PinSetup(PORTNUM_B,  9, PINCFG_AF_4 | PINCFG_OPENDRAIN | PINCFG_PULLUP); // I2C1_SDA
+
+	i2capp.devnum = 1;
+
+  #define I2C_IRQ_NUM       31
+  #define I2C_IRQ_HANDLER   IRQ_Handler_31
+}
+
+#endif
+
+
 #if defined(BOARD_BOOT_XMC1200)
 
 TGpioPin  led1pin(0, 0, true);
