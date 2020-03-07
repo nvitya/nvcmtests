@@ -55,6 +55,14 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX (marked as B10 beside D31)
 	conuart.Init(0);
+
+	// TWIHS0
+	hwpinctrl.PinSetup(PORTNUM_A,  3, PINCFG_AF_0 | PINCFG_PULLUP); // TWIHS0: SDA/TWD0
+	hwpinctrl.PinSetup(PORTNUM_A,  4, PINCFG_AF_0 | PINCFG_PULLUP); // TWIHS0: SCL/TWCK0
+	i2capp.devnum = 0;
+
+  #define I2C_IRQ_NUM       19
+  #define I2C_IRQ_HANDLER   IRQ_Handler_19
 }
 
 #endif
@@ -98,18 +106,26 @@ void setup_board()
 
 #endif
 
-#if defined(BOARD_ARDUINO_DUE)
+#if defined(BOARD_ARDUINO_DUE)  // ATSAM3XE8
 
-TGpioPin  led1pin(1, 27, false); // D13
+TGpioPin  led1pin(PORTNUM_B, 27, false); // D13
 
 void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
 	// UART - On the Arduino programmer interface
-	hwpinctrl.PinSetup(0, 8, PINCFG_INPUT | PINCFG_AF_0);  // UART_RXD
-	hwpinctrl.PinSetup(0, 9, PINCFG_OUTPUT | PINCFG_AF_0); // UART_TXD
+	hwpinctrl.PinSetup(PORTNUM_A, 8, PINCFG_INPUT | PINCFG_AF_0);  // UART_RXD
+	hwpinctrl.PinSetup(PORTNUM_A, 9, PINCFG_OUTPUT | PINCFG_AF_0); // UART_TXD
 	conuart.Init(0);  // UART
+
+	// TWI1
+	hwpinctrl.PinSetup(PORTNUM_B, 12, PINCFG_AF_0 | PINCFG_PULLUP); // TWI0: SDA/TWD1
+	hwpinctrl.PinSetup(PORTNUM_B, 13, PINCFG_AF_0 | PINCFG_PULLUP); // TWI0: SCL/TWCK1
+	i2capp.devnum = 1;
+
+  #define I2C_IRQ_NUM       23
+  #define I2C_IRQ_HANDLER   IRQ_Handler_23
 }
 
 #endif
