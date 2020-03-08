@@ -152,6 +152,20 @@ void i2c_test()
 	unsigned len2 = 1;
 	int r;
 
+#if 0 // very simple read test with 1 byte addressing
+	i2c.StartReadData(I2CADDR, 0 | I2CEX_1, &rxbuf[0], 4); // read byte with 1 byte addressing
+	i2c.WaitFinish();
+	if (i2c.error)
+	{
+		TRACE("Read error: %i\r\n", i2c.error);
+	}
+
+	show_mem(&rxbuf[0], 4);
+
+	return;
+
+#endif
+
 #if 0
 
 	txbuf[0] = 0xDA;
@@ -227,7 +241,6 @@ void i2c_test()
 	}
 
 	TRACE("EEPROM Initialized.\r\n");
-
 
 	TRACE("Reading memory at %04X...\r\n", addr);
 	eeprom.StartReadMem(addr, &rxbuf[0], len);

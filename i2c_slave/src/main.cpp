@@ -44,6 +44,14 @@ TI2cEepromApp  i2capp;
 
 #define I2C_ADDRESS  0x50  // EEPROM Emulation
 
+void setup_irq(int airqnum)
+{
+	IRQn_Type irqnum = IRQn_Type(airqnum);
+	NVIC_SetPriority(irqnum, IRQPRIO_I2C);
+	NVIC_ClearPendingIRQ(irqnum);
+	NVIC_EnableIRQ(irqnum);
+}
+
 #if defined(BOARD_MIBO100_ATSAME70)
 
 TGpioPin  led1pin(PORTNUM_D, 13, false);
@@ -61,7 +69,7 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A,  4, PINCFG_AF_0 | PINCFG_PULLUP); // TWIHS0: SCL/TWCK0
 	i2capp.devnum = 0;
 
-  #define I2C_IRQ_NUM       19
+  #define I2C_IRQ_NUM                   19
   #define I2C_IRQ_HANDLER   IRQ_Handler_19
 }
 
@@ -84,7 +92,7 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A,  4, PINCFG_AF_0 | PINCFG_PULLUP); // TWI0: SCL/TWCK0
 	i2capp.devnum = 0;
 
-  #define I2C_IRQ_NUM       19
+  #define I2C_IRQ_NUM                   19
   #define I2C_IRQ_HANDLER   IRQ_Handler_19
 }
 
@@ -98,11 +106,42 @@ void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
-	// SERCOM0
+	// Console: SERCOM0
 	hwpinctrl.PinSetup(PORTNUM_A, 4, PINCFG_OUTPUT | PINCFG_AF_3);  // PAD[0] = TX
 	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_INPUT  | PINCFG_AF_3);  // PAD[1] = RX
 	conuart.Init(0);
+
+	// I2C: SERCOM4
+	hwpinctrl.PinSetup(PORTNUM_B,  8, PINCFG_AF_D | PINCFG_PULLUP); // SERCOM4/PAD0 = SDA
+	hwpinctrl.PinSetup(PORTNUM_B,  9, PINCFG_AF_D | PINCFG_PULLUP); // SERCOM4/PAD1 = SCL
+	i2capp.devnum = 4;
+
+  #define I2C_IRQ_NUM                   62  // SERCOM4_0: PREC
+  #define I2C_IRQ_HANDLER   IRQ_Handler_62
+
+	// additional IRQ vectors are required here
+	setup_irq(63);
+	setup_irq(64);
+	setup_irq(65);
 }
+
+// This processor has per interrupt flag an interrupt line
+
+extern "C" void IRQ_Handler_63() // SERCOM4_1: AMATCH
+{
+	i2capp.HandleIrq();
+}
+
+extern "C" void IRQ_Handler_64() // SERCOM4_2: DRDY
+{
+	i2capp.HandleIrq();
+}
+
+extern "C" void IRQ_Handler_65() // SERCOM4_3_7: ERROR
+{
+	i2capp.HandleIrq();
+}
+
 
 #endif
 
@@ -124,7 +163,7 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_B, 13, PINCFG_AF_0 | PINCFG_PULLUP); // TWI0: SCL/TWCK1
 	i2capp.devnum = 1;
 
-  #define I2C_IRQ_NUM       23
+  #define I2C_IRQ_NUM                   23
   #define I2C_IRQ_HANDLER   IRQ_Handler_23
 }
 
@@ -151,7 +190,7 @@ void setup_board()
 
 	i2capp.devnum = 1;
 
-  #define I2C_IRQ_NUM       31
+  #define I2C_IRQ_NUM                   31
   #define I2C_IRQ_HANDLER   IRQ_Handler_31
 }
 #endif
@@ -177,7 +216,7 @@ void setup_board()
 
 	i2capp.devnum = 1;
 
-  #define I2C_IRQ_NUM       23
+  #define I2C_IRQ_NUM                   23
   #define I2C_IRQ_HANDLER   IRQ_Handler_23
 }
 #endif
@@ -203,7 +242,7 @@ void setup_board()
 
 	i2capp.devnum = 1;
 
-  #define I2C_IRQ_NUM       23
+  #define I2C_IRQ_NUM                   23
   #define I2C_IRQ_HANDLER   IRQ_Handler_23
 }
 #endif
@@ -229,7 +268,7 @@ void setup_board()
 
 	i2capp.devnum = 1;
 
-  #define I2C_IRQ_NUM       31
+  #define I2C_IRQ_NUM                   31
   #define I2C_IRQ_HANDLER   IRQ_Handler_31
 }
 #endif
@@ -263,7 +302,7 @@ void setup_board()
 
 	i2capp.devnum = 1;
 
-  #define I2C_IRQ_NUM       31
+  #define I2C_IRQ_NUM                   31
   #define I2C_IRQ_HANDLER   IRQ_Handler_31
 }
 
@@ -300,35 +339,8 @@ void setup_board()
 
 	i2capp.devnum = 1;
 
-  #define I2C_IRQ_NUM       31
+  #define I2C_IRQ_NUM                   31
   #define I2C_IRQ_HANDLER   IRQ_Handler_31
-}
-
-#endif
-
-
-#if defined(BOARD_BOOT_XMC1200)
-
-TGpioPin  led1pin(0, 0, true);
-TGpioPin  led2pin(0, 2, true);
-TGpioPin  led3pin(0, 5, true);
-TGpioPin  led4pin(0, 6, true);
-TGpioPin  led5pin(0, 7, true);
-
-#define LED_COUNT 5
-#undef USE_DWT_CYCCNT
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led4pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led5pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinSetup(1,  2, PINCFG_OUTPUT | PINCFG_AF_7);  // UART_TX
-	hwpinctrl.PinSetup(1,  3, PINCFG_INPUT  | PINCFG_AF_1);  // UART_RX
-	conuart.Init(0, 1, 0);  // usic_0_ch_1/DX0A
 }
 
 #endif
@@ -454,11 +466,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	// Enable The I2C IRQ
 
-	IRQn_Type irqnum = IRQn_Type(I2C_IRQ_NUM);
-	NVIC_SetPriority(irqnum, IRQPRIO_I2C);
-	NVIC_ClearPendingIRQ(irqnum);
-	NVIC_EnableIRQ(irqnum);
-	//NVIC_SetPendingIRQ(irqnum);
+	setup_irq(I2C_IRQ_NUM);
 
   TRACE("\r\nStarting main cycle...\r\n");
 
