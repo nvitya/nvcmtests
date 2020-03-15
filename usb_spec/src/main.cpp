@@ -197,7 +197,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	TRACE("\r\nStarting main cycle...\r\n");
 
-	tracebuf.waitsend = false;  // go to buffered mode
+	//tracebuf.waitsend = false;  // go to buffered mode
+	tracebuf.waitsend = true;  // better for basic debugging
 
 	mcu_enable_interrupts();
 
