@@ -74,6 +74,7 @@ void test_usb_bulk_transfer()
 {
 	int r;
 	unsigned n;
+	int count;
 	uint8_t txbuf[64];
 	uint8_t rxbuf[64];
 
@@ -90,7 +91,6 @@ void test_usb_bulk_transfer()
 
 	// send
 
-	int count;
 	r = libusb_bulk_transfer(handle, 1, &txbuf[0], sizeof(txbuf), &count, 0);
 	if (r)
 	{
@@ -99,8 +99,13 @@ void test_usb_bulk_transfer()
 	}
 	printf("  %i bytes sent.\n", count);
 
-	// receive
-	r = libusb_bulk_transfer(handle, 0x81, &rxbuf[0], sizeof(rxbuf), &count, 0);
+	// Warning, this is a difference from the original test from Niklas Gürtler:
+	//   Enpoint 2 (instead of endpoint 1) is used here, because the NVCM does not support bi-directional endpoints !
+	//   (some ARM microcontrollers (e.g. ATSAM) does not support bi-directional endpoints other than control endpoints)
+
+	uint8_t epnum = 2;
+	printf("Receiving from ep %i...\n", epnum);
+	r = libusb_bulk_transfer(handle, 0x80 + epnum, &rxbuf[0], sizeof(rxbuf), &count, 0);
 	if (r)
 	{
 		printf("  Error receiving data: %i\n", r);
@@ -189,7 +194,7 @@ int main(int argc, char * argv[])
 
 		test_usb_control_transfer();
 
-		//test_usb_bulk_transfer();
+		test_usb_bulk_transfer();
 	}
 
 	printf("USB Test finished.\n");
