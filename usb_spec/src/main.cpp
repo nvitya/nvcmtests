@@ -187,7 +187,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	tracebuf.waitsend = true;  // start with blocking mode
 
 	TRACE("\r\n--------------------------\r\n");
-	TRACE("NVCM USB HID TEST\r\n");
+	TRACE("NVCM USB SPEC TEST\r\n");
 	TRACE("Board: \"%s\"\r\n", BOARD_NAME);
 	TRACE("SystemCoreClock: %u\r\n", SystemCoreClock);
 
@@ -197,8 +197,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	TRACE("\r\nStarting main cycle...\r\n");
 
-	//tracebuf.waitsend = false;  // go to buffered mode
-	tracebuf.waitsend = true;  // better for basic debugging
+	tracebuf.waitsend = false;  // go to buffered mode
+	//tracebuf.waitsend = true;  // better for basic debugging
 
 	mcu_enable_interrupts();
 
