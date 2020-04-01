@@ -184,7 +184,7 @@ void setup_board()
 
 #endif
 
-#if defined(BOARD_MIN_F103) || defined(BOARD_MIBO48_STM32F303) || defined(BOARD_MIBO64_STM32F405) || defined(BOARD_MIBO64_STM32F070)
+#if defined(BOARD_MIN_F103) || defined(BOARD_MIBO48_STM32F303) || defined(BOARD_MIBO48_STM32G473) || defined(BOARD_MIBO64_STM32F405) || defined(BOARD_MIBO64_STM32F070)
 
 TGpioPin  led1pin(PORTNUM_C, 13, false);
 
