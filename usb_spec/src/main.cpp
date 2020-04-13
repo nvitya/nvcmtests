@@ -201,6 +201,26 @@ void setup_board()
 }
 #endif
 
+#if defined(BOARD_XPLAINED_SAME70)
+
+TGpioPin  led1pin(2, 8, false);  // C8
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1 - EDBG
+	hwpinctrl.PinSetup(0, 21, PINCFG_INPUT | PINCFG_AF_0);  // USART1_RXD
+	MATRIX->CCFG_SYSIO |= (1 << 4); // select PB4 instead of TDI !!!!!!!!!
+	hwpinctrl.PinSetup(1,  4, PINCFG_OUTPUT | PINCFG_AF_3); // USART1_TXD
+	conuart.Init(0x101); // USART1
+
+  // dedicated HS USB pins, no pin setup required
+}
+
+#endif
+
+
 // ---------------------------------------------------------------------------------------
 
 #ifndef LED_COUNT
