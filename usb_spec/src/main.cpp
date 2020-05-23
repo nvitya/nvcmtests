@@ -47,6 +47,22 @@
 
 THwUart   conuart;  // console uart
 
+#if defined(BOARD_ARDUINO_DUE)
+
+TGpioPin  led1pin(1, 27, false); // D13
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// UART - On the Arduino programmer interface
+	hwpinctrl.PinSetup(0, 8, PINCFG_INPUT | PINCFG_AF_0);  // UART_RXD
+	hwpinctrl.PinSetup(0, 9, PINCFG_OUTPUT | PINCFG_AF_0); // UART_TXD
+	conuart.Init(0);  // UART
+}
+
+#endif
+
 #if defined(BOARD_MIBO64_ATSAM4S)
 
 TGpioPin  led1pin(PORTNUM_A, 1, false);
@@ -237,6 +253,10 @@ void setup_board()
 	//hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_AF_2);  // PAD[0] = TX
 	//hwpinctrl.PinSetup(PORTNUM_A, 13, PINCFG_AF_2);  // PAD[1] = RX
 	//conuart.Init(2);
+
+	// USB PINS
+	hwpinctrl.PinSetup(PORTNUM_A, 24, PINCFG_AF_7);  // USB DM
+	hwpinctrl.PinSetup(PORTNUM_A, 25, PINCFG_AF_7);  // USB DP
 }
 #endif
 
