@@ -281,7 +281,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	// Set the interrupt vector table offset, so that the interrupts and exceptions work
 	mcu_init_vector_table();
 
-  unsigned clockspeed = MCU_CLOCK_SPEED;
+  unsigned clockspeed = MCU_CLOCK_SPEED / 1;
 
 #ifdef MCU_INPUT_FREQ
 	if (!hwclkctrl.InitCpuClock(MCU_INPUT_FREQ, clockspeed))
@@ -346,6 +346,9 @@ extern "C" __attribute__((noreturn)) void _start(void)
 		if (t1-t0 > hbclocks)
 		{
 			// heartbeat task
+
+			//led1pin.Toggle();
+
 			t0 = t1;
 		}
 	}
