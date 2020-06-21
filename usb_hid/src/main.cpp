@@ -40,65 +40,18 @@
 
 THwUart   conuart;  // console uart
 
-#if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
+#if defined(BOARD_ARDUINO_DUE)
 
-TGpioPin  led1pin(1, 0, false);
-TGpioPin  led2pin(1, 7, false);
-TGpioPin  led3pin(1, 14, false);
-
-#define LED_COUNT 3
-
-void setup_board()
-{
-	// nucleo board leds
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-  // USART3: Stlink USB / Serial converter
-	// USART3_TX: PD.8
-	hwpinctrl.PinSetup(3, 8,  PINCFG_OUTPUT | PINCFG_AF_7);
-	// USART3_RX: Pd.9
-	hwpinctrl.PinSetup(3, 9,  PINCFG_INPUT  | PINCFG_AF_7);
-
-	conuart.Init(3); // USART3
-}
-
-#endif
-
-#if defined(BOARD_XPLAINED_SAME70)
-
-TGpioPin  led1pin(2, 8, false);  // C8
+TGpioPin  led1pin(1, 27, false); // D13
 
 void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
-	// USART1 - EDBG
-	hwpinctrl.PinSetup(0, 21, PINCFG_INPUT | PINCFG_AF_0);  // USART1_RXD
-	MATRIX->CCFG_SYSIO |= (1 << 4); // select PB4 instead of TDI !!!!!!!!!
-	hwpinctrl.PinSetup(1,  4, PINCFG_OUTPUT | PINCFG_AF_3); // USART1_TXD
-	conuart.Init(0x101); // USART1
-
-	// UART3 - Arduino shield
-	//hwpinctrl.PinSetup(3, 28, PINCFG_INPUT | PINCFG_AF_0);  // UART3_RXD
-	//hwpinctrl.PinSetup(3, 30, PINCFG_OUTPUT | PINCFG_AF_0); // UART3_TXD
-	//uartx2.Init(3); // UART3
-}
-
-#endif
-
-#if defined(BOARD_MIBO100_ATSAME70)
-
-TGpioPin  led1pin(PORTNUM_D, 13, false);
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
-	conuart.Init(0);
+	// UART - On the Arduino programmer interface
+	hwpinctrl.PinSetup(0, 8, PINCFG_INPUT | PINCFG_AF_0);  // UART_RXD
+	hwpinctrl.PinSetup(0, 9, PINCFG_OUTPUT | PINCFG_AF_0); // UART_TXD
+	conuart.Init(0);  // UART
 }
 
 #endif
@@ -118,6 +71,33 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
+
+TGpioPin  led1pin(1, 0, false);
+TGpioPin  led2pin(1, 7, false);
+TGpioPin  led3pin(1, 14, false);
+
+#define LED_COUNT 3
+
+void setup_board()
+{
+	// nucleo board leds
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+  // USART3: Stlink USB / Serial converter
+	hwpinctrl.PinSetup(3, 8,  PINCFG_OUTPUT | PINCFG_AF_7); // USART3_TX: PD.8
+	hwpinctrl.PinSetup(3, 9,  PINCFG_INPUT  | PINCFG_AF_7); // USART3_RX: PD.9
+	conuart.Init(3); // USART3
+
+	// USB_OTG_FS PINS
+	hwpinctrl.PinSetup(PORTNUM_A, 11, PINCFG_INPUT | PINCFG_AF_10 | PINCFG_SPEED_FAST);  // USB_OTG_FS DM
+	hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_INPUT | PINCFG_AF_10 | PINCFG_SPEED_FAST);  // USB_OTG_FS DP
+}
+
+#endif
+
 #if defined(BOARD_DISCOVERY_F072)
 
 TGpioPin  led1pin(PORTNUM_C, 6, false);
@@ -126,7 +106,6 @@ TGpioPin  led3pin(PORTNUM_C, 9, false);
 TGpioPin  led4pin(PORTNUM_C, 7, false);
 
 #define LED_COUNT 4
-#undef USE_DWT_CYCCNT
 
 void setup_board()
 {
@@ -135,60 +114,6 @@ void setup_board()
 	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 	led4pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-}
-
-#endif
-
-#if defined(BOARD_DEV_STM32F407VG)
-
-#define SKIP_DTCRAM_EXEC_TEST
-
-TGpioPin  led1pin(4, 0, true);  // PE0
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
-	conuart.Init(1);
-}
-
-#endif
-
-#if defined(BOARD_DEV_STM32F407ZE)
-
-#define SKIP_DTCRAM_EXEC_TEST
-
-TGpioPin  led1pin(5, 9, true);  // PF9
-TGpioPin  led2pin(5, 10, true);  // PF10
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
-	conuart.Init(1);
-}
-
-#endif
-
-#if defined(BOARD_ARDUINO_DUE)
-
-TGpioPin  led1pin(1, 27, false); // D13
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// UART - On the Arduino programmer interface
-	hwpinctrl.PinSetup(0, 8, PINCFG_INPUT | PINCFG_AF_0);  // UART_RXD
-	hwpinctrl.PinSetup(0, 9, PINCFG_OUTPUT | PINCFG_AF_0); // UART_TXD
-	conuart.Init(0);  // UART
 }
 
 #endif
@@ -227,6 +152,45 @@ void setup_board()
 }
 #endif
 
+#if defined(BOARD_MIBO48_STM32G473)
+
+TGpioPin  led1pin(PORTNUM_C, 13, false); // PC13
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USB PINS
+	hwpinctrl.PinSetup(PORTNUM_A, 11, PINCFG_INPUT | PINCFG_AF_14 | PINCFG_SPEED_FAST);  // USB DM
+	hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_INPUT | PINCFG_AF_14 | PINCFG_SPEED_FAST);  // USB DP
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
+	conuart.Init(1);
+}
+#endif
+
+#if defined(BOARD_MIBO64_STM32F405)
+
+TGpioPin  led1pin(PORTNUM_C, 13, false); // PC13
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USB PINS
+	hwpinctrl.PinSetup(PORTNUM_A, 11, PINCFG_INPUT | PINCFG_AF_10 | PINCFG_SPEED_FAST);  // USB DM
+	hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_INPUT | PINCFG_AF_10 | PINCFG_SPEED_FAST);  // USB DP
+
+	// USART1
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
+	conuart.Init(1);
+}
+
+#endif
+
 #if defined(BOARD_MIBO64_STM32F070)
 
 TGpioPin  led1pin(PORTNUM_C, 13, false); // PC13
@@ -246,54 +210,49 @@ void setup_board()
 }
 #endif
 
-#if defined(BOARD_XPRESSO_LPC4337)
+#if defined(BOARD_XPLAINED_SAME70)
 
-TGpioPin  led1pin(3, 5, true);
-TGpioPin  led2pin(0, 7, true);
-TGpioPin  led3pin(3, 7, true);
-
-#define LED_COUNT 3
-
-void setup_board()
-{
-	// RGB LED
-	hwpinctrl.PinSetup(6,  9, PINCFG_OUTPUT | PINCFG_DRIVE_WEAK | PINCFG_AF_0);  // GPIO_3_5
-	hwpinctrl.PinSetup(2,  7, PINCFG_OUTPUT | PINCFG_DRIVE_WEAK | PINCFG_AF_0);  // GPIO_0_7
-	hwpinctrl.PinSetup(6, 11, PINCFG_OUTPUT | PINCFG_DRIVE_WEAK | PINCFG_AF_0);  // GPIO_3_7
-
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	// UART
-	hwpinctrl.PinSetup(6, 4, PINCFG_OUTPUT | PINCFG_AF_2);  // UART0_TXD
-	hwpinctrl.PinSetup(2, 1, PINCFG_INPUT  | PINCFG_AF_1);  // UART0_RXD
-	conuart.Init(0);
-}
-
-#endif
-
-
-#if defined(BOARD_XPRESSO_LPC54608)
-
-TGpioPin  led1pin(2, 2, true);
-TGpioPin  led2pin(3, 3, true);
-TGpioPin  led3pin(3, 14, true);
-
-#define LED_COUNT 3
+TGpioPin  led1pin(2, 8, false);  // C8
 
 void setup_board()
 {
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
-	hwpinctrl.PinSetup(0, 30, PINCFG_OUTPUT | PINCFG_AF_1); // UART_TX:
-	hwpinctrl.PinSetup(0, 29, PINCFG_INPUT  | PINCFG_AF_1); // UART_RX:
-	conuart.Init(0);
+	// USART1 - EDBG
+	hwpinctrl.PinSetup(0, 21, PINCFG_INPUT | PINCFG_AF_0);  // USART1_RXD
+	MATRIX->CCFG_SYSIO |= (1 << 4); // select PB4 instead of TDI !!!!!!!!!
+	hwpinctrl.PinSetup(1,  4, PINCFG_OUTPUT | PINCFG_AF_3); // USART1_TXD
+	conuart.Init(0x101); // USART1
+
+  // dedicated HS USB pins, no pin setup required
 }
 
 #endif
+
+#if defined(BOARD_MIBO64_ATSAME5X)
+
+TGpioPin  led1pin(PORTNUM_A, 1, false);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// SERCOM0
+	hwpinctrl.PinSetup(PORTNUM_A, 4, PINCFG_OUTPUT | PINCFG_AF_3);  // PAD[0] = TX
+	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_INPUT  | PINCFG_AF_3);  // PAD[1] = RX
+	conuart.Init(0);
+
+	// SERCOM2
+	//hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_AF_2);  // PAD[0] = TX
+	//hwpinctrl.PinSetup(PORTNUM_A, 13, PINCFG_AF_2);  // PAD[1] = RX
+	//conuart.Init(2);
+
+	// USB PINS
+	hwpinctrl.PinSetup(PORTNUM_A, 24, PINCFG_AF_7);  // USB DM
+	hwpinctrl.PinSetup(PORTNUM_A, 25, PINCFG_AF_7);  // USB DP
+}
+#endif
+
 
 // ---------------------------------------------------------------------------------------
 

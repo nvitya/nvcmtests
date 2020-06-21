@@ -104,7 +104,7 @@ void TUifHidTest::SendReport(int8_t adx, int8_t ady)
 	hiddata.dx = adx;
 	hiddata.dy = ady;
 
-	ep_hidreport.StartSend(&hiddata, sizeof(hiddata));
+	ep_hidreport.StartSendData(&hiddata, sizeof(hiddata));
 }
 
 void TUifHidTest::OnConfigured()
@@ -120,13 +120,13 @@ bool TUifHidTest::HandleSetupRequest(TUsbSetupRequest * psrq)
 		if (psrq->request == 0x0A)
 		{
 			// set idle frequency.
-			device->SendControlAck();
+			device->SendControlStatus(true);
 			return true;
 		}
 	}
 	else if (psrq->rqtype == 0xA1) // vendor request
 	{
-		device->SendControlAck();
+		device->SendControlStatus(true);
 		return true;
 	}
 
@@ -137,25 +137,25 @@ bool TUifHidTest::HandleTransferEvent(TUsbEndpoint * aep, bool htod)
 {
 	if (htod)
 	{
-		aep->FinishRecv(true);
+		// impossible case
+		return false;
 	}
 	else
 	{
-		aep->FinishSend();
+		// called when the hid report sent successfully
+		return true;
 	}
-
-	return true;
 }
 
 void usb_hid_test_init()
 {
 	TRACE("Initializing USB HID Test\r\n");
 
-	usbdev.devdesc.vendor_id = 0x0483;
-	usbdev.devdesc.product_id = 0x5710;
-	usbdev.manufacturer_name = "STMicroelectronics";
-	usbdev.device_name = "HID Joystick in FS Mode";
-	usbdev.device_serial_number = "498F20793932";
+	usbdev.devdesc.vendor_id = 0xDEAD;
+	usbdev.devdesc.product_id = 0x0A1D;
+	usbdev.manufacturer_name = "github.com/nvcm";
+	usbdev.device_name = "NVCM Example HID Joystick";
+	usbdev.device_serial_number = "NVCM-HID-1";
 
 	usbdev.AddInterface(&hidtest);
 
