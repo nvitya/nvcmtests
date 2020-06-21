@@ -76,8 +76,8 @@ public: // mandatory functions
 extern TUifSpecTest uif_spectest;
 extern TUsbDevSpec  usbdev;
 
-void usb_spec_test_init();
-void usb_spec_test_run();
+void usb_device_init();
+void usb_device_run();
 
 
 #endif /* SRC_USB_SPEC_TEST_H_ */

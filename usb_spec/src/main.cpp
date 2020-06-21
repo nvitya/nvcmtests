@@ -319,7 +319,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	TRACE_FLUSH();
 
-	usb_spec_test_init();
+	usb_device_init();
 
 	TRACE("\r\nStarting main cycle...\r\n");
 
@@ -341,7 +341,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 		tracebuf.Run(); // send out buffered characters
 
-		usb_spec_test_run();
+		usb_device_run();
 
 		if (t1-t0 > hbclocks)
 		{

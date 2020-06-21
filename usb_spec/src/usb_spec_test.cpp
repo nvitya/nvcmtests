@@ -47,7 +47,7 @@ extern TGpioPin led1pin;
 TUsbDevSpec   usbdev;
 TUifSpecTest  uif_spectest;
 
-void usb_spec_test_init()
+void usb_device_init()
 {
 	TRACE("Initializing Special USB Test\r\n");
 
@@ -61,7 +61,7 @@ void usb_spec_test_init()
 	TRACE("IF output endpoint: %02X\r\n", uif_spectest.ep_output.index);
 }
 
-void usb_spec_test_run()
+void usb_device_run()
 {
 	usbdev.HandleIrq();
 }
