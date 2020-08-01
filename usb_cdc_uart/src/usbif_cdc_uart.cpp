@@ -233,7 +233,7 @@ void TUifCdcUartControl::StartUart()
 		dmaxfer_rx.dstaddr = &serial_rxbuf[0];
 		dmaxfer_rx.flags = DMATR_CIRCULAR;
 
-		dma_rx->StartTransfer(&dmaxfer_rx);
+		uart->DmaStartRecv(&dmaxfer_rx);
 	}
 
 	dataif->Reset();
@@ -243,15 +243,16 @@ void TUifCdcUartControl::StartUart()
 
 bool TUifCdcUartControl::SerialSendBytes(uint8_t * adata, unsigned adatalen)
 {
-	if (adatalen > sizeof(serial_txbuf) - serial_txlen)
+	bool result = false;
+
+	if (adatalen <= sizeof(serial_txbuf[0]) - serial_txlen)
 	{
-		return false;
+		memcpy(&serial_txbuf[serial_txbufidx][serial_txlen], adata, adatalen);
+		serial_txlen += adatalen;
+		result = true;
 	}
 
-	memcpy(&serial_txbuf[serial_txbufidx][serial_txlen], adata, adatalen);
-	serial_txlen += adatalen;
-
-	if (!dma_tx->Active())
+	if (serial_txlen && !dma_tx->Active())
 	{
 		// setup the TX DMA and flip the buffer
 
@@ -260,14 +261,14 @@ bool TUifCdcUartControl::SerialSendBytes(uint8_t * adata, unsigned adatalen)
 		dmaxfer_tx.count = serial_txlen;
 		dmaxfer_tx.srcaddr = &serial_txbuf[serial_txbufidx][0];
 
-		dma_tx->StartTransfer(&dmaxfer_tx);
+		uart->DmaStartSend(&dmaxfer_tx);
 
 		// change the buffer
 		serial_txbufidx ^= 1;
 		serial_txlen = 0;
 	}
 
-	return true;
+	return result;
 }
 
 void TUifCdcUartControl::Run()
@@ -350,11 +351,10 @@ void TUifCdcUartData::OnConfigured()
 
 bool TUifCdcUartData::HandleTransferEvent(TUsbEndpoint * aep, bool htod)
 {
-	int r;
 	if (htod)
 	{
 		usb_rxlen = ep_input.ReadRecvData(&usb_rxbuf[0], sizeof(usb_rxbuf));
-		//TRACE("%i byte VCP data arrived\r\n", r);
+		//TRACE("%i byte VCP data arrived\r\n", usb_rxlen);
 
 		TrySendUsbDataToSerial();  // re-enables USB receive when it is successful
 	}

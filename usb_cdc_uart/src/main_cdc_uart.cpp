@@ -126,8 +126,8 @@ void setup_board()
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
 	// USART1
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART1_TX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_0);  // USART1_RX
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_0);   // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT | PINCFG_PULLUP);  // USART1_RX - do not set AF function here !
 	conuart.Init(1);
 }
 #endif
@@ -305,7 +305,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	tracebuf.waitsend = true;  // start with blocking mode
 
 	TRACE("\r\n--------------------------\r\n");
-	TRACE("NVCM USB SPEC TEST\r\n");
+	TRACE("NVCM USB-UART TEST\r\n");
 	TRACE("Board: \"%s\"\r\n", BOARD_NAME);
 	TRACE("SystemCoreClock: %u\r\n", SystemCoreClock);
 

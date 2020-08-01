@@ -51,7 +51,7 @@ static void init_usb_uart()
 {
 	// USART2
 	hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_0);  // USART2_TX
-	hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_0 | PINCFG_PULLUP);  // USART2_RX
+	hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT | PINCFG_PULLUP);  // USART2_RX - do not set AF for inputs!
 	usbuart.Init(2);
 
 	usbuart_dma_tx.Init(1, 7, 2); // USART2_TX
@@ -80,7 +80,7 @@ void usb_device_run()
 {
 	usbdev.HandleIrq();
 
-	uif_cdcuart.Run();  // check and send incoming UART bytes
+	uif_cdcuart.Run();  // manage UART DMA transfers
 }
 
 
