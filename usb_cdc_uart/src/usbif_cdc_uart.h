@@ -35,8 +35,6 @@
 #include "hwuart.h"
 #include "hwdma.h"
 
-#define USBIF_CDC_UART_BUFSIZE  64
-
 struct TCdcLineCoding
 {
 	uint32_t   baudrate;
@@ -78,7 +76,8 @@ public: // interface specific
 	bool              InitCdcUart(TUifCdcUartData * adataif, THwUart * auart, THwDmaChannel * adma_tx, THwDmaChannel * adma_rx);
 	void              Run(); // must be called periodically
 
-	bool              SerialSendBytes(uint8_t * adata, unsigned adatalen);
+	bool              SerialAddBytes(uint8_t * adata, unsigned adatalen);
+	void              SerialSendBytes();
 
 protected:
 	bool              uart_running = false;
@@ -114,14 +113,14 @@ public:
 	uint8_t               usb_txbufidx = 0;
 	uint8_t               usb_txlen = 0;  // non null value signalizes pending USB RX data to be sent to the serial
 
-	uint8_t           		usb_rxbuf[64];  // the data from the
+	uint8_t           		usb_rxbuf[64+4];  // the data from the usb (+4 for debugging)
 	uint8_t               usb_rxlen = 0;
 
 public:
 	bool                  AddTxByte(uint8_t abyte);
 	bool                  SendTxBytes();
 	void                  Reset();
-	bool                  TrySendUsbDataToSerial();
+	void                  TrySendUsbDataToSerial();
 
 public: // mandatory virtual functions
 	virtual bool    InitInterface();

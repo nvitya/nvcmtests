@@ -31,7 +31,7 @@
 #include "string.h"
 #include "traces.h"
 
-const uint8_t cdc_desc_header_func[] =
+static const uint8_t cdc_desc_header_func[] =
 {
 	/*Header Functional Descriptor*/
 	0x05,   /* bLength: Endpoint Descriptor size */
@@ -41,7 +41,7 @@ const uint8_t cdc_desc_header_func[] =
 	0x01,
 };
 
-const uint8_t cdc_desc_call_management[] =
+static const uint8_t cdc_desc_call_management[] =
 {
 	/*Call Management Functional Descriptor*/
 	0x05,   /* bFunctionLength */
@@ -51,7 +51,7 @@ const uint8_t cdc_desc_call_management[] =
 	0x00,   /* bDataInterface: 0 */   // ???
 };
 
-const uint8_t cdc_desc_call_acm_func[] =
+static const uint8_t cdc_desc_call_acm_func[] =
 {
 	/*ACM Functional Descriptor*/
 	0x04,   /* bFunctionLength */
@@ -60,7 +60,7 @@ const uint8_t cdc_desc_call_acm_func[] =
 	0x02,   /* bmCapabilities */
 };
 
-const uint8_t cdc_desc_call_union_func[] =
+static const uint8_t cdc_desc_call_union_func[] =
 {
 	/*Union Functional Descriptor*/
 	0x05,   /* bFunctionLength */
@@ -241,17 +241,25 @@ void TUifCdcUartControl::StartUart()
 	uart_running = true;
 }
 
-bool TUifCdcUartControl::SerialSendBytes(uint8_t * adata, unsigned adatalen)
+bool TUifCdcUartControl::SerialAddBytes(uint8_t * adata, unsigned adatalen)
 {
-	bool result = false;
-
-	if (adatalen <= sizeof(serial_txbuf[0]) - serial_txlen)
+	if (adatalen > sizeof(serial_txbuf[0]) - serial_txlen)
 	{
-		memcpy(&serial_txbuf[serial_txbufidx][serial_txlen], adata, adatalen);
-		serial_txlen += adatalen;
-		result = true;
+		return false;
 	}
+	else
+	{
+		if (adatalen)
+		{
+			memcpy(&serial_txbuf[serial_txbufidx][serial_txlen], adata, adatalen);
+			serial_txlen += adatalen;
+		}
+		return true;
+	}
+}
 
+void TUifCdcUartControl::SerialSendBytes()
+{
 	if (serial_txlen && !dma_tx->Active())
 	{
 		// setup the TX DMA and flip the buffer
@@ -267,8 +275,6 @@ bool TUifCdcUartControl::SerialSendBytes(uint8_t * adata, unsigned adatalen)
 		serial_txbufidx ^= 1;
 		serial_txlen = 0;
 	}
-
-	return result;
 }
 
 void TUifCdcUartControl::Run()
@@ -305,10 +311,7 @@ void TUifCdcUartControl::Run()
 	// The USB -> Serial transfers are controlled by the USB Events,
 	// but when the serial buffer is full then it is stalled
 
-	if (dataif->usb_rxlen)
-	{
-		dataif->TrySendUsbDataToSerial(); // re-enables the USB receive when the USB Rx data transferred to the serial buffer
-	}
+	dataif->TrySendUsbDataToSerial(); // re-enables the USB receive when the USB Rx data transferred to the serial buffer
 }
 
 //------------------------------------------------
@@ -355,8 +358,12 @@ bool TUifCdcUartData::HandleTransferEvent(TUsbEndpoint * aep, bool htod)
 	{
 		usb_rxlen = ep_input.ReadRecvData(&usb_rxbuf[0], sizeof(usb_rxbuf));
 		//TRACE("%i byte VCP data arrived\r\n", usb_rxlen);
+#if 0
+		usb_rxbuf[usb_rxlen] = 0; // terminate the string (array length + 4 required!)
+		TRACE("%s\r\n", &usb_rxbuf[0]);
+#endif
 
-		TrySendUsbDataToSerial();  // re-enables USB receive when it is successful
+		TrySendUsbDataToSerial();  // re-enables USB receive only when the rx bytes are transferred to the serial buffer
 	}
 	else
 	{
@@ -401,21 +408,13 @@ bool TUifCdcUartData::SendTxBytes()
 	return false;
 }
 
-bool TUifCdcUartData::TrySendUsbDataToSerial()
+void TUifCdcUartData::TrySendUsbDataToSerial()
 {
-	if (!usb_rxlen)
-	{
-		return true;
-	}
-
-	if (control->SerialSendBytes(&usb_rxbuf[0], usb_rxlen))
+	if (usb_rxlen && control->SerialAddBytes(&usb_rxbuf[0], usb_rxlen))
 	{
 		usb_rxlen = 0;
 		ep_input.EnableRecv();
-		return true;
 	}
-	else
-	{
-		return false;
-	}
+
+	control->SerialSendBytes();
 }
