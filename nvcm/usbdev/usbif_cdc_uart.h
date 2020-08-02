@@ -32,16 +32,10 @@
 #define SRC_USBIF_CDC_UART_H_
 
 #include "usbdevice.h"
+#include "usbif_cdc.h"
 #include "hwuart.h"
 #include "hwdma.h"
 
-struct TCdcLineCoding
-{
-	uint32_t   baudrate;
-	uint8_t    charformat;  // 0 = 1 stop bits, 1 = 1.5 stop bits, 2 = 2 stop bits
-	uint8_t    paritytype;  // 0 = off, 1 = odd parity, 2 = even parity
-	uint8_t    databits;
-};
 
 class TUifCdcUartData;
 

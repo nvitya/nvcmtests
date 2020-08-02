@@ -31,14 +31,7 @@
 #define SRC_USB_CDC_ECHO_H_
 
 #include "usbdevice.h"
-
-struct TCdcLineCoding
-{
-	uint32_t   baudrate;
-	uint8_t    charformat;
-	uint8_t    paritytype;
-	uint8_t    databits;
-};
+#include "usbif_cdc.h"
 
 class TUifCdcControl : public TUsbInterface
 {

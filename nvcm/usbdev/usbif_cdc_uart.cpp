@@ -31,45 +31,6 @@
 #include "string.h"
 #include "traces.h"
 
-static const uint8_t cdc_desc_header_func[] =
-{
-	/*Header Functional Descriptor*/
-	0x05,   /* bLength: Endpoint Descriptor size */
-	0x24,   /* bDescriptorType: CS_INTERFACE */
-	0x00,   /* bDescriptorSubtype: Header Func Desc */
-	0x10,   /* bcdCDC: spec release number */
-	0x01,
-};
-
-static const uint8_t cdc_desc_call_management[] =
-{
-	/*Call Management Functional Descriptor*/
-	0x05,   /* bFunctionLength */
-	0x24,   /* bDescriptorType: CS_INTERFACE */
-	0x01,   /* bDescriptorSubtype: Call Management Func Desc */
-	0x00,   /* bmCapabilities: 0 = no call management */
-	0x00,   /* bDataInterface: 0 */   // ???
-};
-
-static const uint8_t cdc_desc_call_acm_func[] =
-{
-	/*ACM Functional Descriptor*/
-	0x04,   /* bFunctionLength */
-	0x24,   /* bDescriptorType: CS_INTERFACE */
-	0x02,   /* bDescriptorSubtype: Abstract Control Management desc */
-	0x02,   /* bmCapabilities */
-};
-
-static const uint8_t cdc_desc_call_union_func[] =
-{
-	/*Union Functional Descriptor*/
-	0x05,   /* bFunctionLength */
-	0x24,   /* bDescriptorType: CS_INTERFACE */
-	0x06,   /* bDescriptorSubtype: Union func desc */
-	0x00,   /* bMasterInterface: Communication class interface */
-	0x01,   /* bSlaveInterface0: Data Class Interface */
-};
-
 //----------------------------------------------------
 
 bool TUifCdcUartControl::InitCdcUart(TUifCdcUartData * adataif, THwUart * auart, THwDmaChannel * adma_tx, THwDmaChannel * adma_rx)
