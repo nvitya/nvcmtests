@@ -273,7 +273,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	// Set the interrupt vector table offset, so that the interrupts and exceptions work
 	mcu_init_vector_table();
 
-  unsigned clockspeed = MCU_CLOCK_SPEED / 1;
+  unsigned clockspeed = MCU_CLOCK_SPEED;
 
 #ifdef MCU_INPUT_FREQ
 	if (!hwclkctrl.InitCpuClock(MCU_INPUT_FREQ, clockspeed))

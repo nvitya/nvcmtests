@@ -60,6 +60,37 @@ static void init_usb_uart()
 
 #endif
 
+#if defined(BOARD_MIBO48_STM32G473)
+
+static void init_usb_uart()
+{
+	// USART2
+	hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART2_TX
+	hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_7 | PINCFG_PULLUP);  // USART2_RX
+	usbuart.Init(2);
+
+	usbuart_dma_tx.Init(1, 7, 27); // USART2_TX
+	usbuart_dma_rx.Init(1, 6, 26); // USART2_RX
+}
+
+#endif
+
+#if defined(BOARD_MIBO48_STM32F303)
+
+static void init_usb_uart()
+{
+	// USART2
+	hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART2_TX
+	hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_7 | PINCFG_PULLUP);  // USART2_RX
+	usbuart.Init(2);
+
+	usbuart_dma_tx.Init(1, 7, 2); // USART2_TX
+	usbuart_dma_rx.Init(1, 6, 2); // USART2_RX
+}
+
+#endif
+
+
 void usb_device_init()
 {
 	TRACE("Initializing USB Device\r\n");
