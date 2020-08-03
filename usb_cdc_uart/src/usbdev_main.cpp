@@ -90,6 +90,104 @@ static void init_usb_uart()
 
 #endif
 
+#if defined(BOARD_MIBO64_STM32F070)
+
+static void init_usb_uart()
+{
+	// USART2
+	hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_1);  // USART2_TX
+	hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_1 | PINCFG_PULLUP);  // USART2_RX
+	usbuart.Init(2);
+
+	usbuart_dma_tx.Init(1, 4, 2); // USART2_TX
+	usbuart_dma_rx.Init(1, 5, 2); // USART2_RX
+}
+
+#endif
+
+#if defined(BOARD_MIBO20_STM32F070)
+
+static void init_usb_uart()
+{
+	// USART2
+	hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_1);  // USART2_TX
+	hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_1 | PINCFG_PULLUP);  // USART2_RX
+	usbuart.Init(2);
+
+	usbuart_dma_tx.Init(1, 4, 2); // USART2_TX
+	usbuart_dma_rx.Init(1, 5, 2); // USART2_RX
+}
+
+#endif
+
+#if defined(BOARD_MIBO64_STM32F405)
+
+#warning "Buggy USB implementation (see line coding trace)"
+
+static void init_usb_uart()
+{
+	// USART2
+	hwpinctrl.PinSetup(PORTNUM_A,  2,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART2_TX
+	hwpinctrl.PinSetup(PORTNUM_A,  3,  PINCFG_INPUT  | PINCFG_AF_7 | PINCFG_PULLUP);  // USART2_RX
+	usbuart.Init(2);
+
+	usbuart.printf("USB uart test...\r\n");
+
+	usbuart_dma_tx.Init(1, 6, 4); // USART2_TX
+	usbuart_dma_rx.Init(1, 5, 4); // USART2_RX
+}
+
+#endif
+
+#if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
+
+#warning "STM32F7 does not work perfectly with big data chunks!"
+
+static void init_usb_uart()
+{
+	// USART6 - on the Arduino pins D0, D1
+	hwpinctrl.PinSetup(PORTNUM_G, 14,  PINCFG_OUTPUT | PINCFG_AF_8);  // USART6_TX
+	hwpinctrl.PinSetup(PORTNUM_G,  9,  PINCFG_INPUT  | PINCFG_AF_8 | PINCFG_PULLUP);  // USART6_RX
+	usbuart.Init(6);
+
+	usbuart_dma_tx.Init(2, 7, 5); // USART6_TX
+	usbuart_dma_rx.Init(2, 2, 5); // USART6_RX
+}
+
+#endif
+
+#if defined(BOARD_MIBO64_ATSAME5X)
+
+#warning "Imperfect USB->Serial big block transfer !!!"
+
+static void init_usb_uart()
+{
+	// SERCOM2
+	hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_AF_2);  // PAD[0] = TX
+	hwpinctrl.PinSetup(PORTNUM_A, 13, PINCFG_AF_2);  // PAD[1] = RX
+	usbuart.Init(2);
+
+	usbuart_dma_tx.Init(4, 0x09); // 0x09 = SERCOM2_TX
+	usbuart_dma_rx.Init(5, 0x08); // 0x08 = SERCOM2_RX
+}
+
+#endif
+
+#if defined(BOARD_MIBO100_ATSAME70)
+
+#warning "Imperfect USB implementation (config descriptor segmentation)"
+
+static void init_usb_uart()
+{
+	hwpinctrl.PinSetup(PORTNUM_A,  5,  PINCFG_INPUT  | PINCFG_AF_C);  // UART1_RX
+	hwpinctrl.PinSetup(PORTNUM_A,  4,  PINCFG_OUTPUT | PINCFG_AF_C);  // UART1_TX
+	usbuart.Init(1);
+
+	usbuart_dma_tx.Init(4, 22); // 22 = UART1_TX
+	usbuart_dma_rx.Init(5, 23); // 23 = UART1_RX
+}
+
+#endif
 
 void usb_device_init()
 {

@@ -86,8 +86,8 @@ void setup_board()
 	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
   // USART3: Stlink USB / Serial converter
-	hwpinctrl.PinSetup(3, 8,  PINCFG_OUTPUT | PINCFG_AF_7); // USART3_TX: PD.8
-	hwpinctrl.PinSetup(3, 9,  PINCFG_INPUT  | PINCFG_AF_7); // USART3_RX: PD.9
+	hwpinctrl.PinSetup(PORTNUM_D, 8,  PINCFG_OUTPUT | PINCFG_AF_7); // USART3_TX: PD.8
+	hwpinctrl.PinSetup(PORTNUM_D, 9,  PINCFG_INPUT  | PINCFG_AF_7); // USART3_RX: PD.9
 	conuart.Init(3); // USART3
 
 	// USB_OTG_FS PINS
@@ -199,13 +199,35 @@ void setup_board()
 	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
 	// USB PINS
-	//hwpinctrl.PinSetup(PORTNUM_A, 11, PINCFG_INPUT | PINCFG_AF_0 | PINCFG_SPEED_FAST);  // USB DM
-	//hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_INPUT | PINCFG_AF_0 | PINCFG_SPEED_FAST);  // USB DP
+	hwpinctrl.PinSetup(PORTNUM_A, 11, PINCFG_INPUT | PINCFG_AF_0 | PINCFG_SPEED_FAST);  // USB DM
+	hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_INPUT | PINCFG_AF_0 | PINCFG_SPEED_FAST);  // USB DP
 
 	// USART1
 	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_1);  // USART1_TX
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_1);  // USART1_RX
 	conuart.Init(1);
+}
+#endif
+
+#if defined(BOARD_MIBO20_STM32F070)
+
+#warning "No serial terminal because the pins A9, A10 are shared with the USB"
+
+TGpioPin  led1pin(PORTNUM_B, 1, false);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// USART1 - not availabe when USB is used too !
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_1);  // USART1_TX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_1);  // USART1_RX
+	conuart.Init(1);
+
+	// USB PINS
+	SYSCFG->CFGR1 |= SYSCFG_CFGR1_PA11_PA12_RMP; // remap pins 17-18 to PA11, PA12 (from PA9, PA10)
+	hwpinctrl.PinSetup(PORTNUM_A, 11, PINCFG_INPUT | PINCFG_AF_0 | PINCFG_SPEED_FAST);  // USB DM
+	hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_INPUT | PINCFG_AF_0 | PINCFG_SPEED_FAST);  // USB DP
 }
 #endif
 
@@ -241,17 +263,28 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_INPUT  | PINCFG_AF_3);  // PAD[1] = RX
 	conuart.Init(0);
 
-	// SERCOM2
-	//hwpinctrl.PinSetup(PORTNUM_A, 12, PINCFG_AF_2);  // PAD[0] = TX
-	//hwpinctrl.PinSetup(PORTNUM_A, 13, PINCFG_AF_2);  // PAD[1] = RX
-	//conuart.Init(2);
-
 	// USB PINS
 	hwpinctrl.PinSetup(PORTNUM_A, 24, PINCFG_AF_7);  // USB DM
 	hwpinctrl.PinSetup(PORTNUM_A, 25, PINCFG_AF_7);  // USB DP
 }
 #endif
 
+#if defined(BOARD_MIBO100_ATSAME70)
+
+TGpioPin  led1pin(PORTNUM_D, 13, false);
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
+	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
+	conuart.Init(0);
+
+  // dedicated HS USB pins, no pin setup required
+}
+
+#endif
 
 // ---------------------------------------------------------------------------------------
 
