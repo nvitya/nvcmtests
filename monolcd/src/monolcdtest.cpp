@@ -5,7 +5,7 @@
 #include "traces.h"
 #include "clockcnt.h"
 
-#define DISPLAY_BITBANG 1
+#define DISPLAY_BITBANG 0
 
 #if DISPLAY_BITBANG
   TMonoLcd_bb   disp;
@@ -13,7 +13,7 @@
   TMonoLcd_spi  disp;
 #endif
 
-uint8_t disp_buf[128*64 >> 3];
+uint8_t disp_buf[256*168 >> 3];
 
 #include "font_FreeSans9pt7b.h"
 TGfxFont font_sans(&FreeSans9pt7b);
@@ -54,6 +54,31 @@ void monolcd_test()
 	disp.spi.speed = 4000000; // 4 MHz
 	disp.spi.Init(1);
 
+#elif defined(BOARD_MIBO48_STM32F303)
+
+	// LCD control
+	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_OUTPUT | PINCFG_AF_5); // SPI1_SCK
+	hwpinctrl.PinSetup(PORTNUM_A, 7, PINCFG_OUTPUT | PINCFG_AF_5); // SPI1_MOSI
+
+	disp.pin_reset.Assign(PORTNUM_A, 1, false);
+	disp.pin_reset.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	disp.pin_cs.Assign(PORTNUM_A, 0, false);
+	disp.pin_cs.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	disp.pin_cd.Assign(PORTNUM_A, 2, false);
+	disp.pin_cd.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	// SPI1
+
+	//disp.txdma.Init(1, 3, 1);  // SPI1/TX = DMA channel 3
+
+	disp.spi.idleclk_high = false;
+	disp.spi.datasample_late = false;
+	disp.spi.speed = 8000000; // 4 MHz
+	disp.spi.Init(1);
+
+
 #elif defined(BOARD_MIBO64_ATSAM4S)
 
 	disp.pin_clk.Assign(PORTNUM_B, 0, false);
@@ -83,6 +108,15 @@ void monolcd_test()
 	}
 
 #else
+
+	#if 1
+		disp.rotation = 0;
+		if (!disp.Init(MLCD_CTRL_ST75256, 256, 160, &disp_buf[0]))
+		{
+			TRACE("Error Initializing LCD display!\r\n");
+			return;
+		}
+	#endif
 
 	#if 0
 		disp.rotation = 0;
@@ -214,7 +248,7 @@ void monolcd_test()
 
 #endif
 
-#if 1
+#if 0
 
 	TRACE("Static LCD test\r\n");
 
