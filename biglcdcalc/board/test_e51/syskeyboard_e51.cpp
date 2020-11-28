@@ -12,33 +12,29 @@ struct TSymConvItem
 	uint16_t   sym_alt;
 };
 
-TSymConvItem sym_conv_table[5 * 4] =
+TSymConvItem sym_conv_table[4 * 4] =
 {
 //  shift		      normal,          shift,            alt
-		{0x00,   KEYSYM_LEFT,    KEYSYM_LEFT,    KEYSYM_HOME},
-		{0x00,           '0',            '.',            '0'},
-		{0x00,  KEYSYM_RIGHT,   KEYSYM_RIGHT,     KEYSYM_END},
-		{0x00,  KEYSYM_ENTER,   KEYSYM_ENTER,   KEYSYM_ENTER},
+		{0x00,           '1',            '+',            'A'},  // 1
+		{0x00,           '2',            '-',            'B'},  // 2
+		{0x00,           '3',            '*',            'C'},  // 3
+		{KEYSHIFT_SHIFT,  0,               0,              0},  // A
 
-		{0x00,           '7',            '7',            '7'},
-		{0x00,           '8',            ',',            '8'},
-		{0x00,           '9',            '9',            '9'},
-		{0x00, KEYSYM_BACKSPACE,   KEYSYM_BACKSPACE,   KEYSYM_BACKSPACE},
+		{0x00,           '4',            '/',            'D'},  // 4
+		{0x00,           '5',            '^',            'E'},  // 5
+		{0x00,           '6',            '=',            'F'},  // 6
+		{KEYSHIFT_ALT,    0,               0,              0},  // B
 
-		{0x00,           '4',            '4',            '4'},
-		{0x00,           '5',            '5',            '5'},
-		{0x00,           '6',            '6',            '6'},
-		{0x00,   KEYSYM_DOWN,    KEYSYM_DOWN,   KEYSYM_DOWN},
+		{0x00,           '7',            '(',            'X'},  // 7
+		{0x00,           '8',            ')',            'Y'},  // 8
+		{0x00,           '9',            ',',            'Z'},  // 9
+		{0x00, KEYSYM_BACKSPACE,   KEYSYM_BACKSPACE,   KEYSYM_BACKSPACE},  // C
 
-		{0x00,           '1',            '1',            '1'},
-		{0x00,           '2',            '(',            '2'},
-		{0x00,           '3',            ')',            '3'},
-		{0x00,     KEYSYM_UP,    KEYSYM_UP,   KEYSYM_UP},
+		{0x00,   KEYSYM_LEFT,    KEYSYM_DOWN,    KEYSYM_PGDN},  // *
+		{0x00,           '0',            '.',            '"'},  // 0
+		{0x00,  KEYSYM_RIGHT,      KEYSYM_UP,    KEYSYM_PGUP},  // #
+		{0x00,  KEYSYM_ENTER,   KEYSYM_ENTER,   KEYSYM_ENTER},  // D
 
-		{KEYSHIFT_SHIFT,  0,               0,              0},
-		{KEYSHIFT_ALT,    0,               0,              0},
-		{0x00,           '+',            '-',            '^'},
-		{0x00,           '*',            '/',            '^'},
 };
 
 bool TSysKeyboard::InitHw()

@@ -111,26 +111,32 @@ extern "C" __attribute__((noreturn)) void _start(void)
 		{
 			TKeyScanEvent * pevent = &g_keyscan_events.events[g_keyscan_events.serial & 31];
 
-			g_display.SetPos(0, 5);
-			g_display.printf("scan %i: ev=%i, key=%2i",
-					 g_keyscan_events.serial,
-					 pevent->evtype,
-					 pevent->scancode
-			);
+      #if 1
+				g_display.SetPos(0, 5);
+				g_display.printf("scan %i: ev=%i, key=%2i",
+						 g_keyscan_events.serial,
+						 pevent->evtype,
+						 pevent->scancode
+				);
+      #endif
 
 			prev_scanserial = g_keyscan_events.serial;
 		}
+#endif
 
+#if 1
 		if (prev_symserial != g_keysym_events.serial)
 		{
 			TKeySymbolEvent * psyme = &g_keysym_events.events[g_keysym_events.serial & 15];
 
-			g_display.SetPos(0, 6);
-			g_display.printf("sym %i: ss=%02X, sym=%04X",
-					 g_keysym_events.serial,
-					 psyme->shiftstate,
-					 psyme->symbol
-			);
+     	#if 0
+				g_display.SetPos(0, 6);
+				g_display.printf("sym %i: ss=%02X, sym=%04X",
+						 g_keysym_events.serial,
+						 psyme->shiftstate,
+						 psyme->symbol
+				);
+	    #endif
 
 			// some processing
 			uint16_t keysym = psyme->symbol;
@@ -173,7 +179,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 			}
 
 			// print editrow
-			g_display.SetPos(0, 7);
+			g_display.SetPos(0, 6);
 			for (unsigned n = 0; n < 40; n++)
 			{
 				if (n < editpos)
@@ -198,7 +204,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 		if (t1-t0 > hbclocks)
 		{
-			g_display.printf("cyclecnt = %u\n", cyclecnt);
+			//g_display.printf("cyclecnt = %u\n", cyclecnt);
 			t0 = t1;
 		}
 
