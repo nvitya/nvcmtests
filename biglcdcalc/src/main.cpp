@@ -68,6 +68,11 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	g_display.printf("Hello World !\n");
 
+	for (unsigned n = 32; n < 127; ++n)
+	{
+		g_display.WriteChar(n);
+	}
+
 	g_display.Run();
 
 	pin_led1.Set0();

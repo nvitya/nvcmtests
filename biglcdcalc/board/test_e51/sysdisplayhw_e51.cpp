@@ -1,4 +1,4 @@
-// sysdisplayhw.cpp (f303)
+// sysdisplayhw_e51.cpp
 
 #include "clockcnt.h"
 #include "hwpins.h"
@@ -9,9 +9,9 @@
 //-----------------------------------------------------------------------------
 // GFX Display
 
-#define GFX_DISPLAY_WIDTH   256
-#define GFX_DISPLAY_HEIGHT  160
-#define GFX_DISPLAY_CTRL    MLCD_CTRL_ST75256
+#define GFX_DISPLAY_WIDTH   128
+#define GFX_DISPLAY_HEIGHT   64
+#define GFX_DISPLAY_CTRL    MLCD_CTRL_UC1701
 
 TMonoLcd_spi  gfx_display;
 uint8_t       gfx_display_buf[GFX_DISPLAY_WIDTH * GFX_DISPLAY_HEIGHT / 8];
@@ -30,8 +30,8 @@ bool gfx_display_init();
 //-----------------------------------------------------------------------------
 // Text Display
 
-#define SYSDISP_CHAR_COLS   42
-#define SYSDISP_CHAR_ROWS   20
+#define SYSDISP_CHAR_COLS   20
+#define SYSDISP_CHAR_ROWS    8
 #define SYSDISP_CHAR_NUM    (SYSDISP_CHAR_COLS * SYSDISP_CHAR_ROWS)
 
 uint8_t sys_disp_chars[SYSDISP_CHAR_NUM];
@@ -41,25 +41,26 @@ uint8_t sys_disp_changemap[SYSDISP_CHAR_NUM / 8];
 
 bool gfx_display_init()
 {
-	gfx_display.pin_reset.Assign(PORTNUM_A, 1, false);
+	gfx_display.pin_reset.Assign(PORTNUM_A, 19, false);
 	gfx_display.pin_reset.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
-	gfx_display.pin_cs.Assign(PORTNUM_A, 0, false);
+	gfx_display.pin_cs.Assign(PORTNUM_B, 16, false);
 	gfx_display.pin_cs.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
-	gfx_display.pin_cd.Assign(PORTNUM_A, 2, false);
+	gfx_display.pin_cd.Assign(PORTNUM_A, 18, false);
 	gfx_display.pin_cd.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
 
-	// SPI1
 
-	hwpinctrl.PinSetup(PORTNUM_A, 5, PINCFG_OUTPUT | PINCFG_AF_5); // SPI1_SCK
-	hwpinctrl.PinSetup(PORTNUM_A, 7, PINCFG_OUTPUT | PINCFG_AF_5); // SPI1_MOSI
-	//disp.txdma.Init(1, 3, 1);  // SPI1/TX = DMA channel 3
+	// SERCOM3
+	unsigned pinflags = PINCFG_AF_D | PINCFG_PULLUP | PINCFG_DRIVE_STRONG;
+	hwpinctrl.PinSetup(PORTNUM_A, 16, pinflags);  // SERCOM3_PAD1: SCK
+	hwpinctrl.PinSetup(PORTNUM_A, 17, pinflags);  // SERCOM3_PAD0: MOSI
+	//disp.txdma.Init(4, SERCOM3_DMAC_ID_TX);
 
 	gfx_display.spi.idleclk_high = false;
 	gfx_display.spi.datasample_late = false;
-	gfx_display.spi.speed = 8000000; // 4 MHz
-	gfx_display.spi.Init(1);
+	gfx_display.spi.speed = 4000000; // 4 MHz
+	gfx_display.spi.Init(3);
 
 	gfx_display.rotation = 0;
 	if (!gfx_display.Init(GFX_DISPLAY_CTRL, GFX_DISPLAY_WIDTH, GFX_DISPLAY_HEIGHT, &gfx_display_buf[0]))
