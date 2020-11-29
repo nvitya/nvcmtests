@@ -529,6 +529,8 @@
                                     								
                                 </option>
                                 								
+                                <option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.useprintffloat.2141707446" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.useprintffloat" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+                                								
                                 <inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.input.1232304670" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.input">
                                     									
                                     <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -641,7 +643,11 @@
                                 							
                             </tool>
                             							
-                            <tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.223179956" name="GNU ARM Cross C Linker" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.9676605"/>
+                            <tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.223179956" name="GNU ARM Cross C Linker" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.9676605">
+                                								
+                                <option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.useprintffloat.599990449" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.useprintffloat" value="true" valueType="boolean"/>
+                                							
+                            </tool>
                             							
                             <tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.12109696" name="GNU ARM Cross C++ Linker" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.750895698"/>
                             							
@@ -699,6 +705,8 @@
     	
     <storageModule moduleId="refreshScope" versionNumber="2">
         		
+        <configuration configurationName="TEST_F303"/>
+        		
         <configuration configurationName="BOARD_MIN_F103"/>
         		
         <configuration configurationName="BOARD_MIBO64_ATSAM4S">
@@ -716,6 +724,8 @@
             <resource resourceType="PROJECT" workspacePath="/blinkled"/>
             		
         </configuration>
+        		
+        <configuration configurationName="TEST_E51"/>
         		
         <configuration configurationName="BOARD_MIBO48_STM32F303"/>
         		

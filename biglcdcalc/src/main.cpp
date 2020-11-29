@@ -13,6 +13,11 @@
 #include "sysdisplay.h"
 #include "syskeyboard.h"
 
+#include "exprcalc.h"
+
+TExprCalc  g_calc;
+TCalcVar   calcvar;
+
 // the C libraries require "_start" so we keep it as the entry point
 extern "C" __attribute__((noreturn)) void _start(void)
 {
@@ -92,6 +97,9 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	uint8_t editpos = 0;
 	editrow[0] = 0;
 
+	g_display.SetPos(0, g_display.rows-1);
+	g_display.WriteChar('>');
+
 	// Infinite loop
 	while (1)
 	{
@@ -164,23 +172,16 @@ extern "C" __attribute__((noreturn)) void _start(void)
 			{
 				if (g_display.cursor_x < 39)  ++g_display.cursor_x;
 			}
-			else if (KEYSYM_ENTER == keysym)
-			{
-				// execute
-
-				// reset
-				editpos = 0;
-				editrow[0] = 0;
-			}
-			else if ((editpos < 38) && (keysym >= 32) && (keysym <= 127))
+			else if ((editpos < g_display.cols-2) && (keysym >= 32) && (keysym <= 127))
 			{
 				editrow[editpos] = keysym;
 				++editpos;
 			}
 
 			// print editrow
-			g_display.SetPos(0, 6);
-			for (unsigned n = 0; n < 40; n++)
+			g_display.SetPos(0, g_display.rows-1);
+			g_display.WriteChar('>');
+			for (unsigned n = 0; n < g_display.cols-2; n++)
 			{
 				if (n < editpos)
 				{
@@ -197,6 +198,26 @@ extern "C" __attribute__((noreturn)) void _start(void)
 			//g_display.cursor_y = 7;
 
 			prev_symserial = g_keysym_events.serial;
+
+			if (KEYSYM_ENTER == keysym)
+			{
+				// execute
+				g_display.WriteChar(10); // new line
+
+				int err = g_calc.Evaluate(&editrow[0], editpos, &calcvar);
+				if (err)
+				{
+					g_display.printf("= [error %i]\n>", err);
+				}
+				else
+				{
+					g_display.printf("= %0.8f\n>", calcvar.floatvalue);
+				}
+
+				// reset
+				editpos = 0;
+				editrow[0] = 0;
+			}
 		}
 #endif
 
