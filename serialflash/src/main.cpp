@@ -41,7 +41,7 @@
 
 THwUart   conuart;  // console uart
 
-#if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746)
+#if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746) || defined(BOARD_NUCLEO_H743)
 
 TGpioPin  led1pin(1, 0, false);
 TGpioPin  led2pin(1, 7, false);

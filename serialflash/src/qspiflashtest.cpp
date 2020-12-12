@@ -62,10 +62,24 @@ void qspi_flash_test()
 	hwpinctrl.PinSetup(PORTNUM_E,  2, qspipincfg | PINCFG_AF_9);   // IO2
 	hwpinctrl.PinSetup(PORTNUM_D, 13, qspipincfg | PINCFG_AF_9);   // IO3
 
+#elif	defined(BOARD_NUCLEO_H743)
+
+	uint32_t qspipincfg = 0;
+
+	hwpinctrl.PinSetup(PORTNUM_B,  6, qspipincfg | PINCFG_AF_10);  // NCS     !!!!!!!!!!!
+	//hwpinctrl.PinSetup(PORTNUM_G,  6, qspipincfg | PINCFG_AF_10);  // NCS
+	hwpinctrl.PinSetup(PORTNUM_B,  2, qspipincfg | PINCFG_AF_9);   // CLK
+
+	hwpinctrl.PinSetup(PORTNUM_D, 11, qspipincfg | PINCFG_AF_9);   // IO0
+	hwpinctrl.PinSetup(PORTNUM_D, 12, qspipincfg | PINCFG_AF_9);   // IO1
+
+	hwpinctrl.PinSetup(PORTNUM_E,  2, qspipincfg | PINCFG_AF_9);   // IO2
+	hwpinctrl.PinSetup(PORTNUM_D, 13, qspipincfg | PINCFG_AF_9);   // IO3
+
 #endif
 
-	qspiflash.qspi.speed = 60000000;
-	qspiflash.qspi.multi_line_count = 2;
+	qspiflash.qspi.speed = 4000000;
+	qspiflash.qspi.multi_line_count = 1;
 	qspiflash.has4kerase = true;
 	if (!qspiflash.Init())
 	{

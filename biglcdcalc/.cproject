@@ -187,6 +187,8 @@
                                     								
                                 </option>
                                 								
+                                <option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.useprintffloat.284045971" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.useprintffloat" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+                                								
                                 <inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.input.947434225" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.input">
                                     									
                                     <additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -299,7 +301,11 @@
                                 							
                             </tool>
                             							
-                            <tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.81487593" name="GNU ARM Cross C Linker" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.1578958012"/>
+                            <tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.81487593" name="GNU ARM Cross C Linker" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.1578958012">
+                                								
+                                <option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.useprintffloat.1020267288" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.useprintffloat" value="true" valueType="boolean"/>
+                                							
+                            </tool>
                             							
                             <tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.785719433" name="GNU ARM Cross C++ Linker" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.1030530165"/>
                             							
@@ -529,7 +535,7 @@
                                     								
                                 </option>
                                 								
-                                <option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.useprintffloat.2141707446" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.useprintffloat" useByScannerDiscovery="false" value="true" valueType="boolean"/>
+                                <option id="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.useprintffloat.2141707446" name="Use float with nano printf (-u _printf_float)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.cpp.linker.useprintffloat" useByScannerDiscovery="false" value="true" valueType="boolean"/>
                                 								
                                 <inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.input.1232304670" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.linker.input">
                                     									
@@ -645,7 +651,7 @@
                             							
                             <tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.223179956" name="GNU ARM Cross C Linker" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.linker.9676605">
                                 								
-                                <option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.useprintffloat.599990449" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.useprintffloat" value="true" valueType="boolean"/>
+                                <option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.useprintffloat.599990449" name="Use float with nano printf (-u _printf_float)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.linker.useprintffloat" value="true" valueType="boolean"/>
                                 							
                             </tool>
                             							

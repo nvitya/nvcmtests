@@ -181,7 +181,7 @@ void spi_flash_test()
 	spiflash.txdma.Init(2, 5, 3);  // dma2/stream5/ch3
 	spiflash.rxdma.Init(2, 0, 3);  // dma2/stream0/ch3
 
-#elif defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746) || defined(BOARD_DISCOVERY_F746)
+#elif defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746) || defined(BOARD_DISCOVERY_F746) || defined(BOARD_NUCLEO_H743)
 
 	spiflash.pin_cs.Assign(PORTNUM_D, 14, false);
 	spiflash.pin_cs.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
