@@ -76,6 +76,43 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746) || defined(BOARD_NUCLEO_H743)
+
+TGpioPin  led1pin(1, 0, false);
+TGpioPin  led2pin(1, 7, false);
+TGpioPin  led3pin(1, 14, false);
+
+void setup_board()
+{
+	// nucleo board leds
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led2pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+	led3pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+  // USART3: Stlink USB / Serial converter
+	// USART3_TX: PD.8
+	hwpinctrl.PinSetup(3, 8,  PINCFG_OUTPUT | PINCFG_AF_7);
+	// USART3_RX: Pd.9
+	hwpinctrl.PinSetup(3, 9,  PINCFG_INPUT  | PINCFG_AF_7);
+
+	conuart.Init(3); // USART3
+
+	// SDCARD Pins
+	hwpinctrl.PinSetup(PORTNUM_C,  8, PINCFG_AF_12); // SDMMC_D0
+	hwpinctrl.PinSetup(PORTNUM_C,  9, PINCFG_AF_12); // SDMMC_D1
+	hwpinctrl.PinSetup(PORTNUM_C, 10, PINCFG_AF_12); // SDMMC_D2
+	hwpinctrl.PinSetup(PORTNUM_C, 11, PINCFG_AF_12); // SDMMC_D3
+	hwpinctrl.PinSetup(PORTNUM_C, 12, PINCFG_AF_12); // SDMMC_CK
+	hwpinctrl.PinSetup(PORTNUM_D,  2, PINCFG_AF_12); // SDMMC_CMD
+
+	//sdcard.dma.Init(9, 0); // 0 = HSMCI DMA Peripheral Id (Transmit and Receive)
+
+	sdcard.Init();
+}
+
+#endif
+
+
 #if defined(BOARD_VERTIBO_A)
 
 TGpioPin  led1pin(PORTNUM_A, 29, false);
@@ -175,97 +212,10 @@ void heartbeat_task() // invoked every 0.5 s
 	//conuart.TrySendChar(0x55);
 }
 
-#if 0
-
-uint8_t sdcard_cid[16];
-
-void sdcard_test()
-{
-	uint32_t n;
-	uint32_t d;
-
-	TRACE("SDCARD test\r\n");
-
-	sdcard.SetSpeed(400000); // initial speed = 400 kHz
-	sdcard.SetBusWidth(1);
-
-	sdcard.SendSpecialCmd(SD_SPECIAL_CMD_INIT); // never fails
-	while (!sdcard.CmdFinished()) { }
-
-	sdcard.SendCmd(0, 0, SDCMD_RES_NO); // never fails
-	while (!sdcard.CmdFinished()) { }
-
-	while (1)
-	{
-		sdcard.SendCmd(55, 0, SDCMD_RES_48BIT | SDCMD_OPENDRAIN);
-		while (!sdcard.CmdFinished()) { }
-		if (sdcard.cmderror)
-		{
-			TRACE("Cmd_55 error!\r\n");
-			return;
-		}
-
-		sdcard.SendCmd(41, 0x001f8000 | 0x40000000, SDCMD_RES_48BIT | SDCMD_OPENDRAIN);
-		while (!sdcard.CmdFinished()) { }
-		if (sdcard.cmderror)
-		{
-			TRACE("Cmd_41 error!\r\n");
-			return;
-		}
-
-		d = sdcard.GetCmdResult32();
-		//TRACE("OCR reg = %08X\r\n", d);
-
-		if (d & 0x80000000)
-		{
-			// card is ready.
-			break;
-		}
-	}
-
-	sdcard.SendCmd(2, 0, SDCMD_RES_136BIT | SDCMD_OPENDRAIN);
-	while (!sdcard.CmdFinished()) { }
-	if (sdcard.cmderror)
-	{
-		TRACE("CID command error!\r\n");
-		return;
-	}
-	else
-	{
-		TRACE("CID command ok.\r\n");
-	}
-
-	sdcard.GetCmdResult128(&sdcard_cid[0]);
-
-	for (n = 0; n < 16; ++n)
-	{
-		TRACE(" %02X", sdcard_cid[n]);
-	}
-	TRACE("\r\n");
-}
-
-void idle_task()
-{
-}
-
-#else
-
-void idle_task()
-{
-	sdcard.Run();
-}
-
-void sdcard_test()
-{
-
-}
-
-#endif
-
 int teststate = 0;
 
 uint8_t testbuf[16384] __attribute__((aligned(4)));
-uint32_t testlen = 2048;
+uint32_t testlen = 512 * 2; //2048;
 uint32_t testcnt = 0;
 
 // the C libraries require "_start" so we keep it as the entry point
@@ -316,8 +266,6 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	TRACE("Board: \"%s\"\r\n", BOARD_NAME);
 	TRACE("SystemCoreClock: %u\r\n", SystemCoreClock);
 
-	sdcard_test();
-
 	TRACE("\r\nStarting main cycle...\r\n");
 
 	SysTick_Config(SystemCoreClock / 1000);
@@ -339,14 +287,15 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	{
 		t1 = CLOCKCNT;
 
-		idle_task();
+		sdcard.Run();
 
 		if (0 == teststate)
 		{
 			if (sdcard.card_initialized)
 			{
 				TRACE("APP: SD Card initialized.\r\n");
-				teststate = 1;
+				teststate = 1; // start read
+				//teststate = 11; // end test
 			}
 		}
 		else if (1 == teststate)
