@@ -105,8 +105,6 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_C, 12, PINCFG_AF_12); // SDMMC_CK
 	hwpinctrl.PinSetup(PORTNUM_D,  2, PINCFG_AF_12); // SDMMC_CMD
 
-	//sdcard.dma.Init(9, 0); // 0 = HSMCI DMA Peripheral Id (Transmit and Receive)
-
 	sdcard.Init();
 }
 
@@ -158,8 +156,6 @@ void setup_board()
 
 #if defined(BOARD_DEV_STM32F407ZE)
 
-#define SKIP_DTCRAM_EXEC_TEST
-
 TGpioPin  led1pin(5, 9, true);  // PF9
 TGpioPin  led2pin(5, 10, true);  // PF10
 
@@ -172,6 +168,16 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
 	conuart.Init(1);
+
+	// SDCARD Pins
+	hwpinctrl.PinSetup(PORTNUM_C,  8, PINCFG_AF_12); // SDMMC_D0
+	hwpinctrl.PinSetup(PORTNUM_C,  9, PINCFG_AF_12); // SDMMC_D1
+	hwpinctrl.PinSetup(PORTNUM_C, 10, PINCFG_AF_12); // SDMMC_D2
+	hwpinctrl.PinSetup(PORTNUM_C, 11, PINCFG_AF_12); // SDMMC_D3
+	hwpinctrl.PinSetup(PORTNUM_C, 12, PINCFG_AF_12); // SDMMC_CK
+	hwpinctrl.PinSetup(PORTNUM_D,  2, PINCFG_AF_12); // SDMMC_CMD
+
+	sdcard.Init();
 }
 
 #endif
