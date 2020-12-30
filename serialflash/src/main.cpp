@@ -343,13 +343,13 @@ extern "C" __attribute__((noreturn)) void main(void)
   mcu_preinit_code(); // inline code for preparing the MCU, RAM regions. Without this even the stack does not work on some MCUs.
 
   unsigned clockspeed = MAX_CLOCK_SPEED;
-  //unsigned clockspeed = 4000000;
+  //unsigned clockspeed = 100000000;
 
 #ifdef MCU_INPUT_FREQ
   //if (false)
-	if (!hwclkctrl.InitCpuClock(MCU_INPUT_FREQ, MAX_CLOCK_SPEED))  // activate the external crystal oscillator with multiplication x2
+	if (!hwclkctrl.InitCpuClock(MCU_INPUT_FREQ, clockspeed))  // activate the external crystal oscillator with multiplication x2
 #else
-	if (!hwclkctrl.InitCpuClockIntRC(MCU_INTRC_SPEED, MAX_CLOCK_SPEED))  // activate the external crystal oscillator with multiplication x2
+	if (!hwclkctrl.InitCpuClockIntRC(MCU_INTRC_SPEED, clockspeed))  // activate the external crystal oscillator with multiplication x2
 #endif
 	{
 		while (1)

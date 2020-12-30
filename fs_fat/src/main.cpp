@@ -34,12 +34,14 @@
 #include "cppinit.h"
 #include "clockcnt.h"
 #include "hwsdcard.h"
+#include "storman_sdcard.h"
+#include "filesys_fat.h"
 
 #include "traces.h"
 
-THwSdcard sdcard;
+THwUart         conuart;  // console uart
 
-THwUart   conuart;  // console uart
+THwSdcard       sdcard;
 
 #if defined(BOARD_XPLAINED_SAME70)
 
@@ -249,9 +251,16 @@ void heartbeat_task() // invoked every 0.5 s
 
 int teststate = 0;
 
-uint8_t testbuf[16384] __attribute__((aligned(4)));
-uint32_t testlen = 512 * 1; //2048;
-uint32_t testcnt = 0;
+uint8_t  testbuf[4096] __attribute__((aligned(16)));
+
+TMbrPtEntry     ptable[4];
+
+uint32_t        fs_firstsector;
+uint32_t        fs_maxsectors;
+
+TStorManSdcard  storman;
+TStorTrans      stra;
+TFileSysFat     fatfs;
 
 // the C libraries require "_start" so we keep it as the entry point
 extern "C" __attribute__((noreturn)) void _start(void)
@@ -296,10 +305,126 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	// go on with the hardware initializations
 	setup_board();
 
-	TRACE("\r\n--------------------------\r\n");
-	TRACE("NVCM SDCARD TEST\r\n");
+	TRACE("\r\n---------------------------------\r\n");
+	TRACE("NVCM SDCARD + FAT Filesystem Test\r\n");
 	TRACE("Board: \"%s\"\r\n", BOARD_NAME);
 	TRACE("SystemCoreClock: %u\r\n", SystemCoreClock);
+
+	int i;
+	unsigned n;
+
+#if 1 // not necessary, but the trace output is nicer and the debugging is easier
+	TRACE("Waiting for SDCARD initialization...\r\n");
+
+	while (!sdcard.card_initialized)
+	{
+		sdcard.Run();
+	}
+#endif
+
+#if 0
+
+	sdcard.StartReadBlocks(0x800, &testbuf[0], 2);
+	while (!sdcard.completed)
+	{
+		sdcard.Run();
+	}
+
+	if (sdcard.errorcode)
+	{
+		TRACE("Read error!\r\n");
+		teststate = 10;
+	}
+	else
+	{
+		TRACE("Read ok.\r\n");
+		for (i = 0; i < 512*2; ++i)
+		{
+			if (i != 0)
+			{
+				if ((i % 16) == 0)  TRACE("\r\n");
+				if ((i % 512) == 0) TRACE("\r\n");
+			}
+
+			TRACE(" %02X", testbuf[i]);
+		}
+		TRACE("\r\n");
+	}
+
+	__BKPT();
+#endif
+
+	storman.Init(&sdcard);
+
+	fs_firstsector = 0;
+	fs_maxsectors = 0;
+
+	TRACE("Reading SDCARD partition table...\r\n");
+
+	storman.AddTransaction(&stra, STRA_READ, 446, &ptable[0], 64);
+	storman.WaitTransaction(&stra);
+	if (stra.errorcode)
+	{
+		TRACE("Error reading partition table!\r\n");
+	}
+	else
+	{
+		TRACE("SDCARD Partition table:\r\n");
+		for (n = 0; n < 4; ++n)
+		{
+			if ((fs_firstsector == 0) && (ptable[n].ptype != 0) && ptable[n].first_lba)
+			{
+				fs_firstsector = ptable[n].first_lba;
+				fs_maxsectors = ptable[n].sector_count;
+			}
+
+			TRACE(" %u.: status=%02X, type=%02X, start=%08X, blocks=%i\r\n",
+					n, ptable[n].status, ptable[n].ptype, ptable[n].first_lba, ptable[n].sector_count
+			);
+		}
+	}
+
+	if (fs_maxsectors)
+	{
+		TRACE("Initializing FAT FS at sector %i...\r\n", fs_firstsector);
+
+		fatfs.Init(&storman, (fs_firstsector << 9), (fs_maxsectors << 9));
+		while (!fatfs.initialized)
+		{
+			fatfs.Run();
+		}
+
+		if (fatfs.fsok)
+		{
+			TRACE("FAT file system initialized:\r\n");
+			if (fatfs.fat32)  TRACE(" FAT32\r\n");
+			TRACE(" cluster size: %u\r\n", fatfs.clusterbytes);
+			TRACE(" total size: %u MByte\r\n", fatfs.databytes >> 20);
+
+			TRACE("Reading the root directory...\r\n");
+
+			storman.AddTransaction(&stra, STRA_READ, fatfs.firstaddr + fatfs.sysbytes, &testbuf[0], 4096);
+			storman.WaitTransaction(&stra);
+			if (stra.errorcode)
+			{
+				TRACE("Error reading the root directory!\r\n");
+			}
+			else
+			{
+				for (i = 0; i < 512; ++i)
+				{
+					if (i != 0)
+					{
+						if ((i % 16) == 0)  TRACE("\r\n");
+						if ((i % 512) == 0) TRACE("\r\n");
+					}
+
+					TRACE(" %02X", testbuf[i]);
+				}
+				TRACE("\r\n");
+			}
+		}
+	}
 
 	TRACE("\r\nStarting main cycle...\r\n");
 
@@ -313,8 +438,6 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 	unsigned rstart, rend;
 
-	int i;
-
 	t0 = CLOCKCNT;
 
 	// Infinite loop
@@ -322,75 +445,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	{
 		t1 = CLOCKCNT;
 
-		sdcard.Run();
-
-		if (0 == teststate)
-		{
-			if (sdcard.card_initialized)
-			{
-				TRACE("APP: SD Card initialized.\r\n");
-				teststate = 1; // start read
-				//teststate = 11; // end test
-			}
-		}
-		else if (1 == teststate)
-		{
-			// start block read
-			//sdcard.StartReadBlocks(2561, &testbuf[0], testlen / 512);
-			sdcard.StartReadBlocks(0, &testbuf[0], testlen / 512);
-			rstart = CLOCKCNT;
-			teststate = 2;
-		}
-		else if (2 == teststate)
-		{
-			// wait until read completed
-			if (sdcard.completed)
-			{
-				if (sdcard.errorcode)
-				{
-					TRACE("Read error!\r\n");
-					teststate = 10;
-				}
-				else
-				{
-					rend = CLOCKCNT;
-					TRACE("Read ok, clocks = %u\r\n", rend - rstart);
-#if 1
-					for (i = 0; i < testlen; ++i)
-					{
-						if (i != 0)
-						{
-							if ((i % 16) == 0)  TRACE("\r\n");
-							if ((i % 512) == 0) TRACE("\r\n");
-						}
-
-						TRACE(" %02X", testbuf[i]);
-					}
-					TRACE("\r\n");
-#endif
-
-					teststate = 10;
-				}
-			}
-		}
-		else if (10 == teststate)
-		{
-			TRACE("Test %i finished.\r\n", testcnt);
-			// the end.
-			++testcnt;
-			if (testcnt < 2)
-			{
-				teststate = 1; // repeat
-			}
-			else
-			{
-				teststate = 11;
-			}
-		}
-		else if (11 == teststate)
-		{
-			// stay here.
-		}
+		storman.Run();
 
 		if (t1-t0 > hbclocks)
 		{

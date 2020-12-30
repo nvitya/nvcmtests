@@ -27,6 +27,7 @@
 */
 
 #include "platform.h"
+#include "string.h"
 #include "hwpins.h"
 #include "hwspi.h"
 #include "traces.h"
@@ -34,12 +35,82 @@
 
 TQspiFlash  qspiflash;
 
+#define QSPI_SPEED       32000000
+#define QSPI_LINE_COUNT         2
+
 //unsigned readlen = 256;
 
 __attribute__((aligned(16)))
-unsigned char qdatabuf[8192];
+unsigned char qdatabuf[256 * 1024];
 
 extern void show_mem(void * addr, unsigned len);
+
+void qspi_test_reliability()
+{
+	TRACE("QSPI reliablility test. speed=%u\r\n", qspiflash.qspi.speed);
+
+	unsigned value;
+	const unsigned begin_value = 0xc35a7291 + 1;
+	const unsigned value_add = 33;
+	uint32_t * dp;
+	uint32_t * endp = (uint32_t *)&qdatabuf[sizeof(qdatabuf)];
+
+	const unsigned test_length = 256 * 1024;
+
+#if 1
+
+	TRACE("Erasing the first %u k...\r\n", test_length / 1024);
+	qspiflash.StartEraseMem(0, test_length);
+	qspiflash.WaitForComplete();
+	TRACE("Erase complete.\r\n");
+
+
+	// fill the buffer:
+	dp = (uint32_t *)&qdatabuf[0];
+	value = begin_value;
+	while (dp < endp)
+	{
+		*dp++ = value;
+		value += value_add;
+	}
+
+	TRACE("Writing blocks...\r\n");
+	qspiflash.StartWriteMem(0, &qdatabuf[0], sizeof(qdatabuf));
+	qspiflash.WaitForComplete();
+
+#endif
+
+	TRACE("Reading back...\r\n");
+	memset(&qdatabuf[0], 0, sizeof(qdatabuf));
+	qspiflash.StartReadMem(0, &qdatabuf[0], sizeof(qdatabuf));
+	qspiflash.WaitForComplete();
+
+	TRACE("Comparing...\r\n");
+
+	unsigned mismatch_cnt = 0;
+
+	value = begin_value;
+	dp = (uint32_t *)&qdatabuf[0];
+	while (dp < endp)
+	{
+		if (*dp++ != value)
+		{
+			++mismatch_cnt;
+		}
+		value += value_add;
+	}
+
+	if (mismatch_cnt)
+	{
+		TRACE("ERROR! Mismatch count: %u\r\n", mismatch_cnt);
+	}
+	else
+	{
+		TRACE("Content check ok.\r\n");
+	}
+
+	TRACE("Test Finished.\r\n");
+}
 
 void qspi_flash_test()
 {
@@ -78,16 +149,40 @@ void qspi_flash_test()
 
 #endif
 
-	qspiflash.qspi.speed = 4000000;
-	qspiflash.qspi.multi_line_count = 1;
+	qspiflash.qspi.speed = QSPI_SPEED;
+	qspiflash.qspi.multi_line_count = QSPI_LINE_COUNT;
+#if 1
 	qspiflash.has4kerase = true;
 	if (!qspiflash.Init())
 	{
 		TRACE("QSPI Flash init failed!\r\n");
 		return;
 	}
+#else
+	qspiflash.qspi.Init();
+#endif
 
 	TRACE("QSPI Flash initialized\r\n  ID CODE = %06X, kbyte size = %u\r\n", qspiflash.idcode, (qspiflash.bytesize >> 10));
+
+	qspi_test_reliability();
+
+	return;
+
+
+#if 0
+	//TRACE("QSPI Erase test...\r\n");
+	qdatabuf[0] = 0x55;
+	qdatabuf[1] = 0x33;
+	qdatabuf[2] = 0xAA;
+	qdatabuf[3] = 0xCC;
+
+	qspiflash.qspi.StartWriteData(0x20, 0, &qdatabuf[0], 3);
+	qspiflash.qspi.WaitFinish();
+	TRACE("QSPI Erase test finished.\r\n");
+
+	return;
+
+#endif
 
 #if 1
 	TRACE("repeating ID code query...\r\n");
@@ -124,6 +219,17 @@ void qspi_flash_test()
 	qspiflash.StartEraseMem(0, write_test_size);
 	qspiflash.WaitForComplete();
 	TRACE("Erase complete.\r\n");
+
+	#if 1
+		TRACE("Erase check read...\r\n");
+
+		qspiflash.StartReadMem(addr, &qdatabuf[0], len);
+		qspiflash.WaitForComplete();
+		show_mem(&qdatabuf[0], len);
+
+		//return;
+	#endif
+
 #endif
 
 	TRACE("Writing bigger memory...\r\n");
