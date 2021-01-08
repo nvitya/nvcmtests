@@ -262,6 +262,61 @@ TStorManSdcard  storman;
 TStorTrans      stra;
 TFileSysFat     fatfs;
 
+TFsTransDir     dirtra;
+
+void test_dir_read()
+{
+	int i;
+
+	TRACE("Reading the root directory...\r\n");
+
+#if 0
+	storman.AddTransaction(&stra, STRA_READ, fatfs.rootdirstart, &testbuf[0], 4096);
+	storman.WaitTransaction(&stra);
+	if (stra.errorcode)
+	{
+		TRACE("Error reading the root directory!\r\n");
+	}
+	else
+	{
+		for (i = 0; i < 512; ++i)
+		{
+			if (i != 0)
+			{
+				if ((i % 16) == 0)  TRACE("\r\n");
+				if ((i % 512) == 0) TRACE("\r\n");
+			}
+
+			TRACE(" %02X", testbuf[i]);
+		}
+		TRACE("\r\n");
+	}
+#endif
+
+	fatfs.DirReadInit(&dirtra, fatfs.rootdirstart, "*");
+
+	while (1)
+	{
+		fatfs.DirReadExec(&dirtra);
+		while (!dirtra.fstra.completed)
+		{
+			fatfs.Run();
+		}
+
+		if (0 == dirtra.fstra.result)
+		{
+			TRACE("  %s: %u bytes\r\n", dirtra.fdata.name, uint32_t(dirtra.fdata.size));
+		}
+		else
+		{
+			TRACE("  result = %i\r\n", dirtra.fstra.result);
+			break;
+		}
+	}
+
+	TRACE("Test finished.\r\n");
+}
+
 // the C libraries require "_start" so we keep it as the entry point
 extern "C" __attribute__((noreturn)) void _start(void)
 {
@@ -401,28 +456,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 			TRACE(" cluster size: %u\r\n", fatfs.clusterbytes);
 			TRACE(" total size: %u MByte\r\n", fatfs.databytes >> 20);
 
-			TRACE("Reading the root directory...\r\n");
-
-			storman.AddTransaction(&stra, STRA_READ, fatfs.firstaddr + fatfs.sysbytes, &testbuf[0], 4096);
-			storman.WaitTransaction(&stra);
-			if (stra.errorcode)
-			{
-				TRACE("Error reading the root directory!\r\n");
-			}
-			else
-			{
-				for (i = 0; i < 512; ++i)
-				{
-					if (i != 0)
-					{
-						if ((i % 16) == 0)  TRACE("\r\n");
-						if ((i % 512) == 0) TRACE("\r\n");
-					}
-
-					TRACE(" %02X", testbuf[i]);
-				}
-				TRACE("\r\n");
-			}
+			test_dir_read();
 		}
 	}
 
