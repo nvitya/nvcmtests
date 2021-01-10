@@ -29,35 +29,8 @@
 #ifndef BOARD_H_
 #define BOARD_H_
 
-// Special, non-builtin boards
+#include "boards_builtin.h"
 
-#if 0
-
-#elif defined(BOARD_NONE_STM32F301)
-
-  #define BOARD_NAME "STM32F301K6 in adapter"
-  #define MCU_STM32F301K6
-
-  #define MCU_INTRC_SPEED    8000000
-  #define MAX_CLOCK_SPEED   64000000
-
-#elif defined(BOARD_NONE_MKV30F)
-
-  #define BOARD_NAME "Breakout board for MKV30F (32 pin)"
-  #define MCU_MKV30F
-  #define MCU_CLOCK_SPEED   96000000
-  #define MCU_INTRC_SPEED   48000000
-
-#elif defined(BOARD_NONE_LPC822)
-
-  #define BOARD_NAME "Breakout board for LPC822 (20 pin)"
-  #define MCU_LPC822
-
-#else
-
-  #include "boards_builtin.h"
-
-#endif
-
+#define PRINTF_SUPPORT_FULL
 
 #endif /* BOARD_H_ */

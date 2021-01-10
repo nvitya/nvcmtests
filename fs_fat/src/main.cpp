@@ -262,15 +262,14 @@ TStorManSdcard  storman;
 TStorTrans      stra;
 TFileSysFat     fatfs;
 
-TFsTransDir     dirtra;
+int g_dir_depth = 0;
 
-void test_dir_read()
+char g_ident[128];
+
+void dump_root_dir()
 {
 	int i;
 
-	TRACE("Reading the root directory...\r\n");
-
-#if 0
 	storman.AddTransaction(&stra, STRA_READ, fatfs.rootdirstart, &testbuf[0], 4096);
 	storman.WaitTransaction(&stra);
 	if (stra.errorcode)
@@ -291,9 +290,28 @@ void test_dir_read()
 		}
 		TRACE("\r\n");
 	}
-#endif
+}
 
-	fatfs.DirReadInit(&dirtra, fatfs.rootdirstart, "*");
+void set_dir_depth(int adepth)
+{
+	g_dir_depth = adepth;
+	int i = 0;
+	while (i < g_dir_depth)
+	{
+		g_ident[i] = ' ';
+		++i;
+	}
+	g_ident[i] = 0;
+}
+
+void test_dir_read(uint64_t adirstart)
+{
+	int i;
+	TFsTransDir     dirtra;
+
+	set_dir_depth(g_dir_depth + 1);
+
+	fatfs.DirReadInit(&dirtra, adirstart, "*");
 
 	while (1)
 	{
@@ -305,17 +323,73 @@ void test_dir_read()
 
 		if (0 == dirtra.fstra.result)
 		{
-			TRACE("  %s: %u bytes\r\n", dirtra.fdata.name, uint32_t(dirtra.fdata.size));
+			if (dirtra.fdata.attributes & FSATTR_DIR)
+			{
+				if ((strcmp(".", dirtra.fdata.name) != 0) && (strcmp("..", dirtra.fdata.name) != 0))
+				{
+					TRACE("%s [%s]\r\n", g_ident, dirtra.fdata.name);
+					if (g_dir_depth < 2)
+					{
+						test_dir_read(dirtra.fdata.location);
+					}
+				}
+			}
+			else if (0 == (dirtra.fdata.attributes & FSATTR_NONFILE))
+			{
+			  TRACE("%s %s: %u bytes\r\n", g_ident, dirtra.fdata.name, uint32_t(dirtra.fdata.size));
+			}
 		}
 		else
 		{
-			TRACE("  result = %i\r\n", dirtra.fstra.result);
 			break;
 		}
 	}
 
-	TRACE("Test finished.\r\n");
+	set_dir_depth(g_dir_depth - 1);
 }
+
+uint8_t filebuf[65536];
+
+void test_file_open(const char * aname)
+{
+	TFsTransFile  ftra;
+
+	TRACE("Testing file open \"%s\"...\r\n", aname);
+
+	fatfs.FileOpen(&ftra, aname);
+	while (!ftra.fstra.completed)
+	{
+		fatfs.Run();
+	}
+
+	TRACE("File Open Result: %i\r\n", ftra.fstra.result);
+	if (0 == ftra.fstra.result)
+	{
+		TRACE("  file size: %llu\r\n", ftra.fdata.size);
+		TRACE("  location:  %llu\r\n", ftra.fdata.location);
+
+		TRACE("Reading file...\r\n");
+		fatfs.FileRead(&ftra, &filebuf[0], sizeof(filebuf));
+		while (!ftra.fstra.completed)
+		{
+			fatfs.Run();
+		}
+		TRACE("File Read Result: %i\r\n", ftra.fstra.result);
+		if (0 == ftra.fstra.result)
+		{
+			int i = 0;
+			char * cp = (char *)&filebuf[0];
+			while (i < 4000)
+			{
+				if (*cp == 10)  TRACE("\r");
+				TRACE("%c", *cp);
+				++cp;
+				++i;
+			}
+		}
+	}
+}
+
 
 // the C libraries require "_start" so we keep it as the entry point
 extern "C" __attribute__((noreturn)) void _start(void)
@@ -456,7 +530,15 @@ extern "C" __attribute__((noreturn)) void _start(void)
 			TRACE(" cluster size: %u\r\n", fatfs.clusterbytes);
 			TRACE(" total size: %u MByte\r\n", fatfs.databytes >> 20);
 
-			test_dir_read();
+#if 0
+			TRACE("Reading root directory...\r\n");
+			test_dir_read(fatfs.rootdirstart);
+#endif
+
+#if 1
+			//test_file_open("NVCM/CORE/SRC/CORE_CM7.H");
+			test_file_open("nvcm/core/src/core_cm7.h");
+#endif
 		}
 	}
 
