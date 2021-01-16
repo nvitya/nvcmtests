@@ -33,15 +33,11 @@
 #include "hwuart.h"
 #include "cppinit.h"
 #include "clockcnt.h"
-#include "hwsdcard.h"
-#include "storman_sdcard.h"
-#include "filesys_fat.h"
-
 #include "traces.h"
 
-THwUart         conuart;  // console uart
+#include "test_fs.h"
 
-THwSdcard       sdcard;
+THwUart         conuart;  // console uart
 
 #if defined(BOARD_XPLAINED_SAME70)
 
@@ -61,21 +57,7 @@ void setup_board()
 	//hwpinctrl.PinSetup(3, 28, PINCFG_INPUT | PINCFG_AF_0);  // UART3_RXD
 	//hwpinctrl.PinSetup(3, 30, PINCFG_OUTPUT | PINCFG_AF_0); // UART3_TXD
 	//uartx2.Init(3); // UART3
-
-	// SDCARD Pins
-	hwpinctrl.PinSetup(PORTNUM_A, 28, PINCFG_AF_2); // MCCDA
-	hwpinctrl.PinSetup(PORTNUM_A, 25, PINCFG_AF_3); // MCCK
-	hwpinctrl.PinSetup(PORTNUM_A, 30, PINCFG_AF_2); // MCDA0
-	hwpinctrl.PinSetup(PORTNUM_A, 31, PINCFG_AF_2); // MCDA1
-	hwpinctrl.PinSetup(PORTNUM_A, 26, PINCFG_AF_2); // MCDA2
-	hwpinctrl.PinSetup(PORTNUM_A, 27, PINCFG_AF_2); // MCDA3
-
-	hwpinctrl.PinSetup(PORTNUM_C, 16, PINCFG_INPUT | PINCFG_PULLUP); // Card detect input
-
-	sdcard.dma.Init(9, 0); // 0 = HSMCI DMA Peripheral Id (Transmit and Receive)
-	sdcard.Init();
 }
-
 #endif
 
 #if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746) || defined(BOARD_NUCLEO_H743)
@@ -98,20 +80,8 @@ void setup_board()
 	hwpinctrl.PinSetup(3, 9,  PINCFG_INPUT  | PINCFG_AF_7);
 
 	conuart.Init(3); // USART3
-
-	// SDCARD Pins
-	hwpinctrl.PinSetup(PORTNUM_C,  8, PINCFG_AF_12); // SDMMC_D0
-	hwpinctrl.PinSetup(PORTNUM_C,  9, PINCFG_AF_12); // SDMMC_D1
-	hwpinctrl.PinSetup(PORTNUM_C, 10, PINCFG_AF_12); // SDMMC_D2
-	hwpinctrl.PinSetup(PORTNUM_C, 11, PINCFG_AF_12); // SDMMC_D3
-	hwpinctrl.PinSetup(PORTNUM_C, 12, PINCFG_AF_12); // SDMMC_CK
-	hwpinctrl.PinSetup(PORTNUM_D,  2, PINCFG_AF_12); // SDMMC_CMD
-
-	sdcard.Init();
 }
-
 #endif
-
 
 #if defined(BOARD_VERTIBO_A)
 
@@ -125,19 +95,7 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
 	conuart.baudrate = 115200;
 	conuart.Init(0);
-
-	// SDCARD Pins
-	hwpinctrl.PinSetup(PORTNUM_A, 28, PINCFG_AF_2); // MCCDA
-	hwpinctrl.PinSetup(PORTNUM_A, 25, PINCFG_AF_3); // MCCK
-	hwpinctrl.PinSetup(PORTNUM_A, 30, PINCFG_AF_2); // MCDA0
-	hwpinctrl.PinSetup(PORTNUM_A, 31, PINCFG_AF_2); // MCDA1
-	hwpinctrl.PinSetup(PORTNUM_A, 26, PINCFG_AF_2); // MCDA2
-	hwpinctrl.PinSetup(PORTNUM_A, 27, PINCFG_AF_2); // MCDA3
-
-	sdcard.dma.Init(9, 0); // 0 = HSMCI DMA Peripheral Id (Transmit and Receive)
-	sdcard.Init();
 }
-
 #endif
 
 #if defined(BOARD_ENEBO_A)
@@ -154,35 +112,7 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
 	conuart.baudrate = 115200;
 	conuart.Init(0);
-
-	// SDCARD Pins
-	hwpinctrl.PinSetup(PORTNUM_A, 28, PINCFG_AF_2); // MCCDA
-	hwpinctrl.PinSetup(PORTNUM_A, 25, PINCFG_AF_3); // MCCK
-	hwpinctrl.PinSetup(PORTNUM_A, 30, PINCFG_AF_2); // MCDA0
-	hwpinctrl.PinSetup(PORTNUM_A, 31, PINCFG_AF_2); // MCDA1
-	hwpinctrl.PinSetup(PORTNUM_A, 26, PINCFG_AF_2); // MCDA2
-	hwpinctrl.PinSetup(PORTNUM_A, 27, PINCFG_AF_2); // MCDA3
-
-	sdcard.dma.Init(9, 0); // 0 = HSMCI DMA Peripheral Id (Transmit and Receive)
-	sdcard.Init();
 }
-
-#endif
-
-
-#if defined(BOARD_MIBO100_ATSAME70)
-
-TGpioPin  led1pin(PORTNUM_D, 13, false);
-
-void setup_board()
-{
-	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
-
-	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_INPUT  | PINCFG_AF_0);  // UART0_RX
-	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
-	conuart.Init(0);
-}
-
 #endif
 
 #if defined(BOARD_DEV_STM32F407ZE)
@@ -199,18 +129,7 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
 	conuart.Init(1);
-
-	// SDCARD Pins
-	hwpinctrl.PinSetup(PORTNUM_C,  8, PINCFG_AF_12); // SDMMC_D0
-	hwpinctrl.PinSetup(PORTNUM_C,  9, PINCFG_AF_12); // SDMMC_D1
-	hwpinctrl.PinSetup(PORTNUM_C, 10, PINCFG_AF_12); // SDMMC_D2
-	hwpinctrl.PinSetup(PORTNUM_C, 11, PINCFG_AF_12); // SDMMC_D3
-	hwpinctrl.PinSetup(PORTNUM_C, 12, PINCFG_AF_12); // SDMMC_CK
-	hwpinctrl.PinSetup(PORTNUM_D,  2, PINCFG_AF_12); // SDMMC_CMD
-
-	sdcard.Init();
 }
-
 #endif
 
 #ifndef LED_COUNT
@@ -249,146 +168,6 @@ void heartbeat_task() // invoked every 0.5 s
 	//conuart.TrySendChar(0x55);
 }
 
-int teststate = 0;
-
-uint8_t  testbuf[4096] __attribute__((aligned(16)));
-
-TMbrPtEntry     ptable[4];
-
-uint32_t        fs_firstsector;
-uint32_t        fs_maxsectors;
-
-TStorManSdcard  storman;
-TStorTrans      stra;
-TFileSysFat     fatfs;
-
-int g_dir_depth = 0;
-
-char g_ident[128];
-
-void dump_root_dir()
-{
-	int i;
-
-	storman.AddTransaction(&stra, STRA_READ, fatfs.rootdirstart, &testbuf[0], 4096);
-	storman.WaitTransaction(&stra);
-	if (stra.errorcode)
-	{
-		TRACE("Error reading the root directory!\r\n");
-	}
-	else
-	{
-		for (i = 0; i < 512; ++i)
-		{
-			if (i != 0)
-			{
-				if ((i % 16) == 0)  TRACE("\r\n");
-				if ((i % 512) == 0) TRACE("\r\n");
-			}
-
-			TRACE(" %02X", testbuf[i]);
-		}
-		TRACE("\r\n");
-	}
-}
-
-void set_dir_depth(int adepth)
-{
-	g_dir_depth = adepth;
-	int i = 0;
-	while (i < g_dir_depth)
-	{
-		g_ident[i] = ' ';
-		++i;
-	}
-	g_ident[i] = 0;
-}
-
-void test_dir_read(uint64_t adirstart)
-{
-	int i;
-	TFsTransDir     dirtra;
-
-	set_dir_depth(g_dir_depth + 1);
-
-	fatfs.DirReadInit(&dirtra, adirstart, "*");
-
-	while (1)
-	{
-		fatfs.DirReadExec(&dirtra);
-		while (!dirtra.fstra.completed)
-		{
-			fatfs.Run();
-		}
-
-		if (0 == dirtra.fstra.result)
-		{
-			if (dirtra.fdata.attributes & FSATTR_DIR)
-			{
-				if ((strcmp(".", dirtra.fdata.name) != 0) && (strcmp("..", dirtra.fdata.name) != 0))
-				{
-					TRACE("%s [%s]\r\n", g_ident, dirtra.fdata.name);
-					if (g_dir_depth < 2)
-					{
-						test_dir_read(dirtra.fdata.location);
-					}
-				}
-			}
-			else if (0 == (dirtra.fdata.attributes & FSATTR_NONFILE))
-			{
-			  TRACE("%s %s: %u bytes\r\n", g_ident, dirtra.fdata.name, uint32_t(dirtra.fdata.size));
-			}
-		}
-		else
-		{
-			break;
-		}
-	}
-
-	set_dir_depth(g_dir_depth - 1);
-}
-
-uint8_t filebuf[65536];
-
-void test_file_open(const char * aname)
-{
-	TFsTransFile  ftra;
-
-	TRACE("Testing file open \"%s\"...\r\n", aname);
-
-	fatfs.FileOpen(&ftra, aname);
-	while (!ftra.fstra.completed)
-	{
-		fatfs.Run();
-	}
-
-	TRACE("File Open Result: %i\r\n", ftra.fstra.result);
-	if (0 == ftra.fstra.result)
-	{
-		TRACE("  file size: %llu\r\n", ftra.fdata.size);
-		TRACE("  location:  %llu\r\n", ftra.fdata.location);
-
-		TRACE("Reading file...\r\n");
-		fatfs.FileRead(&ftra, &filebuf[0], sizeof(filebuf));
-		while (!ftra.fstra.completed)
-		{
-			fatfs.Run();
-		}
-		TRACE("File Read Result: %i\r\n", ftra.fstra.result);
-		if (0 == ftra.fstra.result)
-		{
-			int i = 0;
-			char * cp = (char *)&filebuf[0];
-			while (i < 4000)
-			{
-				if (*cp == 10)  TRACE("\r");
-				TRACE("%c", *cp);
-				++cp;
-				++i;
-			}
-		}
-	}
-}
 
 
 // the C libraries require "_start" so we keep it as the entry point
@@ -439,108 +218,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	TRACE("Board: \"%s\"\r\n", BOARD_NAME);
 	TRACE("SystemCoreClock: %u\r\n", SystemCoreClock);
 
-	int i;
-	unsigned n;
+	test_fs();
 
-#if 1 // not necessary, but the trace output is nicer and the debugging is easier
-	TRACE("Waiting for SDCARD initialization...\r\n");
-
-	while (!sdcard.card_initialized)
-	{
-		sdcard.Run();
-	}
-#endif
-
-#if 0
-
-	sdcard.StartReadBlocks(0x800, &testbuf[0], 2);
-	while (!sdcard.completed)
-	{
-		sdcard.Run();
-	}
-
-	if (sdcard.errorcode)
-	{
-		TRACE("Read error!\r\n");
-		teststate = 10;
-	}
-	else
-	{
-		TRACE("Read ok.\r\n");
-		for (i = 0; i < 512*2; ++i)
-		{
-			if (i != 0)
-			{
-				if ((i % 16) == 0)  TRACE("\r\n");
-				if ((i % 512) == 0) TRACE("\r\n");
-			}
-
-			TRACE(" %02X", testbuf[i]);
-		}
-		TRACE("\r\n");
-	}
-
-	__BKPT();
-#endif
-
-	storman.Init(&sdcard);
-
-	fs_firstsector = 0;
-	fs_maxsectors = 0;
-
-	TRACE("Reading SDCARD partition table...\r\n");
-
-	storman.AddTransaction(&stra, STRA_READ, 446, &ptable[0], 64);
-	storman.WaitTransaction(&stra);
-	if (stra.errorcode)
-	{
-		TRACE("Error reading partition table!\r\n");
-	}
-	else
-	{
-		TRACE("SDCARD Partition table:\r\n");
-		for (n = 0; n < 4; ++n)
-		{
-			if ((fs_firstsector == 0) && (ptable[n].ptype != 0) && ptable[n].first_lba)
-			{
-				fs_firstsector = ptable[n].first_lba;
-				fs_maxsectors = ptable[n].sector_count;
-			}
-
-			TRACE(" %u.: status=%02X, type=%02X, start=%08X, blocks=%i\r\n",
-					n, ptable[n].status, ptable[n].ptype, ptable[n].first_lba, ptable[n].sector_count
-			);
-		}
-	}
-
-	if (fs_maxsectors)
-	{
-		TRACE("Initializing FAT FS at sector %i...\r\n", fs_firstsector);
-
-		fatfs.Init(&storman, (fs_firstsector << 9), (fs_maxsectors << 9));
-		while (!fatfs.initialized)
-		{
-			fatfs.Run();
-		}
-
-		if (fatfs.fsok)
-		{
-			TRACE("FAT file system initialized:\r\n");
-			if (fatfs.fat32)  TRACE(" FAT32\r\n");
-			TRACE(" cluster size: %u\r\n", fatfs.clusterbytes);
-			TRACE(" total size: %u MByte\r\n", fatfs.databytes >> 20);
-
-#if 0
-			TRACE("Reading root directory...\r\n");
-			test_dir_read(fatfs.rootdirstart);
-#endif
-
-#if 1
-			//test_file_open("NVCM/CORE/SRC/CORE_CM7.H");
-			test_file_open("nvcm/core/src/core_cm7.h");
-#endif
-		}
-	}
 
 	TRACE("\r\nStarting main cycle...\r\n");
 
@@ -561,7 +240,7 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	{
 		t1 = CLOCKCNT;
 
-		storman.Run();
+		//storman.Run();
 
 		if (t1-t0 > hbclocks)
 		{
