@@ -47,4 +47,3 @@ After a successful compilation you need to do the following to download and star
 I strongly recommend to set the following options in the "Window" / "Preferences":
  * "Run/Debug" / "Launching": At "Launch Operation" select "Always Launch the previously launched application"
  * "C/C++" / "Indexer": At "Build configuration for the indexer" select "Use active build configuration"
-
