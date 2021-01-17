@@ -24,7 +24,8 @@ TStorTrans      stra;
 TFile *         pfile;
 
 uint8_t  testbuf[4096] __attribute__((aligned(16)));
-uint8_t  filebuf[65536];
+uint8_t  filebuf[32768] __attribute__((aligned(16)));
+uint8_t  filebuf2[32768] __attribute__((aligned(16)));
 
 void init_storage()
 {
@@ -344,6 +345,60 @@ void test_file_read(const char * aname)
 	}
 }
 
+void test_file_seek(const char * aname, uint64_t astart, uint32_t alen)
+{
+	TRACE("Testing file Seek(%llu, %u) \"%s\"...\r\n", astart, alen, aname);
+
+	pfile->Open(aname, 0);
+	if (0 != pfile->WaitComplete())
+	{
+		TRACE("File open error: %i\r\n", pfile->result);
+		return;
+	}
+
+	pfile->Seek(astart);
+	if (0 != pfile->WaitComplete())
+	{
+		TRACE("File seek error: %i\r\n", pfile->result);
+		return;
+	}
+
+	pfile->Read(&filebuf[0], alen);
+	if (0 != pfile->WaitComplete())
+	{
+		TRACE("File read error: %i\r\n", pfile->result);
+		return;
+	}
+
+	TRACE("Part 1 ok, Repeating seek+read...\r\n");
+
+	pfile->Seek(astart);
+	if (0 != pfile->WaitComplete())
+	{
+		TRACE("File seek2 error: %i\r\n", pfile->result);
+		return;
+	}
+
+	pfile->Read(&filebuf2[0], alen);
+	if (0 != pfile->WaitComplete())
+	{
+		TRACE("File read2 error: %i\r\n", pfile->result);
+		return;
+	}
+
+	TRACE("Part2 finished, comparing results...\r\n");
+
+	if (0 != memcmp(filebuf, filebuf2, alen))
+	{
+		TRACE("Error: result data difference!\r\n");
+	}
+	else
+	{
+		TRACE("Result data ok.\r\n");
+	}
+}
+
+
 void test_fs()
 {
 	int i;
@@ -365,7 +420,8 @@ void test_fs()
 	TRACE("File object allocated successfully.\r\n");
 
 	//test_dir_read("/", 2);
-	test_file_read("nvcm/core/src/core_cm7.h");
+	//test_file_read("nvcm/core/src/core_cm7.h");
+	test_file_seek("nvcm/core/src/core_cm7.h", 37567, 13757);
 
 	TRACE("File System Test End\r\n");
 }
