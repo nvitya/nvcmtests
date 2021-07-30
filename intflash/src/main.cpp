@@ -190,6 +190,26 @@ void setup_board()
 
 #endif
 
+#if defined(BOARD_RELAX_XMC4300)
+
+TGpioPin  led1pin(4, 0, true);
+
+#define LED_COUNT 1
+
+#define FLASH_ERASE_VALUE   0x00000000
+
+void setup_board()
+{
+	led1pin.Setup(PINCFG_OUTPUT | PINCFG_GPIO_INIT_1);
+
+	hwpinctrl.PinSetup(0, 5,  PINCFG_AF_2);   // USIC1_CH0.DOUT0
+	hwpinctrl.PinSetup(0, 4,  PINCFG_INPUT);  // USIC1_CH0.DX0A
+	conuart.Init(1, 0, 0);
+}
+
+#endif
+
+
 #if defined(BOARD_DEV_STM32F407VG)
 
 TGpioPin  led1pin(4, 0, true);  // PE0
@@ -328,47 +348,23 @@ void setup_board()
   #define LED_COUNT 1
 #endif
 
+#ifndef FLASH_ERASE_VALUE
+  #define FLASH_ERASE_VALUE 0xFFFFFFFF
+#endif
+
 unsigned clocks_to_us(unsigned aclocks)
 {
 	unsigned clocks_per_us = SystemCoreClock / 1000000;
 	return (aclocks + (clocks_per_us >> 1)) / clocks_per_us;
 }
 
-void test_intflash()
+void test_intflash(uint32_t testaddr, uint32_t testlen, uint8_t * pbuf)
 {
 	unsigned    t0, t1;
 	uint32_t *  p1;
 	uint32_t *  p2;
 	int i;
 	bool bok = true;
-
-	// the test length depends on how much RAM we can allocate
-
-	uint32_t testlen  = (hwintflash.bytesize >> 1);
-	uint8_t * pbuf = nullptr;
-	while (1)
-	{
-		pbuf = (uint8_t *)malloc(testlen);
-		if (pbuf)
-		{
-			break;
-		}
-		else
-		{
-			testlen = (testlen >> 1); // try the half
-		}
-	}
-
-	uint32_t testaddr = hwintflash.start_address + hwintflash.bytesize;  // prepare at the end of the flash
-
-	if (testlen > hwintflash.erasesize)
-	{
-		testaddr -= testlen;
-	}
-	else
-	{
-		testaddr -= hwintflash.erasesize;  // the last eraseable block
-	}
 
 	TRACE("Test parameters:\r\n");
 	TRACE("  Address: 0x%08X\r\n", testaddr);
@@ -393,7 +389,7 @@ void test_intflash()
 		p1 = (uint32_t *)(testaddr);
 		for (i = 0; i < testdwcnt; ++i)
 		{
-			if (*p1 != 0xFFFFFFFF)
+			if (*p1 != FLASH_ERASE_VALUE)
 			{
 				TRACE("  Not erased at 0x%08X !\r\n", p1);
 				bok = false;
@@ -446,6 +442,8 @@ void test_intflash()
 		}
 	}
 
+
+#if 1
 	if (bok)
 	{
 		TRACE("Testing Copy...\r\n");
@@ -484,12 +482,11 @@ void test_intflash()
 			TRACE("  OK.\r\n");
 		}
 	}
+#endif
 
-	free(pbuf);
 
 	TRACE("Internal Flash Write Test finished.\r\n");
 }
-
 
 // the C libraries require "_start" so we keep it as the entry point
 extern "C" __attribute__((noreturn)) void _start(void)
@@ -550,12 +547,33 @@ extern "C" __attribute__((noreturn)) void _start(void)
 
 #if 1
 
-	test_intflash();
+	unsigned testlen = 0x10000;
+	uint8_t * pmem = nullptr;
+	while (!pmem)
+	{
+		pmem = (uint8_t *)malloc(testlen);
+		if (pmem)  break;
+		testlen = (testlen >> 1); // try smaller mem
+	}
 
-  #if 1
-	  TRACE("Reapeating Write Test\r\n");
-	  test_intflash();
-  #endif
+	for (unsigned runcnt = 0; runcnt < 2; ++runcnt)
+	{
+		if (runcnt > 0)
+		{
+		  TRACE("Reapeating Write Test\r\n");
+		}
+
+#if defined(MCUF_XMC)
+		test_intflash(0x0C010000, testlen, pmem);
+#else
+		test_intflash(hwintflash.start_address + hwintflash.bytesize / 2, testlen, pmem);
+#endif
+	}
+
+	if (pmem)
+	{
+		free(pmem);
+	}
 
 #endif
 
