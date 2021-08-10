@@ -35,9 +35,9 @@
 #include "clockcnt.h"
 #include "hwsdcard.h"
 
-#include "traces.h"
+#include "test_sdcard.h"
 
-THwSdcard sdcard;
+#include "traces.h"
 
 THwUart   conuart;  // console uart
 
@@ -59,21 +59,7 @@ void setup_board()
 	//hwpinctrl.PinSetup(3, 28, PINCFG_INPUT | PINCFG_AF_0);  // UART3_RXD
 	//hwpinctrl.PinSetup(3, 30, PINCFG_OUTPUT | PINCFG_AF_0); // UART3_TXD
 	//uartx2.Init(3); // UART3
-
-	// SDCARD Pins
-	hwpinctrl.PinSetup(PORTNUM_A, 28, PINCFG_AF_2); // MCCDA
-	hwpinctrl.PinSetup(PORTNUM_A, 25, PINCFG_AF_3); // MCCK
-	hwpinctrl.PinSetup(PORTNUM_A, 30, PINCFG_AF_2); // MCDA0
-	hwpinctrl.PinSetup(PORTNUM_A, 31, PINCFG_AF_2); // MCDA1
-	hwpinctrl.PinSetup(PORTNUM_A, 26, PINCFG_AF_2); // MCDA2
-	hwpinctrl.PinSetup(PORTNUM_A, 27, PINCFG_AF_2); // MCDA3
-
-	hwpinctrl.PinSetup(PORTNUM_C, 16, PINCFG_INPUT | PINCFG_PULLUP); // Card detect input
-
-	sdcard.dma.Init(9, 0); // 0 = HSMCI DMA Peripheral Id (Transmit and Receive)
-	sdcard.Init();
 }
-
 #endif
 
 #if defined(BOARD_NUCLEO_F446) || defined(BOARD_NUCLEO_F746) || defined(BOARD_NUCLEO_H743)
@@ -96,18 +82,7 @@ void setup_board()
 	hwpinctrl.PinSetup(3, 9,  PINCFG_INPUT  | PINCFG_AF_7);
 
 	conuart.Init(3); // USART3
-
-	// SDCARD Pins
-	hwpinctrl.PinSetup(PORTNUM_C,  8, PINCFG_AF_12); // SDMMC_D0
-	hwpinctrl.PinSetup(PORTNUM_C,  9, PINCFG_AF_12); // SDMMC_D1
-	hwpinctrl.PinSetup(PORTNUM_C, 10, PINCFG_AF_12); // SDMMC_D2
-	hwpinctrl.PinSetup(PORTNUM_C, 11, PINCFG_AF_12); // SDMMC_D3
-	hwpinctrl.PinSetup(PORTNUM_C, 12, PINCFG_AF_12); // SDMMC_CK
-	hwpinctrl.PinSetup(PORTNUM_D,  2, PINCFG_AF_12); // SDMMC_CMD
-
-	sdcard.Init();
 }
-
 #endif
 
 
@@ -123,19 +98,7 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
 	conuart.baudrate = 115200;
 	conuart.Init(0);
-
-	// SDCARD Pins
-	hwpinctrl.PinSetup(PORTNUM_A, 28, PINCFG_AF_2); // MCCDA
-	hwpinctrl.PinSetup(PORTNUM_A, 25, PINCFG_AF_3); // MCCK
-	hwpinctrl.PinSetup(PORTNUM_A, 30, PINCFG_AF_2); // MCDA0
-	hwpinctrl.PinSetup(PORTNUM_A, 31, PINCFG_AF_2); // MCDA1
-	hwpinctrl.PinSetup(PORTNUM_A, 26, PINCFG_AF_2); // MCDA2
-	hwpinctrl.PinSetup(PORTNUM_A, 27, PINCFG_AF_2); // MCDA3
-
-	sdcard.dma.Init(9, 0); // 0 = HSMCI DMA Peripheral Id (Transmit and Receive)
-	sdcard.Init();
 }
-
 #endif
 
 #if defined(BOARD_ENEBO_A)
@@ -152,19 +115,7 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
 	conuart.baudrate = 115200;
 	conuart.Init(0);
-
-	// SDCARD Pins
-	hwpinctrl.PinSetup(PORTNUM_A, 28, PINCFG_AF_2); // MCCDA
-	hwpinctrl.PinSetup(PORTNUM_A, 25, PINCFG_AF_3); // MCCK
-	hwpinctrl.PinSetup(PORTNUM_A, 30, PINCFG_AF_2); // MCDA0
-	hwpinctrl.PinSetup(PORTNUM_A, 31, PINCFG_AF_2); // MCDA1
-	hwpinctrl.PinSetup(PORTNUM_A, 26, PINCFG_AF_2); // MCDA2
-	hwpinctrl.PinSetup(PORTNUM_A, 27, PINCFG_AF_2); // MCDA3
-
-	sdcard.dma.Init(9, 0); // 0 = HSMCI DMA Peripheral Id (Transmit and Receive)
-	sdcard.Init();
 }
-
 #endif
 
 
@@ -180,7 +131,6 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_OUTPUT | PINCFG_AF_0);  // UART0_TX
 	conuart.Init(0);
 }
-
 #endif
 
 #if defined(BOARD_DEV_STM32F407ZE)
@@ -197,18 +147,7 @@ void setup_board()
 	hwpinctrl.PinSetup(PORTNUM_A,  9,  PINCFG_OUTPUT | PINCFG_AF_7);  // USART1_TX
 	hwpinctrl.PinSetup(PORTNUM_A, 10,  PINCFG_INPUT  | PINCFG_AF_7);  // USART1_RX
 	conuart.Init(1);
-
-	// SDCARD Pins
-	hwpinctrl.PinSetup(PORTNUM_C,  8, PINCFG_AF_12); // SDMMC_D0
-	hwpinctrl.PinSetup(PORTNUM_C,  9, PINCFG_AF_12); // SDMMC_D1
-	hwpinctrl.PinSetup(PORTNUM_C, 10, PINCFG_AF_12); // SDMMC_D2
-	hwpinctrl.PinSetup(PORTNUM_C, 11, PINCFG_AF_12); // SDMMC_D3
-	hwpinctrl.PinSetup(PORTNUM_C, 12, PINCFG_AF_12); // SDMMC_CK
-	hwpinctrl.PinSetup(PORTNUM_D,  2, PINCFG_AF_12); // SDMMC_CMD
-
-	sdcard.Init();
 }
-
 #endif
 
 #ifndef LED_COUNT
@@ -243,15 +182,7 @@ void heartbeat_task() // invoked every 0.5 s
 #endif
 
 	//TRACE("hbcounter = %u, systick = %u\r\n", hbcounter, systick);
-
-	//conuart.TrySendChar(0x55);
 }
-
-int teststate = 0;
-
-uint8_t testbuf[16384] __attribute__((aligned(4)));
-uint32_t testlen = 512 * 1; //2048;
-uint32_t testcnt = 0;
 
 // the C libraries require "_start" so we keep it as the entry point
 extern "C" __attribute__((noreturn)) void _start(void)
@@ -301,6 +232,8 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	TRACE("Board: \"%s\"\r\n", BOARD_NAME);
 	TRACE("SystemCoreClock: %u\r\n", SystemCoreClock);
 
+	test_sdcard();
+
 	TRACE("\r\nStarting main cycle...\r\n");
 
 	SysTick_Config(SystemCoreClock / 1000);
@@ -321,76 +254,6 @@ extern "C" __attribute__((noreturn)) void _start(void)
 	while (1)
 	{
 		t1 = CLOCKCNT;
-
-		sdcard.Run();
-
-		if (0 == teststate)
-		{
-			if (sdcard.card_initialized)
-			{
-				TRACE("APP: SD Card initialized.\r\n");
-				teststate = 1; // start read
-				//teststate = 11; // end test
-			}
-		}
-		else if (1 == teststate)
-		{
-			// start block read
-			//sdcard.StartReadBlocks(2561, &testbuf[0], testlen / 512);
-			sdcard.StartReadBlocks(0, &testbuf[0], testlen / 512);
-			rstart = CLOCKCNT;
-			teststate = 2;
-		}
-		else if (2 == teststate)
-		{
-			// wait until read completed
-			if (sdcard.completed)
-			{
-				if (sdcard.errorcode)
-				{
-					TRACE("Read error!\r\n");
-					teststate = 10;
-				}
-				else
-				{
-					rend = CLOCKCNT;
-					TRACE("Read ok, clocks = %u\r\n", rend - rstart);
-#if 1
-					for (i = 0; i < testlen; ++i)
-					{
-						if (i != 0)
-						{
-							if ((i % 16) == 0)  TRACE("\r\n");
-							if ((i % 512) == 0) TRACE("\r\n");
-						}
-
-						TRACE(" %02X", testbuf[i]);
-					}
-					TRACE("\r\n");
-#endif
-
-					teststate = 10;
-				}
-			}
-		}
-		else if (10 == teststate)
-		{
-			TRACE("Test %i finished.\r\n", testcnt);
-			// the end.
-			++testcnt;
-			if (testcnt < 2)
-			{
-				teststate = 1; // repeat
-			}
-			else
-			{
-				teststate = 11;
-			}
-		}
-		else if (11 == teststate)
-		{
-			// stay here.
-		}
 
 		if (t1-t0 > hbclocks)
 		{
