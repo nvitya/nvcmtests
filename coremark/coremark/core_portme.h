@@ -32,7 +32,9 @@ Original Author: Shay Gal-on
 extern "C" {
 #endif
 
-#define ITERATIONS  5000
+#ifndef ITERATIONS
+  #define ITERATIONS 5000
+#endif
 
 #define FLAGS_STR  "-> default, see makefile" // compiler optimization
 

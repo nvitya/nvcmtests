@@ -66,9 +66,12 @@ barebones_clock()
    does not occur. If there are issues with the return value overflowing,
    increase this value.
         */
-#define GETMYTIME(_t)              (*_t = CLOCKCNT)
+
+extern volatile unsigned systick;
+
+#define GETMYTIME(_t)              (*_t = systick)
 #define MYTIMEDIFF(fin, ini)       ((fin) - (ini))
-#define TIMER_RES_DIVIDER          1
+#define TIMER_RES_DIVIDER          50
 #define SAMPLE_TIME_IMPLEMENTATION 1
 #define EE_TICKS_PER_SEC           (CLOCKS_PER_SEC / TIMER_RES_DIVIDER)
 
@@ -114,7 +117,7 @@ CORE_TICKS
 get_time(void)  // millisecs
 {
     CORE_TICKS elapsed
-        = (CORE_TICKS)(MYTIMEDIFF(stop_time_val, start_time_val) / (SystemCoreClock / 1000));
+        = (CORE_TICKS)(MYTIMEDIFF(stop_time_val, start_time_val));
     return elapsed;
 }
 /* Function : time_in_secs
@@ -127,7 +130,7 @@ get_time(void)  // millisecs
 secs_ret
 time_in_secs(CORE_TICKS ticks)
 {
-    secs_ret retval = (secs_ret)(((CORE_TICKS)ticks) / ((CORE_TICKS)1000));
+    secs_ret retval = (secs_ret)(((CORE_TICKS)ticks) / ((CORE_TICKS)50));
     return retval;
 }
 

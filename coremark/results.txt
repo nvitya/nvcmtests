@@ -1,0 +1,11 @@
+COREMARK RESULTS
+
+Compiler: GCC6.3.1 20170620 (release) [ARM/embedded-6-branch revision 249437]
+
+STM32F070:     1.73 CM/MHz, Flash, -O3 + lto
+STM32F103C8:   1.72 CM/MHz, RAM, -O2
+STM32F303CB:   1.25 CM/MHz, Flash, -O3 + lto
+STM32F303CB:   1.97 CM/MHz, RAM + TCRAM, -O3 + lto
+ATSAME51J20:   2.64 CM/MHz, Flash, Cache Enabled, -O3
+STM32G473:     2.45 CM/MHz, ITC, -O2/3 + lto
+STM32F746ZG:   4.20 CM/MHz, Flash, Cache Enabled, using DTC, -O3
