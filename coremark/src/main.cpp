@@ -396,8 +396,21 @@ void heartbeat_task() // invoked every 0.5 s
 // CoreMark Main:
 extern "C" int main(int argc, char *argv[]);
 
+// Entry point for Development
+extern "C" __attribute__((section(".startup"))) void _start(void)
+{
+	// the processor jumps here right after the reset
+	// the stack might not be set properly so set it
+  asm("ldr  r0, =__stack");
+  asm("mov  sp, r0");
+
+  // start main
+  asm("ldr  r1, =_main");
+  asm("bx   r1");
+}
+
 // the C libraries require "_start" so we keep it as the entry point
-extern "C" __attribute__((noreturn)) void _start(void)
+extern "C" __attribute__((noreturn,used)) void _main(void)
 {
 	// the processor jumps here right after the reset
 	// the MCU runs slower, using the internal RC oscillator
