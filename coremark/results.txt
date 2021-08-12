@@ -10,4 +10,4 @@ ATSAME51J20  M4F:   2.64 CM/MHz,  Flash, Cache Enabled, -O3
 STM32G473    M4F:   2.45 CM/MHz,  ITC, -O2/3 + lto
 STM32F446    M4F:   2.52 CM/MHz,  Flash, -O3 + lto
 STM32F446    M4F:   2.31 CM/MHz,  Same TCRAM all, -O3 + lto
-STM32F746ZG  M7 :   4.20 CM/MHz,  Flash, Cache Enabled, using DTC, -O3
+STM32F746ZG  M7 :   4.27 CM/MHz,  Flash, Cache Enabled, using DTC, -O3 + lto
